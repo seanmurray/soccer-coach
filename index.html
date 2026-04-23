@@ -771,7 +771,7 @@ var S = {
   rec:72, slp:72, body:3, mot:3, mode:'full',
   dayType:'acc', week:1,
   dayOrder:['acc','lat','lin','vel','cond'],
-  sbUrl:'', sbKey:'', sbConnected:false,
+  sbUrl:'https://oxvtmmiwgmheudgbvpjp.supabase.co', sbKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dnRtbWl3Z21oZXVkZ2J2cGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjQyNjMsImV4cCI6MjA5MDkwMDI2M30.cpmmFF2uTRwxToxeUUu3ixUwP8JMSaWNl7XtVEDRwY4', sbConnected:false,
   history:[], lastRPE:7.5, lastEnergy:3, lastJump:22, lastDebrief:'',
   maxes:{ trapbar:0, bsq:0, bench:0, blgsq:0 }
 };
@@ -2925,6 +2925,17 @@ renderStepperVal('rec'); renderStepperVal('slp'); renderStepperVal('body'); rend
 renderDayOrderList();
 loadTimerPrefs();
 renderModuleRow();
+// Pre-fill Supabase config from baked-in credentials
+(function() {
+  var urlEl = document.getElementById('sb-url');
+  var keyEl = document.getElementById('sb-key');
+  if (urlEl) urlEl.value = S.sbUrl;
+  if (keyEl) keyEl.value = S.sbKey;
+  if (S.sbUrl && S.sbKey) {
+    S.sbConnected = true;
+    setSBStatus(true, 'Connected');
+  }
+})();
 </script>
 
 <!-- FLOATING REST TIMER -->
