@@ -776,6 +776,44 @@ input[type=date] { color-scheme: dark; }
         oninput="S.mot=+this.value;renderStepperVal('mot');updateReadiness()">
       <div class="slider-value" id="sv-mot">3/5</div>
     </div>
+    <!-- Battery and Stress: manual entry from Athlytic app -->
+    <div class="slider-row">
+      <div class="slider-label" style="display:flex;flex-direction:column;gap:2px">
+        Battery
+        <span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-100</span>
+      </div>
+      <input type="range" min="0" max="100" value="50" id="sl-battery"
+        oninput="S.battery=+this.value;document.getElementById('sv-battery').textContent=this.value+'%';updateReadiness()">
+      <div class="slider-value" id="sv-battery" style="color:var(--blue)">50%</div>
+    </div>
+    <div class="slider-row">
+      <div class="slider-label" style="display:flex;flex-direction:column;gap:2px">
+        Stress
+        <span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-60</span>
+      </div>
+      <input type="range" min="0" max="60" step="1" value="25" id="sl-stress"
+        oninput="S.stress=+this.value;document.getElementById('sv-stress').textContent=this.value;updateReadiness()">
+      <div class="slider-value" id="sv-stress" style="color:var(--blue)">25</div>
+    </div>
+    <!-- HRV + RHR: auto-populated from HealthKit via iOS Shortcuts -->
+    <div style="display:flex;gap:0;border-top:.5px solid rgba(255,255,255,.06)">
+      <div style="flex:1;text-align:center;padding:12px 8px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">HRV</div>
+        <div class="mono" style="font-size:20px;color:var(--t1)" id="bio-hrv">—</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">ms · HealthKit</div>
+      </div>
+      <div style="width:.5px;background:rgba(255,255,255,.06)"></div>
+      <div style="flex:1;text-align:center;padding:12px 8px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">RHR</div>
+        <div class="mono" style="font-size:20px;color:var(--t1)" id="bio-rhr">—</div>
+        <div style="font-size:10px;color:var(--t3);margin-top:2px">bpm · HealthKit</div>
+      </div>
+      <div style="width:.5px;background:rgba(255,255,255,.06)"></div>
+      <div style="flex:2;display:flex;flex-direction:column;justify-content:center;padding:12px 12px">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">Watch</div>
+        <div style="font-size:12px;line-height:1.4" id="bio-status" class="mono" style="color:var(--t3)">Run Shortcut to sync</div>
+      </div>
+    </div>
   </div>
 
   <div class="overline" style="margin-bottom:10px">Session</div>
@@ -968,6 +1006,7 @@ input[type=date] { color-scheme: dark; }
 // ═══════════════════════════════════════════════════════════
 var S = {
   rec:72, slp:72, body:3, mot:3, mode:'full',
+  battery:null, stress:null, hrv:null, rhr:null, bioSource:'none',
   dayType:'acc', week:1,
   dayOrder:['acc','lat','lin','vel','cond'],
   sbUrl:'https://oxvtmmiwgmheudgbvpjp.supabase.co', sbKey:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im94dnRtbWl3Z21oZXVkZ2J2cGpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMjQyNjMsImV4cCI6MjA5MDkwMDI2M30.cpmmFF2uTRwxToxeUUu3ixUwP8JMSaWNl7XtVEDRwY4', sbConnected:false,
@@ -1615,18 +1654,42 @@ function setRing(id, pct, color) {
 }
 
 function computeMode() {
-  // Weighted readiness composite 0-100
-  // Weights: recovery 40%, sleep 25%, body feel 17.5%, motivation 17.5%
-  // Sleep gets extra weight for soccer-skill days (agility/velocity) — per SBS research
-  // on sleep restriction disproportionately affecting coordination and reaction time
-  var c = (S.rec * 0.40) + (S.slp * 0.25) + ((S.body/5) * 17.5) + ((S.mot/5) * 17.5);
+  // ── Readiness composite ──────────────────────────────────────────────────
+  // Base inputs (always available): rec 40%, slp 25%, body 17.5%, mot 17.5%
+  // Athlytic inputs (when available): battery and stress replace/supplement base weights
+  //
+  // Battery = real-time intra-day HRV readiness (most current signal available)
+  // Stress  = sympathetic load 0-10 (inverted: lower stress = higher readiness)
+  //
+  // When Athlytic data IS available:
+  //   battery 28%, stress-inverted 12%, rec 25%, slp 18%, body 10%, mot 7%
+  // When Athlytic data is NOT available:
+  //   rec 40%, slp 25%, body 17.5%, mot 17.5% (original formula)
 
-  // 5-level system
-  // Full (≥72): full CNS availability — all blocks, all volume, max intent
-  // Mod1 (58-71): minor fatigue — strength -15%, plyo -1 set, same exercises
-  // Mod2 (45-57): moderate fatigue — strength -25%, plyo -30%, lighter agility
-  // Mod3 (30-44): high fatigue — strength 55% for motor pattern only, low-impact plyos, mechanics agility
-  // Recovery (<30): active recovery only — no new tissue stress
+  // Battery (0-100) and Stress (0-10) are always set via manual sliders
+  // Stress inverted: (10 - stress) * 10 → 0-100 scale so higher stress = lower score
+  // Stress inversion: Athlytic 0-60 scale. 0=no stress→100 readiness, 60=max stress→0 readiness
+  var stressInv = Math.max(0, Math.min(100, (60 - S.stress) / 60 * 100));
+
+  // HRV from HealthKit (via Shortcuts) — used as a tiebreaker when available
+  // A higher HRV shifts the score up slightly; lower HRV shifts it down
+  // HRV contribution is small (±5 points max) so it nudges rather than dominates
+  var hrvBonus = 0;
+  if (S.hrv !== null && S.hrv !== undefined) {
+    // Typical HRV range for active 40s male: 40-120ms. Normalize around 70ms midpoint.
+    // >70ms = positive nudge, <70ms = negative nudge, capped at ±5 pts
+    hrvBonus = Math.max(-5, Math.min(5, (S.hrv - 70) * 0.15));
+  }
+
+  // Weights: Battery 28%, Stress-inv 12%, Recovery 25%, Sleep 18%, Body 10%, Motivation 7%
+  var c = (S.battery  * 0.28) +
+          (stressInv  * 0.12) +
+          (S.rec      * 0.25) +
+          (S.slp      * 0.18) +
+          ((S.body/5) * 10)   +
+          ((S.mot/5)  * 7)    +
+          hrvBonus;
+
   if (c >= 72) return 'full';
   if (c >= 58) return 'mod1';
   if (c >= 45) return 'mod2';
@@ -2298,7 +2361,7 @@ async function saveSession() {
     try {
       await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
         method:'POST',headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=minimal'},
-        body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief,performed_at:performedAt})
+        body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,battery_pct:S.battery,stress_score:S.stress,hrv_ms:S.hrv,rhr_bpm:S.rhr,biometrics_source:S.bioSource,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief,performed_at:performedAt})
       });
     } catch(e){ console.warn('SB save failed',e); }
   }
@@ -3059,7 +3122,7 @@ async function saveSession() {
     try {
       await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
         method:'POST',headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=minimal'},
-        body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief,performed_at:performedAt})
+        body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,battery_pct:S.battery,stress_score:S.stress,hrv_ms:S.hrv,rhr_bpm:S.rhr,biometrics_source:S.bioSource,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief,performed_at:performedAt})
       });
     } catch(e){ console.warn('SB save failed',e); }
   }
@@ -3470,9 +3533,19 @@ renderStepperVal('rec'); renderStepperVal('slp'); renderStepperVal('body'); rend
 renderDayOrderList();
 loadTimerPrefs();
 renderModuleRow();
+// Fetch latest biometrics from Supabase (pushed by iOS Shortcuts)
+fetchLatestBiometrics().then(function() {
+  // If no watch data, show manual status
+  if (S.bioSource === 'none') showBioStatus('manual', 0);
+}).catch(function() {
+  showBioStatus('manual', 0);
+});
+
 // Sync sliders to initial S values
 (function() {
   var slMap = {rec:'sl-rec', slp:'sl-slp', body:'sl-body', mot:'sl-mot'};
+  // Battery and Stress default to 50 and 5 (neutral midpoint)
+  S.battery = 50; S.stress = 25;
   for (var k in slMap) {
     var el = document.getElementById(slMap[k]);
     if (el) el.value = S[k];
