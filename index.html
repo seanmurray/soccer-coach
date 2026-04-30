@@ -121,8 +121,8 @@ a { color: var(--green); text-decoration: none; }
   font-size: 11px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--t3);
 }
-.body { font-size: 16px; line-height: 1.55; color: var(--t2); }
-.body-sm { font-size: 14px; line-height: 1.5; color: var(--t2); }
+.body { font-size: 18px; line-height: 1.6; color: var(--t2); }
+.body-sm { font-size: 16px; line-height: 1.55; color: var(--t2); }
 .caption { font-size: 12px; color: var(--t3); }
 .mono { font-family: 'DM Mono', monospace; }
 
@@ -179,8 +179,8 @@ a { color: var(--green); text-decoration: none; }
   border-bottom: .5px solid rgba(255,255,255,.06);
 }
 .slider-row:last-child { border-bottom: none; }
-.slider-label { font-size: 16px; font-weight: 500; color: var(--t1); flex-shrink: 0; min-width: 130px; }
-.slider-value { font-family: 'DM Mono', monospace; font-size: 16px; color: var(--green); min-width: 44px; text-align: right; flex-shrink: 0; }
+.slider-label { font-size: 17px; font-weight: 500; color: var(--t1); flex-shrink: 0; min-width: 130px; }
+.slider-value { font-family: 'DM Mono', monospace; font-size: 18px; color: var(--green); min-width: 44px; text-align: right; flex-shrink: 0; }
 input[type=range] {
   flex: 1;
   -webkit-appearance: none; appearance: none;
@@ -209,12 +209,16 @@ input[type=range]::-moz-range-thumb {
   margin-bottom: 16px;
   display: flex; align-items: center; justify-content: space-between;
 }
-.mode-banner.full     { background: rgba(48,209,88,.1);  border: .5px solid rgba(48,209,88,.25); }
-.mode-banner.modified { background: rgba(255,214,10,.08); border: .5px solid rgba(255,214,10,.2); }
+.mode-banner.full     { background: rgba(48,209,88,.1);   border: .5px solid rgba(48,209,88,.3); }
+.mode-banner.mod1     { background: rgba(48,209,88,.06);  border: .5px solid rgba(48,209,88,.18); }
+.mode-banner.mod2     { background: rgba(255,214,10,.08); border: .5px solid rgba(255,214,10,.2); }
+.mode-banner.mod3     { background: rgba(255,149,0,.08);  border: .5px solid rgba(255,149,0,.2); }
 .mode-banner.recovery { background: rgba(255,69,58,.08);  border: .5px solid rgba(255,69,58,.2); }
 .mode-name { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: .04em; }
 .mode-banner.full     .mode-name { color: var(--green); }
-.mode-banner.modified .mode-name { color: var(--amber); }
+.mode-banner.mod1     .mode-name { color: #62e890; }
+.mode-banner.mod2     .mode-name { color: var(--amber); }
+.mode-banner.mod3     .mode-name { color: #ff9500; }
 .mode-banner.recovery .mode-name { color: var(--red); }
 .mode-sub { font-size: 12px; color: var(--t3); margin-top: 3px; }
 .mode-emoji { font-size: 32px; }
@@ -274,7 +278,7 @@ input[type=range]::-moz-range-thumb {
   font-size: 11px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--green); margin-bottom: 8px;
 }
-.ai-text { font-size: 16px; line-height: 1.6; color: var(--t2); }
+.ai-text { font-size: 18px; line-height: 1.65; color: var(--t2); }
 
 /* ─── CTA BUTTON ──────────────────────────────────────────── */
 .cta {
@@ -345,7 +349,7 @@ input[type=range]::-moz-range-thumb {
 .ex-load { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--green); }
 .ex-tempo { font-size: 11px; color: var(--t3); font-family: 'DM Mono', monospace; margin-top: 2px; }
 .ex-body { padding: 0 16px 16px; border-top: .5px solid rgba(255,255,255,.06); }
-.ex-cue { font-size: 15px; line-height: 1.55; color: var(--t2); padding: 14px 0 10px; font-style: italic; }
+.ex-cue { font-size: 17px; line-height: 1.6; color: var(--t2); padding: 14px 0 12px; font-style: italic; }
 
 /* Tags */
 .tag { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 100px; font-size: 11px; font-weight: 700; letter-spacing: .04em; margin: 0 3px 4px 0; }
@@ -376,8 +380,8 @@ input[type=range]::-moz-range-thumb {
   background: var(--bg-input);
   border: none;
   border-radius: var(--r1);
-  padding: 10px 6px;
-  font-family: 'DM Mono', monospace; font-size: 16px; color: var(--t1);
+  padding: 12px 6px;
+  font-family: 'DM Mono', monospace; font-size: 18px; color: var(--t1);
   text-align: center; width: 100%;
 }
 .set-input:focus { outline: 2px solid var(--green); }
@@ -431,12 +435,12 @@ input[type=range]::-moz-range-thumb {
 
 /* ─── WARMUP ──────────────────────────────────────────────── */
 .wu-item {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 0; border-bottom: .5px solid rgba(255,255,255,.06);
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px 0; border-bottom: .5px solid rgba(255,255,255,.06);
 }
 .wu-item:last-child { border-bottom: none; }
-.wu-cb { width: 22px; height: 22px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
-.wu-text { font-size: 16px; color: var(--t1); line-height: 1.4; }
+.wu-cb { width: 26px; height: 26px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; }
+.wu-text { font-size: 18px; color: var(--t1); line-height: 1.45; font-weight: 400; }
 
 /* ─── FRC BLOCK ───────────────────────────────────────────── */
 .frc-card {
@@ -446,12 +450,12 @@ input[type=range]::-moz-range-thumb {
 }
 .frc-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--purple); margin-bottom: 4px; }
 .frc-sub { font-size: 14px; color: var(--t3); margin-bottom: 12px; line-height: 1.4; }
-.frc-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: .5px solid rgba(191,90,242,.1); }
+.frc-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: .5px solid rgba(191,90,242,.1); }
 .frc-item:last-child { border-bottom: none; }
-.frc-cb { width: 22px; height: 22px; accent-color: var(--purple); cursor: pointer; flex-shrink: 0; margin-top: 1px; }
+.frc-cb { width: 26px; height: 26px; accent-color: var(--purple); cursor: pointer; flex-shrink: 0; margin-top: 1px; }
 .frc-content { flex: 1; }
-.frc-text { font-size: 15px; color: var(--t1); line-height: 1.45; }
-.frc-cue { font-size: 13px; color: var(--t3); font-style: italic; margin-top: 4px; line-height: 1.45; }
+.frc-text { font-size: 18px; color: var(--t1); line-height: 1.5; }
+.frc-cue { font-size: 15px; color: var(--t2); font-style: italic; margin-top: 5px; line-height: 1.5; }
 .frc-badge { display: inline-block; font-family: 'DM Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 4px; background: var(--purple-bg); color: var(--purple); margin-top: 4px; }
 
 /* ─── UPGRADE PILL ────────────────────────────────────────── */
@@ -482,7 +486,7 @@ input[type=range]::-moz-range-thumb {
 /* ─── SWAP SECTION ────────────────────────────────────────── */
 .swap-section { margin-top: 12px; padding-top: 12px; border-top: .5px solid rgba(255,255,255,.06); }
 .swap-label { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 8px; }
-.swap-item { font-size: 14px; color: var(--t3); padding: 4px 0; line-height: 1.4; }
+.swap-item { font-size: 16px; color: var(--t2); padding: 5px 0; line-height: 1.45; }
 
 /* ─── PHASE CONTEXT BOX ───────────────────────────────────── */
 .phase-box {
@@ -492,7 +496,7 @@ input[type=range]::-moz-range-thumb {
   padding: 12px 14px; margin-bottom: 14px;
 }
 .phase-box-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--green); margin-bottom: 6px; }
-.phase-box-text { font-size: 14px; color: var(--t2); line-height: 1.55; }
+.phase-box-text { font-size: 16px; color: var(--t2); line-height: 1.6; }
 
 /* ─── CONTRAST / INFO BOX ─────────────────────────────────── */
 .contrast-box { background: var(--green-bg); border: .5px solid var(--green-line); border-radius: var(--r2); padding: 12px; font-size: 14px; color: var(--green); margin-top: 10px; line-height: 1.5; }
@@ -513,7 +517,7 @@ input[type=range]::-moz-range-thumb {
 }
 .cond-sel-btn.selected { background: var(--green); color: #0a0a0a; border-color: var(--green); }
 .cond-body { padding: 0 16px 16px; border-top: .5px solid rgba(255,255,255,.06); }
-.cond-desc { font-size: 15px; color: var(--t2); line-height: 1.55; padding-top: 14px; margin-bottom: 12px; }
+.cond-desc { font-size: 17px; color: var(--t2); line-height: 1.6; padding-top: 14px; margin-bottom: 12px; }
 
 /* ─── HISTORY ─────────────────────────────────────────────── */
 .hist-item {
@@ -528,7 +532,7 @@ input[type=range]::-moz-range-thumb {
 .hist-badge.modified { background: var(--amber-bg); color: var(--amber); }
 .hist-badge.recovery { background: var(--red-bg);   color: var(--red); }
 .hist-stats { display: flex; gap: 14px; flex-wrap: wrap; }
-.hist-stat { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--t3); }
+.hist-stat { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--t3); }
 .hist-stat span { color: var(--t2); }
 
 /* ─── SETTINGS ────────────────────────────────────────────── */
@@ -541,8 +545,8 @@ input[type=range]::-moz-range-thumb {
   min-height: var(--tap);
 }
 .settings-row:last-child { border-bottom: none; }
-.settings-row-label { font-size: 16px; color: var(--t1); }
-.settings-row-sub { font-size: 13px; color: var(--t3); margin-top: 2px; }
+.settings-row-label { font-size: 18px; color: var(--t1); }
+.settings-row-sub { font-size: 15px; color: var(--t2); margin-top: 3px; }
 
 /* Toggle switch */
 .toggle { position: relative; width: 52px; height: 32px; flex-shrink: 0; }
@@ -649,18 +653,18 @@ input[type=range]::-moz-range-thumb {
 /* Module item */
 .mod-section { margin-bottom: 22px; }
 .mod-section-title { font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--t3); margin-bottom: 12px; padding-bottom: 8px; border-bottom: .5px solid rgba(255,255,255,.06); }
-.mod-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: .5px solid rgba(255,255,255,.06); }
+.mod-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 0; border-bottom: .5px solid rgba(255,255,255,.06); }
 .mod-item:last-child { border-bottom: none; }
-.mod-cb { width: 24px; height: 24px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
+.mod-cb { width: 28px; height: 28px; accent-color: var(--green); cursor: pointer; flex-shrink: 0; margin-top: 2px; }
 .mod-content { flex: 1; }
-.mod-name { font-family: 'Bebas Neue', sans-serif; font-size: 19px; letter-spacing: .03em; color: var(--t1); margin-bottom: 3px; }
-.mod-rx { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--green); margin-bottom: 5px; }
-.mod-cue { font-size: 14px; color: var(--t2); line-height: 1.55; font-style: italic; }
-.mod-warn { background: var(--amber-bg); border: .5px solid rgba(255,214,10,.25); border-radius: var(--r2); padding: 12px 14px; font-size: 14px; color: #ffd060; line-height: 1.6; margin-bottom: 14px; }
-.mod-info { background: var(--green-bg); border: .5px solid var(--green-line); border-radius: var(--r2); padding: 12px 14px; font-size: 14px; color: #4af090; line-height: 1.6; margin-bottom: 14px; }
+.mod-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: .03em; color: var(--t1); margin-bottom: 4px; }
+.mod-rx { font-family: 'DM Mono', monospace; font-size: 14px; color: var(--green); margin-bottom: 6px; }
+.mod-cue { font-size: 16px; color: var(--t2); line-height: 1.6; font-style: italic; }
+.mod-warn { background: var(--amber-bg); border: .5px solid rgba(255,214,10,.25); border-radius: var(--r2); padding: 14px 16px; font-size: 16px; color: #ffd060; line-height: 1.6; margin-bottom: 16px; }
+.mod-info { background: var(--green-bg); border: .5px solid var(--green-line); border-radius: var(--r2); padding: 14px 16px; font-size: 16px; color: #4af090; line-height: 1.6; margin-bottom: 16px; }
 .mod-phase { background: var(--bg-card); border-radius: var(--r2); padding: 12px 14px; margin-bottom: 10px; border-left: 2px solid var(--purple); }
-.mod-phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--purple); margin-bottom: 5px; }
-.mod-phase-desc { font-size: 14px; color: var(--t2); line-height: 1.55; }
+.mod-phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--purple); margin-bottom: 6px; }
+.mod-phase-desc { font-size: 16px; color: var(--t2); line-height: 1.6; }
 
 /* ─── LOG SCREEN ──────────────────────────────────────────── */
 .log-slider-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: .5px solid rgba(255,255,255,.06); }
@@ -1037,10 +1041,31 @@ function getStrengthPrescription(exKey, week, mode) {
                   blgsq:{sets:2,reps:6,pct:.40,tempo:'[1|1|1]',note:'Minimal'} }
     }
   };
-  var modeMap = {bench_press:'bench',floor_press:'bench',trapbar_dl:'trapbar',blg_split_sq:'blgsq'};
-  var key = modeMap[exKey] || 'bench';
-  var modeData = p[phase] && p[phase][mode] ? p[phase][mode] : p[phase]['full'];
-  return modeData[key] || p.accumulation.full.bench;
+  var exMap = {bench_press:'bench',floor_press:'bench',trapbar_dl:'trapbar',blg_split_sq:'blgsq'};
+  var key = exMap[exKey] || 'bench';
+  // Map 5-level mode system to 3-level prescription system
+  // mod1: use 'modified' prescription but pct bumped up slightly (-15% vs -25%)
+  // mod2: use 'modified' prescription (standard -25%)
+  // mod3: use 'recovery' prescription (50-55%)
+  var prescMode = {full:'full', mod1:'mod1adj', mod2:'modified', mod3:'recovery', recovery:'recovery'}[mode] || 'full';
+  var phasePrx = p[phase] || p.accumulation;
+
+  // mod1 uses modified base but with lighter reduction (-15% not -25%)
+  // We create mod1adj on the fly from modified by bumping pct up
+  if (prescMode === 'mod1adj') {
+    var modBase = phasePrx['modified'] && phasePrx['modified'][key] ? phasePrx['modified'][key] : phasePrx['full'][key];
+    var fullBase = phasePrx['full'] && phasePrx['full'][key] ? phasePrx['full'][key] : null;
+    if (modBase && fullBase) {
+      // Interpolate: mod1 = full - 15% (modified is full - 25%)
+      var adjPct = fullBase.pct - (fullBase.pct - modBase.pct) * 0.6;
+      return Object.assign({}, modBase, {pct: Math.round(adjPct*100)/100, sets: modBase.sets, note: modBase.note + ' (mod1: –15%)'});
+    }
+    return modBase || phasePrx['full'][key];
+  }
+
+  var prxMode = phasePrx[prescMode] ? prescMode : 'full';
+  var modeBlock = phasePrx[prxMode];
+  return (modeBlock && modeBlock[key]) ? modeBlock[key] : p.accumulation.full.bench;
 }
 
 function calcLoad(exKey, pct) {
@@ -1411,6 +1436,65 @@ var SESSIONS = {
     vel:{agility:['a_skips','b_skips','alternating_bounds','build_ups'],plyo:['sl_broad_jump','box_jump'],strength:['trapbar_dl'],build:['blg_split_sq','single_leg_hip_thrust']},
     cond:{protocols:[{name:'Easy bike or court jog',desc:'20 min at RPE 5-6 — aerobic flush. HR 130-150.',rpe:5,tags:['cond']}]}
   },
+  // Mod1: minor fatigue — same exercise selection as full, trim 1 set from strength, skip last plyo
+  // Strength prescription handled by getStrengthPrescription('modified') -15%
+  mod1:{
+    acc:{agility:['falling_starts','two_pt_starts','half_kneel_starts','decel_series'],
+         plyo:['snap_downs','broad_jump','sprinter_step_up'],
+         strength:['bench_press'],build:['walking_lunge_db','the_grappler','pullup']},
+    lat:{agility:['lat_power_shuffle','carioca_qstep','half_arc_run','y_cut','jump_cut'],
+         plyo:['v_jumps','skater_jumps','russian_lunge'],
+         strength:['blg_split_sq'],build:['walking_lunge_db','nordic_curl','the_grappler']},
+    lin:{agility:['two_pt_stop_go','pro_shuttle','l_drill','figure_8_drill'],
+         plyo:['lateral_bounds','sl_snap_down','russian_lunge'],
+         strength:['bench_press'],build:['walking_lunge_db','cable_row_rotation','pallof_press']},
+    vel:{agility:['a_skips','b_skips','sl_high_knee','str_leg_bounds','alternating_bounds','build_ups'],
+         plyo:['sl_broad_jump','box_jump'],
+         strength:['trapbar_dl'],build:['blg_split_sq','walking_lunge_db','the_grappler']},
+    cond:{protocols:[
+      {name:'Assault bike — aerobic intervals',desc:'6 rounds: 30 sec moderate / 90 sec easy. RPE 6-7 — not all-out. Aerobic development without high CNS cost.',rpe:6,tags:['cond']},
+      {name:'Rower — steady state',desc:'15-20 min at RPE 6. Consistent pace, nasal breathing if possible.',rpe:6,tags:['cond']},
+      {name:'Easy court jog',desc:'15-20 min light jog. Movement prep, not conditioning.',rpe:5,tags:['cond']}
+    ]}
+  },
+  // Mod2: moderate fatigue — core exercises only, cap RPE 7.5, skip high-CNS plyos
+  mod2:{
+    acc:{agility:['two_pt_starts','wall_starts','decel_series'],
+         plyo:['snap_downs','seated_box_jump'],
+         strength:['bench_press'],build:['walking_lunge_db','the_grappler']},
+    lat:{agility:['lat_power_shuffle','half_arc_run','y_cut'],
+         plyo:['skater_jumps'],
+         strength:['blg_split_sq'],build:['walking_lunge_db','nordic_curl']},
+    lin:{agility:['pro_shuttle','figure_8_drill'],
+         plyo:['lateral_bounds'],
+         strength:['bench_press'],build:['walking_lunge_db','cable_row_rotation']},
+    vel:{agility:['a_skips','b_skips','build_ups'],
+         plyo:['box_jump'],
+         strength:['trapbar_dl'],build:['blg_split_sq','walking_lunge_db']},
+    cond:{protocols:[
+      {name:'Assault bike — Zone 2',desc:'20 min at RPE 5-6. Conversational pace. HR 130-150. Aerobic flush — supports recovery, not a training stimulus.',rpe:5,tags:['cond']},
+      {name:'SkiErg — easy steady state',desc:'15 min easy. Breathing should be controlled throughout.',rpe:5,tags:['cond']}
+    ]}
+  },
+  // Mod3: high fatigue — technique maintenance only, 55% load, bodyweight plyos
+  mod3:{
+    acc:{agility:['a_skips','b_skips','wall_starts'],
+         plyo:['pogo_jumps','snap_downs'],
+         strength:['bench_press'],build:['walking_lunge_db','half_kneel_rot_chop']},
+    lat:{agility:['lat_power_shuffle'],
+         plyo:['pogo_jumps','skater_jumps'],
+         strength:['blg_split_sq'],build:['walking_lunge_db','cable_woodchop']},
+    lin:{agility:['a_skips','b_skips'],
+         plyo:['pogo_jumps'],
+         strength:['bench_press'],build:['walking_lunge_db','pallof_press']},
+    vel:{agility:['a_skips','b_skips','high_knee_run'],
+         plyo:['pogo_jumps'],
+         strength:['trapbar_dl'],build:['walking_lunge_db','single_leg_hip_thrust']},
+    cond:{protocols:[
+      {name:'Easy bike — active recovery',desc:'15 min very easy cycling. RPE 3-4. This is movement, not conditioning. HR should stay under 120.',rpe:3,tags:['cond']},
+      {name:'Walking — active recovery',desc:'15-20 min walk. No intensity. Promotes circulation and tissue recovery.',rpe:2,tags:['cond']}
+    ]}
+  },
   recovery:{
     acc:{agility:['a_skips','b_skips'],plyo:['pogo_jumps'],strength:['bench_press'],build:['half_kneel_rot_chop']},
     lat:{agility:[],plyo:['pogo_jumps','skater_jumps'],strength:['blg_split_sq'],build:['the_grappler']},
@@ -1421,9 +1505,41 @@ var SESSIONS = {
 };
 
 var MODE_INSIGHTS = {
-  full:{acc:'CNS is primed. Lead with acceleration — falling starts at full intent before fatigue. Plyo block next. Strength last with tempo work.',lat:'Lateral COD first while fresh. Mirror drill needs full cognitive engagement. Bulgarian split squats: eccentric control and iso pause.',lin:'Linear agility quality over quantity. Pro shuttle and L-drill are CNS-demanding — full recovery between reps.',vel:'Max velocity is skill work first — stay technical through build-ups. Trap bar contrast: heavy set → box jump. This is the session to chase speed.',cond:'Full conditioning capacity. Push repeat sprint intervals hard — RPE 8-9 on work, true recovery between sets.'},
-  modified:{acc:'Cap all efforts at 85%. Acceleration work stays but pull back intent. No max sprints. Strength cap RPE 7.',lat:'Lateral work preserved, volume cut. Mirror drill 2 rounds max.',lin:'Linear agility reduced. Pro shuttle stays, L-drill stays. 2 attempts max each direction.',vel:'Velocity drills at 85% — run build-ups but stop before true max. Trap bar at 70%.',cond:'Pull intensity back. Aerobic flush — HR 130-150 range. No all-out sprint intervals.'},
-  recovery:{acc:'Active recovery only. Light skip work for mechanics, very light lifting. 30 min max.',lat:'Pogo jumps and skater jumps at low intensity. Hip mobility focus.',lin:'Skip agility today. Light pulling and core work.',vel:'A/B skips for mechanics — not speed. Light trap bar, perfect form.',cond:'Easy bike at Zone 2 only. Recovery flush.'}
+  full:{
+    acc:'CNS is fully primed. Lead with falling starts at maximum intent before any fatigue accumulates. Plyos next, strength last with full tempo prescription. This is your day to chase adaptation — do not hold back on the agility block.',
+    lat:'Full lateral COD block. All 5 agility drills. Bulgarian split squats with complete eccentric control and iso pause per phase prescription. Rotational build work after — hip-leads-shoulder sequencing.',
+    lin:'Linear agility quality over quantity. Pro shuttle and L-drill are CNS-expensive — full 90-120 sec recovery between reps. Strength at full prescription.',
+    vel:'Max velocity is skill work. Stay technical through all build-ups. Trap bar contrast method: heavy set immediately followed by max box jump. The heavy load potentiates CNS for the explosive movement.',
+    cond:'Full conditioning capacity. Push hard on work intervals — RPE 8-9 during effort, genuine rest between. Research: court sprints create the highest interference with strength; if session follows a heavy strength day, bias toward bike instead.'
+  },
+  mod1:{
+    acc:'Minor fatigue — trim 1 exercise from agility, not intensity. First 3 drills stay at full effort. Cap acceleration volume at 85% of planned. Strength at –15% load, same sets.',
+    lat:'Lateral work at 90% effort. Cut last agility drill. BSQ stays — reduce by 1 set if needed, keep eccentric quality. SBS research: skill-based performance (agility, reaction) is more sleep/fatigue sensitive than raw strength.',
+    lin:'Trim to 4 agility exercises. Full effort on each rep, fewer total reps. Strength at –15%, technique priority.',
+    vel:'All velocity mechanics work stays — mechanics do not degrade with minor fatigue. Build-ups at 90% max. Strength –15%.',
+    cond:'Aerobic intervals at RPE 6-7, not all-out. 6 rounds instead of 8. Avoid running-based conditioning today — SBS research: running creates greater strength interference than cycling. Prefer bike or rower.'
+  },
+  mod2:{
+    acc:'Moderate fatigue. Two agility drills only — choose highest skill demand. Snap downs and seated box jump only — no max-effort plyos. Strength at –25%, cap RPE 7.5. No surprise if today feels heavy.',
+    lat:'Core lateral work only — shuffle and one cutting drill. One plyo. BSQ at –25% — maintain tempo and form but do not push into high RPE territory. McGill: do not load a system already under stress.',
+    lin:'Two agility drills. One plyo set. Strength at –25%. Use today to practice mechanics, not chase load.',
+    vel:'A/B skips and build-ups only — mechanics work. Box jump stays as single plyo (sub-max effort). Trap bar at –25%.',
+    cond:'Zone 2 aerobic work only. 20 min max. HR 130-150. This is an aerobic flush — supports recovery rather than creating new training stress. No sprint intervals at this readiness level.'
+  },
+  mod3:{
+    acc:'High fatigue — tissue stress elevated. Mechanics work only: A/B skips, wall starts. Pogo jumps for lower leg stiffness — low CNS cost. Strength at 55%: motor pattern maintenance, not training stimulus. McGill: loading a fatigued system creates injury risk without corresponding adaptation.',
+    lat:'Pogo jumps and light skaters — no max landing demand. Shuffle only. BSQ at 55% — 3 sets, technique focus. Single rotation build exercise.',
+    lin:'Mechanics skips only. Pogo jumps. Bench at 55%. Your job today is to show up and move — not to train.',
+    vel:'High knee run and A/B skips. Pogo jumps. Trap bar at 55% — hip hinge pattern maintenance only. SBS data: strength maintenance requires only ~30-40% of the volume needed to build it.',
+    cond:'Active recovery movement only. Easy bike at RPE 3-4 or a walk. The goal is circulation and tissue recovery, not a training effect. HR under 120.'
+  },
+  recovery:{
+    acc:'Active recovery. Light skip work for mechanics, very light lifting. 30 min max. Nothing that creates new DOMS.',
+    lat:'Pogo jumps and bodyweight skaters at low intensity. Hip mobility module strongly recommended today.',
+    lin:'Skip agility. Light rotation work and core. Back prehab module ideal.',
+    vel:'A/B skips for mechanics — not speed. Light trap bar for hip hinge pattern only.',
+    cond:'Easy bike Zone 2 only. 15 min. No intervals, no sprints, no elevated HR.'
+  }
 };
 
 var DAY_TYPE_INFO = {
@@ -1499,8 +1615,33 @@ function setRing(id, pct, color) {
 }
 
 function computeMode() {
-  var c = (S.rec*0.4) + (S.slp*0.25) + (S.body/5*17.5) + (S.mot/5*17.5);
-  return c >= 65 ? 'full' : c >= 42 ? 'modified' : 'recovery';
+  // Weighted readiness composite 0-100
+  // Weights: recovery 40%, sleep 25%, body feel 17.5%, motivation 17.5%
+  // Sleep gets extra weight for soccer-skill days (agility/velocity) — per SBS research
+  // on sleep restriction disproportionately affecting coordination and reaction time
+  var c = (S.rec * 0.40) + (S.slp * 0.25) + ((S.body/5) * 17.5) + ((S.mot/5) * 17.5);
+
+  // 5-level system
+  // Full (≥72): full CNS availability — all blocks, all volume, max intent
+  // Mod1 (58-71): minor fatigue — strength -15%, plyo -1 set, same exercises
+  // Mod2 (45-57): moderate fatigue — strength -25%, plyo -30%, lighter agility
+  // Mod3 (30-44): high fatigue — strength 55% for motor pattern only, low-impact plyos, mechanics agility
+  // Recovery (<30): active recovery only — no new tissue stress
+  if (c >= 72) return 'full';
+  if (c >= 58) return 'mod1';
+  if (c >= 45) return 'mod2';
+  if (c >= 30) return 'mod3';
+  return 'recovery';
+}
+
+function modeData(mode) {
+  return {
+    full:     { label:'Full Training',       short:'Full',       detail:'All blocks · Full volume · Max intent',                icon:'⚡', cls:'full'     },
+    mod1:     { label:'Modified — Light',    short:'Mod 1',      detail:'Strength –15% · Plyo –1 set · Quality over quantity',  icon:'↘', cls:'mod1'     },
+    mod2:     { label:'Modified — Medium',   short:'Mod 2',      detail:'Strength –25% · Plyo –30% · Cap RPE 7.5',             icon:'↓', cls:'mod2'     },
+    mod3:     { label:'Modified — Heavy',    short:'Mod 3',      detail:'Technique only · 55% load · Low-impact plyos',         icon:'⚠', cls:'mod3'     },
+    recovery: { label:'Recovery Day',        short:'Recovery',   detail:'Active recovery only · No new tissue stress',          icon:'↺', cls:'recovery' }
+  }[mode] || { label:'Full Training', short:'Full', detail:'', icon:'⚡', cls:'full' };
 }
 
 function updateReadiness() {
@@ -1817,6 +1958,8 @@ function stepCondVal(id, delta, min, max) {
 function buildWorkout() {
   sessionLoads = {};
   var prog = SESSIONS[S.mode] && SESSIONS[S.mode][S.dayType] ? SESSIONS[S.mode][S.dayType] : SESSIONS.full[S.dayType];
+  // Map strength prescription mode: mod3 → recovery level, mod1/mod2 → modified level
+  var strengthMode = {full:'full', mod1:'mod1', mod2:'modified', mod3:'recovery', recovery:'recovery'}[S.mode] || S.mode;
   var isCond = S.dayType === 'cond';
   var tabs = isCond ? ['warmup','conditioning'] : ['warmup','agility','plyometrics','strength','build'];
   var tabLabels = {warmup:'Warm-up',agility:'Agility',plyometrics:'Plyometrics',strength:'Strength',build:'Build/Trunk',conditioning:'Conditioning'};
@@ -1925,10 +2068,10 @@ function buildWorkout() {
         realization:'<div class="ai-box" style="margin-bottom:10px"><div class="ai-label">Realization phase — concentric contrast</div><div class="ai-text">Maximum intent on the concentric. Pairs with explosive movement (box jump, broad jump) immediately after each set. CNS potentiation from the heavy load makes the explosive movement more powerful than normal. This is where the strength from accumulation and transmutation converts to speed.</div></div>',
         deload:'<div class="ai-box" style="margin-bottom:10px"><div class="ai-label">Deload week</div><div class="ai-text">50% load, normal tempo. Technique work only. Allows super-compensation from the previous 8 weeks. Do not push intensity.</div></div>'
       }[phase] || '';
-      var h = '<p class="section-label">Strength</p>' + phaseNote;
+      var h = '<p class="section-label">Strength</p>' + phaseNote + modeNote;
       for (var si=0;si<strKeys.length;si++) {
         var ex = EX[strKeys[si]]; if (!ex) continue;
-        var pres = getStrengthPrescription(strKeys[si], S.week, S.mode);
+        var pres = getStrengthPrescription(strKeys[si], S.week, strengthMode);
         var id = 'st-'+si;
         var baseRec = calcLoad(strKeys[si], pres.pct);
         var setRows = buildSetRows(id, pres.sets||5, pres.reps, baseRec, 8, [6,6.5,7,7.5,8,8.5,9,9.5,10]);
@@ -1982,7 +2125,8 @@ function buildWorkout() {
 
     } else if (tab === 'conditioning') {
       var protos = prog.protocols || [];
-      var h = '<p class="section-label">Soccer conditioning — pick 1 or 2 protocols</p>' +
+      var interferenceWarn = getCondInterferenceWarning();
+      var h = interferenceWarn + '<p class="section-label">Soccer conditioning — pick 1 or 2 protocols</p>' +
         '<div class="ai-box" style="margin-bottom:12px"><div class="ai-text">Choose based on equipment available. One protocol done with full effort beats two done half-heartedly. On full readiness: bias toward assault bike or court sprints for soccer specificity.</div></div>';
       for (var ci=0;ci<protos.length;ci++) {
         var p = protos[ci];
@@ -2075,7 +2219,7 @@ async function fetchWorkoutAI() {
 function finishWorkout() {
   showScreen('screen-log');
   var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
-  // Set today's date as default for session date
+  // Set today date as default for session date
   var today = new Date();
   var yyyy = today.getFullYear();
   var mm = String(today.getMonth()+1).padStart(2,'0');
@@ -2148,6 +2292,7 @@ async function saveSession() {
   var performedAt = dateEl && dateEl.value ? dateEl.value : new Date().toISOString().slice(0,10);
   var displayDate = performedAt ? new Date(performedAt+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
   var entry = {date:displayDate,mode:S.mode,dayType:info.sub,week:S.week,rec:S.rec,slp:S.slp,rpe:S.lastRPE,energy:S.lastEnergy,jump:S.lastJump,debrief:S.lastDebrief};
+  setLastSessionDayType(info.sub); // Track for conditioning interference check
   S.history.unshift(entry);
   if (S.sbConnected && S.sbUrl && S.sbKey) {
     try {
@@ -2908,6 +3053,7 @@ async function saveSession() {
   var displayDate = performedAt ? new Date(performedAt+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'});
   var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
   var entry = {date:displayDate,mode:S.mode,dayType:info.sub,week:S.week,rec:S.rec,slp:S.slp,rpe:S.lastRPE,energy:S.lastEnergy,jump:S.lastJump,debrief:S.lastDebrief};
+  setLastSessionDayType(info.sub); // Track for conditioning interference check
   S.history.unshift(entry);
   if (S.sbConnected && S.sbUrl && S.sbKey) {
     try {
@@ -3046,15 +3192,11 @@ function updateReadiness() {
   var detail = document.getElementById('mode-detail');
   var icon = document.getElementById('mode-icon');
   if (!banner) return;
-  var modeData = {
-    full:    {cls:'full',    label:'Full Training',     detail:'All blocks · Full volume · Full intent', icon:'⚡'},
-    modified:{cls:'modified',label:'Modified Training', detail:'Volume –25% · Max RPE 7 · 85% effort',  icon:'〜'},
-    recovery:{cls:'recovery',label:'Recovery Day',      detail:'Light movement · No max effort',         icon:'↺'}
-  }[S.mode] || {cls:'full',label:'Full Training',detail:'',icon:'⚡'};
-  banner.className = 'mode-banner '+modeData.cls;
-  if (label) label.textContent = modeData.label;
-  if (detail) detail.textContent = modeData.detail;
-  if (icon) icon.textContent = modeData.icon;
+  var md = modeData(S.mode);
+  banner.className = 'mode-banner ' + md.cls;
+  if (label) label.textContent = md.label;
+  if (detail) detail.textContent = md.detail;
+  if (icon) icon.textContent = md.icon;
   var ai = document.getElementById('readiness-ai');
   if (ai) ai.textContent = (MODE_INSIGHTS[S.mode]||{})[S.dayType]||'';
 }
