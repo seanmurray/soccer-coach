@@ -1809,15 +1809,7 @@ function selectDay(d) {
 // ═══════════════════════════════════════════════════════════
 // BUILD WORKOUT
 // ═══════════════════════════════════════════════════════════
-function goToWorkout() {
-  resetSessionLog();
-  buildWorkout();
-  showScreen('screen-workout');
-  var info = DAY_TYPE_INFO[S.dayType] || {sub:S.dayType};
-  var hdr = document.getElementById('workout-header');
-  if (hdr) hdr.textContent = 'Week '+S.week+' \u00b7 '+getPhaseLabel(S.week)+' \u00b7 '+info.sub+' day';
-  fetchWorkoutAI();
-}
+// goToWorkout v7 stub removed
 
 function videoLink(url, name) {
   if (!url) return '';
@@ -2131,6 +2123,20 @@ function buildWorkout() {
         realization:'<div class="ai-box" style="margin-bottom:10px"><div class="ai-label">Realization phase — concentric contrast</div><div class="ai-text">Maximum intent on the concentric. Pairs with explosive movement (box jump, broad jump) immediately after each set. CNS potentiation from the heavy load makes the explosive movement more powerful than normal. This is where the strength from accumulation and transmutation converts to speed.</div></div>',
         deload:'<div class="ai-box" style="margin-bottom:10px"><div class="ai-label">Deload week</div><div class="ai-text">50% load, normal tempo. Technique work only. Allows super-compensation from the previous 8 weeks. Do not push intensity.</div></div>'
       }[phase] || '';
+
+      // Mode context note — shown when not at full training capacity
+      var modeNote = S.mode !== 'full' ? (function() {
+        var md = modeData(S.mode);
+        var notes = {
+          mod1: 'Load –15% from full prescription. Same sets and reps. Maintain eccentric quality.',
+          mod2: 'Load –25% from full prescription. Cap RPE 7.5. Quality over load today.',
+          mod3: '55% load — motor pattern maintenance only. Do not push. McGill: loading a fatigued system creates injury risk without adaptation.',
+          recovery: '50% load, normal tempo. Technique rehearsal only.'
+        };
+        return '<div style="background:rgba(255,149,0,.08);border:.5px solid rgba(255,149,0,.25);border-radius:var(--r2);padding:12px 14px;margin-bottom:12px;font-size:14px;color:#ff9500;line-height:1.5">' +
+          '<strong>' + md.label + '</strong> — ' + (notes[S.mode] || '') + '</div>';
+      })() : '';
+
       var h = '<p class="section-label">Strength</p>' + phaseNote + modeNote;
       for (var si=0;si<strKeys.length;si++) {
         var ex = EX[strKeys[si]]; if (!ex) continue;
@@ -3533,6 +3539,86 @@ renderStepperVal('rec'); renderStepperVal('slp'); renderStepperVal('body'); rend
 renderDayOrderList();
 loadTimerPrefs();
 renderModuleRow();
+
+
+// ─── CONDITIONING INTERFERENCE & SESSION TRACKING ──────────────────────────
+function getLastSessionDayType() {
+  try { return localStorage.getItem('last_session_day_type') || ''; } catch(e) { return ''; }
+}
+
+function setLastSessionDayType(dayType) {
+  try { localStorage.setItem('last_session_day_type', dayType); } catch(e) {}
+}
+
+function getCondInterferenceWarning() {
+  var lastDay = getLastSessionDayType();
+  var heavyDays = ['Acceleration', 'Max Velocity', 'Linear Agility'];
+  if (S.dayType === 'cond' && heavyDays.indexOf(lastDay) >= 0) {
+    return '<div style="background:rgba(255,149,0,.1);border:.5px solid rgba(255,149,0,.3);border-radius:var(--r2);padding:14px 16px;margin-bottom:14px;font-size:15px;color:#ff9500;line-height:1.6">' +
+      '<strong style="display:block;margin-bottom:4px">&#9888; Conditioning Interference Risk</strong>' +
+      'Your previous session was a <strong>' + lastDay + '</strong> day with heavy compound strength work. ' +
+      'Running-based conditioning creates significant interference with strength adaptations (SBS research). ' +
+      '<strong>Recommend:</strong> Assault bike, rower, or SkiErg today instead of court sprints.' +
+      '</div>';
+  }
+  return '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// BIOMETRICS — fetch HRV + RHR from Supabase (pushed by iOS Shortcuts)
+// Battery and Stress are entered manually via sliders
+// ═══════════════════════════════════════════════════════════
+
+async function fetchLatestBiometrics() {
+  if (!S.sbUrl || !S.sbKey) return;
+  try {
+    var r = await fetch(
+      S.sbUrl + '/rest/v1/soccer_biometrics?order=recorded_at.desc&limit=1',
+      { headers: { 'apikey': S.sbKey, 'Authorization': 'Bearer ' + S.sbKey } }
+    );
+    if (!r.ok) return;
+    var rows = await r.json();
+    if (!rows || !rows.length) { showBioStatus('manual', 0); return; }
+
+    var row = rows[0];
+    var recordedAt = new Date(row.recorded_at);
+    var ageHours = (Date.now() - recordedAt.getTime()) / 3600000;
+
+    // Only use if within last 18 hours
+    if (ageHours > 18) { showBioStatus('stale', ageHours); return; }
+
+    if (row.hrv_ms  != null) S.hrv = row.hrv_ms;
+    if (row.rhr_bpm != null) S.rhr = row.rhr_bpm;
+    S.bioSource = 'shortcuts';
+
+    renderBioDisplay();
+    updateReadiness();
+    showBioStatus('live', ageHours);
+  } catch(e) {
+    console.warn('Biometrics fetch failed:', e);
+    showBioStatus('manual', 0);
+  }
+}
+
+function showBioStatus(state, ageHours) {
+  var el = document.getElementById('bio-status');
+  if (!el) return;
+  var msgs = {
+    live:   ageHours < 1 ? 'Synced just now' : 'Synced ' + Math.round(ageHours) + 'h ago',
+    stale:  Math.round(ageHours) + 'h old — run Shortcut',
+    manual: 'Run Shortcut to sync'
+  };
+  el.textContent = msgs[state] || '';
+  el.style.color = state === 'live' ? 'var(--green)' : state === 'stale' ? 'var(--amber)' : 'var(--t3)';
+}
+
+function renderBioDisplay() {
+  var hrvEl = document.getElementById('bio-hrv');
+  var rhrEl = document.getElementById('bio-rhr');
+  if (hrvEl) hrvEl.textContent = S.hrv ? Math.round(S.hrv) : '—';
+  if (rhrEl) rhrEl.textContent = S.rhr ? Math.round(S.rhr) : '—';
+}
+
 // Fetch latest biometrics from Supabase (pushed by iOS Shortcuts)
 fetchLatestBiometrics().then(function() {
   // If no watch data, show manual status
