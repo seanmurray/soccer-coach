@@ -730,6 +730,85 @@ input[type=range]::-moz-range-thumb {
 
 input[type=number]::-webkit-inner-spin-button { opacity: .4; }
 input[type=date] { color-scheme: dark; }
+
+.version-btn {
+  flex: 1; height: 40px; border-radius: var(--r1);
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  background: var(--bg-pill); color: var(--t3);
+  border: .5px solid rgba(255,255,255,.08);
+  cursor: pointer; transition: all .2s;
+}
+.version-btn.active {
+  background: var(--green-bg); color: var(--green);
+  border-color: var(--green-line);
+}
+
+/* ─── EXERCISE FEEDBACK (agility / plyo) ─────────────────────────────── */
+.speed-feedback {
+  background: var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 16px;
+  margin-top: 12px;
+}
+.fb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: .5px solid rgba(255,255,255,.06);
+}
+.fb-row:last-of-type { border-bottom: none; }
+.fb-row label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--t2);
+  flex-shrink: 0;
+  min-width: 120px;
+}
+.fb-row input[type=range] {
+  flex: 1;
+  accent-color: var(--green);
+  height: 4px;
+}
+.fb-val {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  color: var(--green);
+  min-width: 70px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.fb-area {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--bg-input);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: var(--r2);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--t1);
+  resize: vertical;
+  min-height: 72px;
+  color-scheme: dark;
+  display: block;
+}
+.fb-area::placeholder { color: var(--t3); }
+.fb-area:focus { outline: none; border-color: var(--green); }
+
+.section-label {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 10px;
+}
 </style>
 </head>
 <body>
@@ -883,11 +962,6 @@ input[type=date] { color-scheme: dark; }
       <div class="log-slider-label">Energy</div>
       <input type="range" min="1" max="5" step="1" value="3" id="sl-energy" oninput="document.getElementById('lbl-energy').textContent=this.value+'/5'">
       <div class="log-slider-val" id="lbl-energy">3/5</div>
-    </div>
-    <div class="log-slider-row">
-      <div class="log-slider-label">Box jump</div>
-      <input type="range" min="10" max="42" step="1" value="22" id="sl-jump" oninput="document.getElementById('lbl-jump').textContent=this.value+'&quot;'">
-      <div class="log-slider-val" id="lbl-jump">22"</div>
     </div>
   </div>
   <div class="ai-card"><div class="ai-label">AI Debrief</div><div class="ai-text" id="log-ai"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
@@ -1320,31 +1394,38 @@ var EX = {
     upgrade:null},
   broad_jump:{name:'Broad jump',target:'4×3',tags:['acc'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/horizontal/broad-jump/',
+    measure:{label:'Longest jump',unit:'in',min:24,max:180,step:1},
     cue:'Drive horizontally — swing arms, load hips, cover distance.',
     upgrade:{name:'Band-resisted broad jumps',desc:'Light band anchored behind hips. Slight backward pull forces better landing balance and develops horizontal power with added challenge. 4×3.',prereq:'Broad jump distance is consistent and landings stable.',url:'https://blog.overtimeathletes.com/resisted-broad-jumps-for-lower-body-power/'}},
   sl_broad_jump:{name:'Single-leg broad jump',target:'4×3 each leg',tags:['acc'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-broad-jump/',
+    measure:{label:'Longest jump (per leg)',unit:'in',min:24,max:144,step:1},
     cue:'Load through hip, drive knee — pure horizontal force production.',
     upgrade:{name:'SL double/triple broad jump',desc:'Land and immediately reload for a second (or third) jump without stopping. Develops rate of force development — reload and explode. 4×2 sequences.',prereq:'Single broad jump is easy and distance is consistent.',url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-broad-jump/'}},
   sl_triple_jump:{name:'Single-leg triple jump',target:'4×1 each leg',tags:['acc','vel'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-triple-jump/',
+    measure:{label:'Total distance',unit:'in',min:36,max:240,step:2},
     cue:'Short ground contacts — reload and explode each landing.',
     upgrade:{name:'SL triple jump from low box',desc:'Start on 6-8" box, step off and execute triple jump immediately. Extra initial velocity into first contact challenges reactive strength beyond flat-ground version.',prereq:'Flat-ground SL triple jump is dialed — consistent distance and landing control.',url:YT('single leg triple jump plyometric')}},
   box_jump:{name:'Box jump',target:'6×1',tags:['vel','acc'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/vertical/box-jump/',
+    measure:{label:'Box height',unit:'in',min:12,max:48,step:2},
     cue:'Swing arms, extend fully, land soft on box. Step down — do not jump down.',
     upgrade:{name:'Continuous hurdle hops',desc:'Set 3-4 hurdles at hip height. Bounce over consecutively with minimal ground contact. Develops ankle stiffness and tendon elasticity at speed.',prereq:'Box jumps feel easy and ground contact is quick and quiet.',url:YT('continuous hurdle hops plyometric')}},
   approach_box_jump:{name:'Approach box jump',target:'6×2',tags:['vel'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/vertical/approach-box-jump/',
+    measure:{label:'Box height',unit:'in',min:12,max:48,step:2},
     cue:'2-3 step approach, load, explode. Use momentum.',upgrade:null},
   seated_box_jump:{name:'Seated box jump (no CMJ)',target:'8×1',tags:['acc'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/vertical/seated-box-jump/',
     cue:'No stretch reflex — pure concentric power. Sit, pause briefly, explode.',upgrade:null},
   sl_box_jump:{name:'Single-leg box jump (land 2)',target:'4×1 each leg',tags:['vel'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/vertical/single-leg-box-jump/',
+    measure:{label:'Box height',unit:'in',min:12,max:48,step:2},
     cue:'Drive off one foot, land controlled on both. Track knee over toe.',upgrade:null},
   half_kneel_box_jump:{name:'Half-kneeling box jump',target:'4×1 each side',tags:['acc'],type:'plyo',
     url:YT('half kneeling box jump'),
+    measure:{label:'Box height',unit:'in',min:12,max:36,step:2},
     cue:'Starting strength from dead position — drive through hip extension. No momentum.',upgrade:null},
   snap_downs:{name:'Snap downs',target:'8×1',tags:['acc'],type:'plyo',
     url:YT('snap down plyometric landing drill'),
@@ -1356,10 +1437,12 @@ var EX = {
     upgrade:{name:'Altitude drop leg to depth jump',desc:'Hold one leg up, step off elevated box, snap both feet down, immediately rebound into max jump. Less time on ground = more elastic power. Advanced — earn this with perfect standard depth drops.',prereq:'Depth drops are easy and ground contact is minimal.',url:'https://www.tiktok.com/@joeybergles/video/7180516758015708462'}},
   skater_jumps:{name:'Skater jumps',target:'4×4 each direction',tags:['lat'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/horizontal/skater-jump/',
+    measure:{label:'Lateral distance per jump',unit:'in',min:12,max:84,step:2},
     cue:'Lateral leap, stick landing, minimal wobble. Cover distance each rep.',
     upgrade:{name:'Reactive skater jumps (visual cue)',desc:'Standard skater pattern but hold each landing until visual cue to redirect. Adds the reactive component — trains the read-react-redirect sequence specific to soccer cutting.',prereq:'Skater jump landings are solid and controlled.',url:'https://movements.overtimeathletes.com/power/horizontal/skater-jump/'}},
   ascending_skaters:{name:'Ascending skater jumps',target:'2×10 yds each',tags:['lat'],type:'plyo',
     url:YT('ascending skater jumps lateral bounds'),
+    measure:{label:'Max lateral distance',unit:'in',min:12,max:96,step:2},
     cue:'Progressive lateral distance — each rep farther than the last.',upgrade:null},
   lateral_bounds:{name:'Lateral alternating bounds',target:'4×20 yds',tags:['lat'],type:'plyo',
     url:'https://movements.overtimeathletes.com/power/horizontal/alternating-bounds/',
@@ -1941,6 +2024,11 @@ function toggleSetDone(exId, setIdx, targetRPE, el) {
   onSetDone(exId, setIdx, targetRPE);
   logSetDone(exId);
 
+  // Save to session buffer for Supabase persistence
+  var recEl = document.getElementById(exId + '_rec' + (setIdx + 1));
+  var recWeight = recEl ? parseFloat(recEl.textContent) : null;
+  saveSetToBuffer(exId, setIdx + 1, rpe, isNaN(recWeight) ? null : recWeight);
+
   // Determine context from exId prefix for rest time
   var context = 'build';
   if (exId.indexOf('st-') === 0) context = 'strength';
@@ -2046,8 +2134,11 @@ function buildWorkout() {
     div.style.display = ti===0 ? 'block' : 'none';
 
     if (tab === 'warmup') {
-      var wuHtml = '<p class="section-label">OTA dynamic warm-up — 8-10 min ' +
-        '<a href="'+WARMUP_OTA_URL+'" target="_blank" class="video-link" style="margin-left:6px;font-size:10px">&#9654; Watch full sequence</a></p>' +
+      var wuHtml = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+        '<p class="section-label" style="margin:0">OTA dynamic warm-up — 8-10 min ' +
+        '<a href="'+WARMUP_OTA_URL+'" target="_blank" class="video-link" style="margin-left:6px;font-size:10px">&#9654; Watch</a></p>' +
+        '<button onclick="checkAllWarmup()" style="height:36px;padding:0 14px;border-radius:var(--r1);background:var(--green-bg);border:.5px solid var(--green-line);color:var(--green);font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:.06em;cursor:pointer;text-transform:uppercase">Check All</button>' +
+        '</div>' +
         '<div class="card">';
       for (var wi=0;wi<WARMUP.length;wi++) {
         wuHtml += '<div class="warmup-item"><input type="checkbox" class="warmup-cb" id="wu-'+wi+'"><label for="wu-'+wi+'" style="cursor:pointer;flex:1">'+WARMUP[wi]+'</label></div>';
@@ -2145,6 +2236,7 @@ function buildWorkout() {
         var ex = EX[strKeys[si]]; if (!ex) continue;
         var pres = getStrengthPrescription(strKeys[si], S.week, strengthMode);
         var id = 'st-'+si;
+        registerExId(id, strKeys[si], ex.name);
         var baseRec = calcLoad(strKeys[si], pres.pct);
         var setRows = buildSetRows(id, pres.sets||5, pres.reps, baseRec, 8, [6,6.5,7,7.5,8,8.5,9,9.5,10]);
         var loadNote = baseRec ? '<span style="color:var(--green)">~'+Math.round(baseRec)+' lbs ('+Math.round(pres.pct*100)+'%)</span>' : '';
@@ -2176,6 +2268,7 @@ function buildWorkout() {
       for (var bi=0;bi<bldKeys.length;bi++) {
         var ex = EX[bldKeys[bi]]; if (!ex) continue;
         var id = 'bd-'+bi;
+        registerExId(id, bldKeys[bi], ex.name);
         var setRows = buildSetRows(id, 3, 8, 0, 7, [5,6,6.5,7,7.5,8]);
         var swapHtml = '';
         if (ex.swaps) {
@@ -2310,8 +2403,7 @@ async function fetchDebrief() {
   el.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
   var rpe = document.getElementById('sl-rpe').value;
   var energy = document.getElementById('sl-energy').value;
-  var jump = document.getElementById('sl-jump').value;
-  S.lastRPE=+rpe; S.lastEnergy=+energy; S.lastJump=+jump;
+  S.lastJump = 0;
 
   var summary = buildSessionSummary();
   var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
@@ -2366,7 +2458,7 @@ async function saveSession() {
   var entry = {date:displayDate,mode:S.mode,dayType:info.sub,week:S.week,rec:S.rec,slp:S.slp,rpe:S.lastRPE,energy:S.lastEnergy,jump:S.lastJump,debrief:S.lastDebrief};
   setLastSessionDayType(info.sub); // Track for conditioning interference check
   S.history.unshift(entry);
-  if (S.sbConnected && S.sbUrl && S.sbKey) {
+  if (S.sbUrl && S.sbKey) {  // sbConnected not required — credentials are baked in
     try {
       await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
         method:'POST',headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=minimal'},
@@ -2506,6 +2598,9 @@ var sessionLog = {
 
 function resetSessionLog() {
   sessionLog = { tabsVisited:[], setsCompleted:{}, warmupChecked:0, frcChecked:0, startTime: Date.now() };
+  resetSessionBuffer();
+  exerciseHistoryCache = {};
+  versionSelections = {};
 }
 
 function logTabVisit(tab) {
@@ -3324,6 +3419,9 @@ var sessionLog = {
 
 function resetSessionLog() {
   sessionLog = { tabsVisited:[], setsCompleted:{}, warmupChecked:0, frcChecked:0, startTime: Date.now() };
+  resetSessionBuffer();
+  exerciseHistoryCache = {};
+  versionSelections = {};
 }
 
 function logTabVisit(tab) {
@@ -3610,8 +3708,21 @@ function buildAgFeedback(id, ex, exType) {
 function buildPlyoFeedback(id, ex) {
   var saveCall = "saveExFeedback('" + id + "','" + (ex.key||id) + "','" +
     (ex.name||'').replace(/'/g,"\'") + "','plyo')";
+  // Upgrade version selector — only shown if exercise has an upgrade
+  var upgradeSelect = '';
+  if (ex.upgrade) {
+    upgradeSelect = '<div class="fb-row" style="margin-bottom:14px">' +
+      '<label>Version done</label>' +
+      '<div style="display:flex;gap:8px;flex:1">' +
+      '<button class="version-btn active" id="' + id + '-ver-orig" ' +
+      'onclick="selectVersion(\'' + id + '\',\'original\')">Original</button>' +
+      '<button class="version-btn" id="' + id + '-ver-upg" ' +
+      'onclick="selectVersion(\'' + id + '\',\'upgrade\')">Upgrade</button>' +
+      '</div></div>';
+  }
   return '<div class="speed-feedback" style="margin-top:10px">' +
-    '<div class="section-label" style="margin-bottom:8px">Feedback</div>' +
+    '<div class="section-label" style="margin-bottom:12px">Feedback</div>' +
+    upgradeSelect +
     '<div class="fb-row"><label>Explosiveness</label>' +
     '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-e" ' +
     'oninput="document.getElementById(\'' + id + '-el\').textContent=this.value+\'/5\';' + saveCall + '">' +
@@ -3623,22 +3734,49 @@ function buildPlyoFeedback(id, ex) {
     '<div class="fb-row"><label>Ease</label>' +
     '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-ease" ' +
     'oninput="document.getElementById(\'' + id + '-easel\').textContent=EASE_LABELS[+this.value];' + saveCall + '">' +
-    '<span class="fb-val" style="min-width:72px" id="' + id + '-easel">Moderate</span></div>' +
+    '<span class="fb-val" style="min-width:80px" id="' + id + '-easel">Moderate</span></div>' +
+    (ex.measure ? (
+      '<div class="fb-row">' +
+      '<label>' + ex.measure.label + '</label>' +
+      '<input type="number" min="' + ex.measure.min + '" max="' + ex.measure.max + '" ' +
+      'placeholder="e.g. ' + Math.round((ex.measure.min + ex.measure.max)/2) + '" ' +
+      'id="' + id + '-meas" ' +
+      'style="background:var(--bg-input);border:1px solid rgba(255,255,255,.1);border-radius:var(--r1);padding:10px;font-family:var(--font-mono);font-size:18px;color:var(--t1);width:90px;text-align:center"' +
+      'oninput="' + saveCall + '">' +
+      '<span class="fb-val" style="color:var(--t2)">' + ex.measure.unit + '</span>' +
+      '</div>'
+    ) : '') +
     '<textarea class="fb-area" placeholder="Notes (height, distance, feel...)" id="' + id + '-n" ' +
     'onblur="' + saveCall + '"></textarea>' +
     '</div>';
 }
 
+var versionSelections = {};  // id -> 'original' or 'upgrade'
+
+function selectVersion(id, version) {
+  versionSelections[id] = version;
+  var orig = document.getElementById(id + '-ver-orig');
+  var upg  = document.getElementById(id + '-ver-upg');
+  if (orig) orig.classList.toggle('active', version === 'original');
+  if (upg)  upg.classList.toggle('active', version === 'upgrade');
+}
+
 function saveExFeedback(id, exKey, exName, exType) {
   var q    = document.getElementById(id+'-q');
   var r    = document.getElementById(id+'-r');
-  var e    = document.getElementById(id+'-e');   // plyo explosiveness
+  var e    = document.getElementById(id+'-e');
   var ease = document.getElementById(id+'-ease');
   var n    = document.getElementById(id+'-n');
   var quality   = q    ? parseInt(q.value)    : (e ? parseInt(e.value) : null);
   var effortRpe = r    ? parseFloat(r.value)  : null;
   var easeVal   = ease ? parseInt(ease.value) : null;
-  var notes     = n    ? n.value.trim()       : null;
+  var version   = versionSelections[id] || null;
+  var measEl   = document.getElementById(id+'-meas');
+  var measVal  = measEl && measEl.value ? measEl.value : null;
+  var notesRaw  = n ? n.value.trim() : null;
+  var notes = notesRaw || null;
+  if (measVal)  notes = (notes ? notes + ' | ' : '') + 'Distance/Height: ' + measVal + ' in';
+  if (version)  notes = (notes ? notes + ' | ' : '') + 'Version: ' + version;
   saveExPerfToBuffer(id, exKey, exName, exType, quality, effortRpe, easeVal, notes || null);
 }
 
@@ -3884,6 +4022,17 @@ var currentModuleSession = null;
 
 
 // ─── CONDITIONING INTERFERENCE & SESSION TRACKING ──────────────────────────
+
+function checkAllWarmup() {
+  var cbs = document.querySelectorAll('.wu-cb');
+  var allChecked = Array.from(cbs).every(function(cb){ return cb.checked; });
+  cbs.forEach(function(cb) {
+    cb.checked = !allChecked;
+    if (cb.checked) sessionLog.warmupChecked = cbs.length;
+    else sessionLog.warmupChecked = 0;
+  });
+}
+
 function getLastSessionDayType() {
   try { return localStorage.getItem('last_session_day_type') || ''; } catch(e) { return ''; }
 }
