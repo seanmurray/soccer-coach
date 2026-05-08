@@ -189,6 +189,19 @@ input[type=range] {
   outline: none;
   cursor: pointer;
 }
+.slider-adj {
+  width: 44px; height: 44px;
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  border: .5px solid rgba(255,255,255,.08);
+  color: var(--t1); font-size: 22px; font-weight: 300;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+}
+.slider-adj:active { background: var(--bg-raised); }
 input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 26px; height: 26px; border-radius: 50%;
@@ -578,7 +591,7 @@ input[type=range]::-moz-range-thumb {
 .dayorder-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: var(--bg-card); border-radius: var(--r3); margin-bottom: 8px; }
 .dayorder-n { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--t3); min-width: 30px; }
 .dayorder-name { flex: 1; font-size: 16px; font-weight: 500; color: var(--t1); }
-.dayorder-btn { width: 40px; height: 40px; border-radius: var(--r1); background: var(--bg-pill); color: var(--t2); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.dayorder-btn { width: 48px; height: 48px; border-radius: var(--r1); background: var(--bg-pill); color: var(--t2); font-size: 22px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 .dayorder-btn:active { background: var(--bg-raised); }
 
 /* SB status */
@@ -616,7 +629,7 @@ input[type=range]::-moz-range-thumb {
 .timer-exname { font-size: 15px; font-weight: 600; color: var(--t1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .timer-rpe-note { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--t3); margin-top: 2px; }
 .timer-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
-.timer-adj { width: 40px; height: 40px; border-radius: 50%; background: var(--bg-pill); color: var(--t2); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+.timer-adj { width: 48px; height: 48px; border-radius: 50%; background: var(--bg-pill); color: var(--t2); font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all .15s; }
 .timer-adj:active { background: var(--bg-input); }
 .timer-skip { width: 40px; height: 40px; border-radius: 50%; background: var(--green); color: #0a0a0a; font-size: 18px; display: flex; align-items: center; justify-content: center; transition: opacity .15s; }
 .timer-skip:active { opacity: .8; }
@@ -666,6 +679,35 @@ input[type=range]::-moz-range-thumb {
 .mod-phase-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--purple); margin-bottom: 6px; }
 .mod-phase-desc { font-size: 16px; color: var(--t2); line-height: 1.6; }
 
+/* Conditioning tab stepper buttons */
+.stepper-btn {
+  width: 56px; height: 56px;
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  border: .5px solid rgba(255,255,255,.1);
+  color: var(--t1); font-size: 26px; font-weight: 300;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0;
+  transition: background .15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none; -webkit-user-select: none;
+}
+.stepper-btn:active { background: var(--bg-raised); }
+.stepper-val {
+  flex: 1; text-align: center;
+  font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500;
+  color: var(--t1);
+}
+.stepper-label {
+  font-size: 15px; font-weight: 500; color: var(--t2);
+  margin-bottom: 8px;
+}
+.stepper-controls {
+  display: flex; align-items: center;
+  background: var(--bg-input); border-radius: var(--r2);
+  overflow: hidden; border: .5px solid rgba(255,255,255,.08);
+}
+
 /* ─── LOG SCREEN ──────────────────────────────────────────── */
 .log-slider-row { display: flex; align-items: center; gap: 14px; padding: 14px 0; border-bottom: .5px solid rgba(255,255,255,.06); }
 .log-slider-row:last-child { border-bottom: none; }
@@ -683,7 +725,7 @@ input[type=range]::-moz-range-thumb {
 .week-label { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: .04em; color: var(--t1); }
 .phase-chip { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 100px; background: var(--green-bg); color: var(--green); border: .5px solid var(--green-line); }
 .week-nav { margin-left: auto; display: flex; gap: 6px; }
-.week-nav-btn { width: 38px; height: 38px; border-radius: var(--r1); background: var(--bg-card); color: var(--t2); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.week-nav-btn { width: 44px; height: 44px; border-radius: var(--r1); background: var(--bg-card); color: var(--t2); font-size: 18px; display: flex; align-items: center; justify-content: center; transition: background .15s; }
 .week-nav-btn:active { background: var(--bg-raised); }
 
 input[type=number]::-webkit-inner-spin-button { opacity: .4; }
@@ -754,48 +796,46 @@ input[type=date] { color-scheme: dark; }
   <div class="slider-card">
     <div class="slider-row">
       <div class="slider-label">Recovery</div>
-      <input type="range" min="0" max="100" value="72" id="sl-rec"
-        oninput="S.rec=+this.value;renderStepperVal('rec');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-rec','sv-rec',-1,0,100,'%')">−</button>
+      <input type="range" min="0" max="100" value="72" id="sl-rec" oninput="S.rec=+this.value;renderStepperVal('rec');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-rec','sv-rec',1,0,100,'%')">+</button>
       <div class="slider-value" id="sv-rec">72%</div>
     </div>
     <div class="slider-row">
       <div class="slider-label">Sleep</div>
-      <input type="range" min="0" max="100" value="72" id="sl-slp"
-        oninput="S.slp=+this.value;renderStepperVal('slp');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-slp','sv-slp',-1,0,100,'%')">−</button>
+      <input type="range" min="0" max="100" value="72" id="sl-slp" oninput="S.slp=+this.value;renderStepperVal('slp');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-slp','sv-slp',1,0,100,'%')">+</button>
       <div class="slider-value" id="sv-slp">72%</div>
     </div>
     <div class="slider-row">
       <div class="slider-label">Body feel</div>
-      <input type="range" min="1" max="5" step="1" value="3" id="sl-body"
-        oninput="S.body=+this.value;renderStepperVal('body');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-body','sv-body',-1,1,5,'/5')">−</button>
+      <input type="range" min="1" max="5" step="1" value="3" id="sl-body" oninput="S.body=+this.value;renderStepperVal('body');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-body','sv-body',1,1,5,'/5')">+</button>
       <div class="slider-value" id="sv-body">3/5</div>
     </div>
     <div class="slider-row">
       <div class="slider-label">Motivation</div>
-      <input type="range" min="1" max="5" step="1" value="3" id="sl-mot"
-        oninput="S.mot=+this.value;renderStepperVal('mot');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-mot','sv-mot',-1,1,5,'/5')">−</button>
+      <input type="range" min="1" max="5" step="1" value="3" id="sl-mot" oninput="S.mot=+this.value;renderStepperVal('mot');updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-mot','sv-mot',1,1,5,'/5')">+</button>
       <div class="slider-value" id="sv-mot">3/5</div>
     </div>
-    <!-- Battery and Stress: manual entry from Athlytic app -->
     <div class="slider-row">
-      <div class="slider-label" style="display:flex;flex-direction:column;gap:2px">
-        Battery
-        <span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-100</span>
-      </div>
-      <input type="range" min="0" max="100" value="50" id="sl-battery"
-        oninput="S.battery=+this.value;document.getElementById('sv-battery').textContent=this.value+'%';updateReadiness()">
+      <div class="slider-label">Battery<br><span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-100</span></div>
+      <button class="slider-adj" onclick="adjSlider('sl-battery','sv-battery',-1,0,100,'%');S.battery=+document.getElementById('sl-battery').value;updateReadiness()">−</button>
+      <input type="range" min="0" max="100" value="50" id="sl-battery" oninput="S.battery=+this.value;document.getElementById('sv-battery').textContent=this.value+'%';updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-battery','sv-battery',1,0,100,'%');S.battery=+document.getElementById('sl-battery').value;updateReadiness()">+</button>
       <div class="slider-value" id="sv-battery" style="color:var(--blue)">50%</div>
     </div>
     <div class="slider-row">
-      <div class="slider-label" style="display:flex;flex-direction:column;gap:2px">
-        Stress
-        <span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-60</span>
-      </div>
-      <input type="range" min="0" max="60" step="1" value="25" id="sl-stress"
-        oninput="S.stress=+this.value;document.getElementById('sv-stress').textContent=this.value;updateReadiness()">
+      <div class="slider-label">Stress<br><span style="font-size:11px;color:var(--t3);font-weight:400">Athlytic · 0-60</span></div>
+      <button class="slider-adj" onclick="adjSlider('sl-stress','sv-stress',-1,0,60,'');S.stress=+document.getElementById('sl-stress').value;updateReadiness()">−</button>
+      <input type="range" min="0" max="60" step="1" value="25" id="sl-stress" oninput="S.stress=+this.value;document.getElementById('sv-stress').textContent=this.value;updateReadiness()">
+      <button class="slider-adj" onclick="adjSlider('sl-stress','sv-stress',1,0,60,'');S.stress=+document.getElementById('sl-stress').value;updateReadiness()">+</button>
       <div class="slider-value" id="sv-stress" style="color:var(--blue)">25</div>
     </div>
-
   </div>
 
   <div class="overline" style="margin-bottom:10px">Session</div>
@@ -3535,6 +3575,21 @@ function getCondInterferenceWarning() {
   return '';
 }
 
+
+
+// ─── SLIDER ADJUSTMENT ────────────────────────────────────────────────────
+function adjSlider(slId, svId, delta, min, max, unit) {
+  var sl = document.getElementById(slId);
+  var sv = document.getElementById(svId);
+  if (!sl) return;
+  var v = Math.min(max, Math.max(min, parseFloat(sl.value) + delta));
+  // Round to avoid floating point drift
+  if (Math.abs(delta) >= 1) v = Math.round(v);
+  sl.value = v;
+  if (sv) sv.textContent = v + unit;
+  // Fire oninput to keep S state in sync
+  sl.dispatchEvent(new Event('input'));
+}
 
 // Sync sliders to initial S values
 (function() {
