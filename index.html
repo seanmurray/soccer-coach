@@ -2078,12 +2078,8 @@ function buildWorkout() {
             '<div class="ex-body" id="'+id+'" style="display:none">' +
             '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+ex.cue+'</div>' +
             videoLink(ex.url, ex.name) +
-            '<div class="speed-feedback" style="margin-top:8px">' +
-            '<div class="section-label" style="margin-bottom:4px">Feedback</div>' +
-            '<div class="slider-row"><label>Quality (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-q" oninput="document.getElementById(\''+id+'-ql\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-ql">3/5</span></div>' +
-            '<div class="slider-row"><label>Effort RPE</label><input type="range" min="5" max="10" step=".5" value="7.5" id="'+id+'-r" oninput="document.getElementById(\''+id+'-rl\').textContent=this.value"><span class="slider-val" id="'+id+'-rl">7.5</span></div>' +
-            '<textarea placeholder="Notes (feel, times, issues...)" style="background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:48px;margin-top:4px"></textarea>' +
-            '</div></div></div>';
+            buildAgFeedback(id, ex, 'agility') +
+            '</div></div>';
         }
         div.innerHTML = h;
       }
@@ -2115,12 +2111,8 @@ function buildWorkout() {
             '<div class="ex-body" id="'+id+'" style="display:none">' +
             '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+ex.cue+'</div>' +
             videoLink(ex.url, ex.name) + upgHtml +
-            '<div class="speed-feedback" style="margin-top:8px">' +
-            '<div class="section-label" style="margin-bottom:4px">Feedback</div>' +
-            '<div class="slider-row"><label>Explosiveness (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-e" oninput="document.getElementById(\''+id+'-el\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-el">3/5</span></div>' +
-            '<div class="slider-row"><label>Landing quality (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-l" oninput="document.getElementById(\''+id+'-ll\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-ll">3/5</span></div>' +
-            '<textarea placeholder="Notes (height, distance, feel...)" style="background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:48px;margin-top:4px"></textarea>' +
-            '</div></div></div>';
+            buildPlyoFeedback(id, ex) +
+            '</div></div>';
         }
         div.innerHTML = h;
       }
@@ -3030,12 +3022,43 @@ function openModule(idx) {
   document.getElementById('module-overlay').classList.add('open');
   document.getElementById('module-sheet').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Track module open
+  currentModuleSession = {
+    moduleId: m.id, moduleLabel: m.label,
+    openedAt: new Date().toISOString(), closedAt: null,
+    exercisesDone: [], exercisesTotal: null
+  };
+  // Count total checkboxes in this module for context
+  setTimeout(function() {
+    var cbs = document.querySelectorAll('#ms-body .mod-cb');
+    if (currentModuleSession) currentModuleSession.exercisesTotal = cbs.length;
+    // Attach change listeners to each checkbox
+    cbs.forEach(function(cb) {
+      cb.addEventListener('change', function() {
+        if (!currentModuleSession) return;
+        var label = cb.parentElement && cb.parentElement.querySelector('.mod-name');
+        var name = label ? label.textContent : cb.id || 'exercise';
+        if (cb.checked) {
+          if (currentModuleSession.exercisesDone.indexOf(name) < 0)
+            currentModuleSession.exercisesDone.push(name);
+        } else {
+          currentModuleSession.exercisesDone = currentModuleSession.exercisesDone.filter(function(n){ return n !== name; });
+        }
+      });
+    });
+  }, 50);
 }
 
 function closeModuleSheet() {
   document.getElementById('module-overlay').classList.remove('open');
   document.getElementById('module-sheet').classList.remove('open');
   document.body.style.overflow = '';
+  // Save module usage to buffer
+  if (currentModuleSession) {
+    currentModuleSession.closedAt = new Date().toISOString();
+    sessionBuffer.moduleUsage.push(currentModuleSession);
+    currentModuleSession = null;
+  }
 }
 
 // INIT
@@ -3137,10 +3160,15 @@ async function saveSession() {
   S.history.unshift(entry);
   if (S.sbConnected && S.sbUrl && S.sbKey) {
     try {
-      await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
-        method:'POST',headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=minimal'},
+      var sessRes = await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=representation'},
         body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,battery_pct:S.battery,stress_score:S.stress,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief,performed_at:performedAt})
       });
+      var sessData = await sessRes.json();
+      var sessionId = sessData && sessData[0] ? sessData[0].id : null;
+      // Flush detailed logging (sets, exercise perf, modules)
+      await flushSessionBuffer(sessionId, performedAt);
     } catch(e){ console.warn('SB save failed',e); }
   }
   switchNav('history');
@@ -3550,6 +3578,309 @@ renderStepperVal('rec'); renderStepperVal('slp'); renderStepperVal('body'); rend
 renderDayOrderList();
 loadTimerPrefs();
 renderModuleRow();
+
+
+
+// ─── FEEDBACK HTML BUILDERS ─────────────────────────────────────────────
+// Ease scale: 1=maximal effort, 2=hard, 3=moderate(target), 4=easy, 5=too easy
+var EASE_LABELS = ['', 'Max effort', 'Hard', 'Moderate', 'Easy', 'Too easy'];
+
+function buildAgFeedback(id, ex, exType) {
+  var saveCall = "saveExFeedback('" + id + "','" + (ex.key||id) + "','" + 
+    (ex.name||'').replace(/'/g,"\'") + "','" + exType + "')";
+  return '<div class="speed-feedback" style="margin-top:10px">' +
+    '<div class="section-label" style="margin-bottom:8px">Feedback</div>' +
+    '<div class="fb-row"><label>Quality</label>' +
+    '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-q" ' +
+    'oninput="document.getElementById(\'' + id + '-ql\').textContent=this.value+\'/5\';' + saveCall + '">' +
+    '<span class="fb-val" id="' + id + '-ql">3/5</span></div>' +
+    '<div class="fb-row"><label>Effort RPE</label>' +
+    '<input type="range" min="5" max="10" step=".5" value="7.5" id="' + id + '-r" ' +
+    'oninput="document.getElementById(\'' + id + '-rl\').textContent=this.value;' + saveCall + '">' +
+    '<span class="fb-val" id="' + id + '-rl">7.5</span></div>' +
+    '<div class="fb-row"><label>Ease</label>' +
+    '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-ease" ' +
+    'oninput="document.getElementById(\'' + id + '-easel\').textContent=EASE_LABELS[+this.value];' + saveCall + '">' +
+    '<span class="fb-val" style="min-width:72px" id="' + id + '-easel">Moderate</span></div>' +
+    '<textarea class="fb-area" placeholder="Notes (times, feel, issues...)" id="' + id + '-n" ' +
+    'onblur="' + saveCall + '"></textarea>' +
+    '</div>';
+}
+
+function buildPlyoFeedback(id, ex) {
+  var saveCall = "saveExFeedback('" + id + "','" + (ex.key||id) + "','" +
+    (ex.name||'').replace(/'/g,"\'") + "','plyo')";
+  return '<div class="speed-feedback" style="margin-top:10px">' +
+    '<div class="section-label" style="margin-bottom:8px">Feedback</div>' +
+    '<div class="fb-row"><label>Explosiveness</label>' +
+    '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-e" ' +
+    'oninput="document.getElementById(\'' + id + '-el\').textContent=this.value+\'/5\';' + saveCall + '">' +
+    '<span class="fb-val" id="' + id + '-el">3/5</span></div>' +
+    '<div class="fb-row"><label>Landing</label>' +
+    '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-l" ' +
+    'oninput="document.getElementById(\'' + id + '-ll\').textContent=this.value+\'/5\';' + saveCall + '">' +
+    '<span class="fb-val" id="' + id + '-ll">3/5</span></div>' +
+    '<div class="fb-row"><label>Ease</label>' +
+    '<input type="range" min="1" max="5" step="1" value="3" id="' + id + '-ease" ' +
+    'oninput="document.getElementById(\'' + id + '-easel\').textContent=EASE_LABELS[+this.value];' + saveCall + '">' +
+    '<span class="fb-val" style="min-width:72px" id="' + id + '-easel">Moderate</span></div>' +
+    '<textarea class="fb-area" placeholder="Notes (height, distance, feel...)" id="' + id + '-n" ' +
+    'onblur="' + saveCall + '"></textarea>' +
+    '</div>';
+}
+
+function saveExFeedback(id, exKey, exName, exType) {
+  var q    = document.getElementById(id+'-q');
+  var r    = document.getElementById(id+'-r');
+  var e    = document.getElementById(id+'-e');   // plyo explosiveness
+  var ease = document.getElementById(id+'-ease');
+  var n    = document.getElementById(id+'-n');
+  var quality   = q    ? parseInt(q.value)    : (e ? parseInt(e.value) : null);
+  var effortRpe = r    ? parseFloat(r.value)  : null;
+  var easeVal   = ease ? parseInt(ease.value) : null;
+  var notes     = n    ? n.value.trim()       : null;
+  saveExPerfToBuffer(id, exKey, exName, exType, quality, effortRpe, easeVal, notes || null);
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// DETAILED LOGGING SYSTEM
+// ═══════════════════════════════════════════════════════════
+
+// ── In-memory session buffer ─────────────────────────────────────────────
+// All detail data accumulates here during a session, then flushes on save
+var sessionBuffer = {
+  sets:         [],   // {exId, exKey, exName, setNum, reps, weight, rpe, recWeight}
+  exercisePerf: [],   // {exId, exKey, exName, type, quality, effortRpe, ease, notes}
+  moduleUsage:  [],   // {moduleId, moduleLabel, openedAt, closedAt, exercisesDone}
+  performedAt:  null,
+  dayType:      null,
+  weekNum:      null,
+  phase:        null,
+  mode:         null
+};
+
+// ── exId → exercise key/name lookup ─────────────────────────────────────
+// Built by buildWorkout, used when saving sets
+var exIdMap = {};  // e.g. {'st-0': {key:'bench_press', name:'Bench press'}}
+
+function registerExId(exId, exKey, exName) {
+  exIdMap[exId] = {key: exKey, name: exName};
+}
+
+function resetSessionBuffer() {
+  sessionBuffer = {
+    sets: [], exercisePerf: [], moduleUsage: [],
+    performedAt: null, dayType: S.dayType, weekNum: S.week,
+    phase: getPhase(S.week), mode: S.mode
+  };
+  exIdMap = {};
+}
+
+// ── Save a single set immediately when marked done ───────────────────────
+function saveSetToBuffer(exId, setNum, rpe, recWeight) {
+  var info = exIdMap[exId] || {key: exId, name: exId};
+  var repsEl   = document.getElementById(exId + '_r' + setNum);
+  var weightEl = document.getElementById(exId + '_l' + setNum);
+  var reps   = repsEl   ? parseInt(repsEl.value)   : null;
+  var weight = weightEl ? parseFloat(weightEl.value) : null;
+  sessionBuffer.sets.push({
+    exId:      exId,
+    exKey:     info.key,
+    exName:    info.name,
+    setNum:    setNum,
+    reps:      isNaN(reps)   ? null : reps,
+    weight:    isNaN(weight) ? null : weight,
+    rpe:       rpe,
+    recWeight: recWeight || null
+  });
+}
+
+// ── Save exercise perf (agility/plyo/build) when feedback changes ────────
+function saveExPerfToBuffer(exId, exKey, exName, type, quality, effortRpe, ease, notes) {
+  // Upsert — replace if already in buffer for this exId
+  var idx = sessionBuffer.exercisePerf.findIndex(function(e){ return e.exId === exId; });
+  var obj = {exId:exId, exKey:exKey, exName:exName, type:type,
+             quality:quality, effortRpe:effortRpe, ease:ease, notes:notes};
+  if (idx >= 0) sessionBuffer.exercisePerf[idx] = obj;
+  else sessionBuffer.exercisePerf.push(obj);
+}
+
+// ── Flush buffer to Supabase on session save ─────────────────────────────
+async function flushSessionBuffer(sessionId, performedAt) {
+  if (!S.sbUrl || !S.sbKey) return;
+  var headers = {
+    'Content-Type': 'application/json',
+    'apikey': S.sbKey,
+    'Authorization': 'Bearer ' + S.sbKey,
+    'Prefer': 'return=minimal'
+  };
+  var date = performedAt || new Date().toISOString().slice(0,10);
+  var phase = getPhase(S.week);
+
+  // Flush sets
+  if (sessionBuffer.sets.length) {
+    var setRows = sessionBuffer.sets.map(function(s) {
+      return {
+        performed_at:  date,
+        session_id:    sessionId || null,
+        day_type:      S.dayType,
+        week_num:      S.week,
+        exercise_key:  s.exKey,
+        exercise_name: s.exName,
+        set_num:       s.setNum,
+        actual_reps:   s.reps,
+        actual_weight: s.weight,
+        rpe:           s.rpe,
+        rec_weight:    s.recWeight,
+        phase:         phase,
+        mode:          S.mode
+      };
+    });
+    try {
+      await fetch(S.sbUrl + '/rest/v1/soccer_sets', {
+        method: 'POST', headers: headers, body: JSON.stringify(setRows)
+      });
+    } catch(e) { console.warn('Sets flush failed', e); }
+  }
+
+  // Flush exercise perf
+  if (sessionBuffer.exercisePerf.length) {
+    var perfRows = sessionBuffer.exercisePerf.map(function(p) {
+      return {
+        performed_at:  date,
+        session_id:    sessionId || null,
+        day_type:      S.dayType,
+        week_num:      S.week,
+        exercise_key:  p.exKey,
+        exercise_name: p.exName,
+        exercise_type: p.type,
+        quality:       p.quality,
+        effort_rpe:    p.effortRpe,
+        ease:          p.ease,
+        notes:         p.notes,
+        phase:         phase,
+        mode:          S.mode
+      };
+    });
+    try {
+      await fetch(S.sbUrl + '/rest/v1/soccer_exercise_perf', {
+        method: 'POST', headers: headers, body: JSON.stringify(perfRows)
+      });
+    } catch(e) { console.warn('ExPerf flush failed', e); }
+  }
+
+  // Flush module usage
+  if (sessionBuffer.moduleUsage.length) {
+    var modRows = sessionBuffer.moduleUsage.map(function(m) {
+      return {
+        performed_at:     date,
+        session_id:       sessionId || null,
+        module_id:        m.moduleId,
+        module_label:     m.moduleLabel,
+        opened_at:        m.openedAt,
+        closed_at:        m.closedAt,
+        duration_seconds: m.closedAt && m.openedAt ?
+          Math.round((new Date(m.closedAt) - new Date(m.openedAt)) / 1000) : null,
+        exercises_done:   JSON.stringify(m.exercisesDone || []),
+        exercises_total:  m.exercisesTotal || null
+      };
+    });
+    try {
+      await fetch(S.sbUrl + '/rest/v1/soccer_module_usage', {
+        method: 'POST', headers: headers, body: JSON.stringify(modRows)
+      });
+    } catch(e) { console.warn('Module flush failed', e); }
+  }
+}
+
+// ── Load exercise history (last 3 sessions) ──────────────────────────────
+var exerciseHistoryCache = {};  // key → [{date, sets:[{reps,weight,rpe}]}]
+
+async function loadExerciseHistory(exKey) {
+  if (!S.sbUrl || !S.sbKey) return [];
+  if (exerciseHistoryCache[exKey]) return exerciseHistoryCache[exKey];
+  try {
+    var r = await fetch(
+      S.sbUrl + '/rest/v1/soccer_sets?exercise_key=eq.' + encodeURIComponent(exKey) +
+      '&order=performed_at.desc,set_num.asc&limit=30',
+      { headers: { 'apikey': S.sbKey, 'Authorization': 'Bearer ' + S.sbKey } }
+    );
+    if (!r.ok) return [];
+    var rows = await r.json();
+    // Group by performed_at → up to 3 distinct dates
+    var byDate = {};
+    rows.forEach(function(row) {
+      var d = row.performed_at;
+      if (!byDate[d]) byDate[d] = [];
+      byDate[d].push({reps: row.actual_reps, weight: row.actual_weight, rpe: row.rpe});
+    });
+    var dates = Object.keys(byDate).sort().reverse().slice(0, 3);
+    var result = dates.map(function(d) {
+      return {date: d, sets: byDate[d]};
+    });
+    exerciseHistoryCache[exKey] = result;
+    return result;
+  } catch(e) { return []; }
+}
+
+function formatHistoryHTML(history) {
+  if (!history || !history.length) return '';
+  var h = '<div style="margin-top:10px;padding-top:10px;border-top:.5px solid rgba(255,255,255,.06)">' +
+    '<div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--t3);margin-bottom:8px">Previous sessions</div>';
+  history.forEach(function(session) {
+    var d = new Date(session.date + 'T12:00:00');
+    var dateStr = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+    var setsStr = session.sets.map(function(s) {
+      var parts = [];
+      if (s.reps)    parts.push(s.reps + ' reps');
+      if (s.weight)  parts.push(s.weight + ' lbs');
+      if (s.rpe)     parts.push('RPE ' + s.rpe);
+      return parts.join(' @ ');
+    }).filter(Boolean);
+    // Summarize: show top set or all sets compactly
+    var summary = '';
+    if (setsStr.length === 0) {
+      summary = 'Logged — no weights recorded';
+    } else {
+      // Show first set with reps×weight format if available, then +N more
+      var first = session.sets[0];
+      if (first.weight && first.reps) {
+        summary = session.sets.length + '×' + first.reps + ' @ ' + first.weight + ' lbs';
+        if (first.rpe) summary += ', RPE ' + first.rpe;
+      } else {
+        summary = setsStr[0];
+      }
+      if (session.sets.length > 1) summary += ' (+' + (session.sets.length-1) + ' sets)';
+    }
+    h += '<div style="display:flex;justify-content:space-between;align-items:baseline;padding:4px 0;border-bottom:.5px solid rgba(255,255,255,.04)">' +
+      '<span style="font-family:var(--font-mono);font-size:12px;color:var(--t3)">' + dateStr + '</span>' +
+      '<span style="font-family:var(--font-mono);font-size:13px;color:var(--t2)">' + summary + '</span>' +
+      '</div>';
+  });
+  h += '</div>';
+  return h;
+}
+
+// ── Load agility/plyo ease history for upgrade suggestion ────────────────
+async function checkEaseForUpgrade(exKey, dayType) {
+  if (!S.sbUrl || !S.sbKey) return false;
+  try {
+    var r = await fetch(
+      S.sbUrl + '/rest/v1/soccer_exercise_perf?exercise_key=eq.' +
+      encodeURIComponent(exKey) + '&day_type=eq.' + dayType +
+      '&order=performed_at.desc&limit=3',
+      { headers: { 'apikey': S.sbKey, 'Authorization': 'Bearer ' + S.sbKey } }
+    );
+    if (!r.ok) return false;
+    var rows = await r.json();
+    // Suggest upgrade if last 3 sessions all had ease >= 4
+    return rows.length >= 3 && rows.every(function(row) { return row.ease >= 4; });
+  } catch(e) { return false; }
+}
+
+// ── Module tracking ──────────────────────────────────────────────────────
+var currentModuleSession = null;
 
 
 // ─── CONDITIONING INTERFERENCE & SESSION TRACKING ──────────────────────────
