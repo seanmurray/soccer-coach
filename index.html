@@ -1981,7 +1981,10 @@ function onLoadInput(exId, setIdx, totalSets, baseRec) {
 // ── SET ROW BUILDERS (string concat — no nested template literals) ──
 function rpeOptsHTML(vals, target) {
   var h = '';
-  for (var i=0;i<vals.length;i++) h += '<option'+(vals[i]===target?' selected':'')+'>'+vals[i]+'</option>';
+  for (var i=0;i<vals.length;i++) {
+    var v = vals[i];
+    h += '<option value="'+v+'"'+(v===target?' selected':'')+'>'+v+'</option>';
+  }
   return h;
 }
 
@@ -2243,11 +2246,22 @@ function buildWorkout() {
         var contrastHtml = pres.contrast ? '<div class="contrast-note">&#9889; Contrast pair: '+pres.contrast+'</div>' : '';
         var swapHtml = '';
         if (ex.swaps) {
-          swapHtml = '<div class="swap-section"><div class="section-label" style="margin-bottom:4px">Equipment / injury swaps:</div>';
-          for (var xi=0;xi<ex.swaps.length;xi++) swapHtml += '<div class="swap-item">'+ex.swaps[xi]+'</div>';
-          swapHtml += '</div>';
+          swapHtml = '<div class="swap-section"><div class="swap-label" style="margin-bottom:8px">Swaps — tap to select:</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+          for (var xi=0;xi<ex.swaps.length;xi++) {
+            var sw = ex.swaps[xi];
+            var swSafe = sw.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            var nmSafe = ex.name.replace(/'/g,"\\'");
+            swapHtml += '<button class="swap-btn swap-btn-'+id+'" data-swap="'+swSafe+'" ' +
+              'onclick="selectSwap(\''+id+'\',this)" ' +
+              'data-original="'+nmSafe+'" ' +
+              'style="padding:8px 14px;border-radius:var(--r1);background:var(--bg-pill);' +
+              'border:.5px solid rgba(255,255,255,.08);color:var(--t2);' +
+              'font-family:var(--font-body);font-size:14px;cursor:pointer;text-align:left;transition:all .2s">' +
+              sw+'</button>';
+          }
+          swapHtml += '</div></div>';
         }
-        h += '<div class="ex-block">' +
+        h += '<div class="ex-block" id="ex-block-'+id+'">' +
           '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
           '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div>' +
           '<div style="margin-top:4px"><span class="tempo-badge">'+pres.sets+'x'+pres.reps+' @ '+pres.tempo+'</span></div></div>' +
@@ -2272,11 +2286,22 @@ function buildWorkout() {
         var setRows = buildSetRows(id, 3, 8, 0, 7, [5,6,6.5,7,7.5,8]);
         var swapHtml = '';
         if (ex.swaps) {
-          swapHtml = '<div class="swap-section"><div class="section-label" style="margin-bottom:4px">Swaps:</div>';
-          for (var xi=0;xi<Math.min(2,ex.swaps.length);xi++) swapHtml += '<div class="swap-item">'+ex.swaps[xi]+'</div>';
-          swapHtml += '</div>';
+          swapHtml = '<div class="swap-section"><div class="swap-label" style="margin-bottom:8px">Swaps — tap to select:</div><div style="display:flex;flex-wrap:wrap;gap:6px">';
+          for (var xi=0;xi<ex.swaps.length;xi++) {
+            var sw = ex.swaps[xi];
+            var swSafe = sw.replace(/'/g,"\\'").replace(/"/g,'&quot;');
+            var nmSafe = ex.name.replace(/'/g,"\\'");
+            swapHtml += '<button class="swap-btn swap-btn-'+id+'" data-swap="'+swSafe+'" ' +
+              'onclick="selectSwap(\''+id+'\',this)" ' +
+              'data-original="'+nmSafe+'" ' +
+              'style="padding:8px 14px;border-radius:var(--r1);background:var(--bg-pill);' +
+              'border:.5px solid rgba(255,255,255,.08);color:var(--t2);' +
+              'font-family:var(--font-body);font-size:14px;cursor:pointer;text-align:left;transition:all .2s">' +
+              sw+'</button>';
+          }
+          swapHtml += '</div></div>';
         }
-        h += '<div class="ex-block">' +
+        h += '<div class="ex-block" id="ex-block-'+id+'">' +
           '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
           '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div></div>' +
           '<div class="ex-meta">3x8 @RPE 7</div></div>' +
@@ -2601,6 +2626,7 @@ function resetSessionLog() {
   resetSessionBuffer();
   exerciseHistoryCache = {};
   versionSelections = {};
+  selectedSwaps = {};
 }
 
 function logTabVisit(tab) {
@@ -3222,7 +3248,7 @@ function goToWorkout() {
   fetchWorkoutAI();
   // Count warmup checkbox ticks
   setTimeout(function() {
-    var wucbs = document.querySelectorAll('.wu-cb');
+    var wucbs = document.querySelectorAll('.warmup-cb');
     for (var i=0;i<wucbs.length;i++) {
       (function(cb) {
         cb.addEventListener('change', function() {
@@ -3422,6 +3448,7 @@ function resetSessionLog() {
   resetSessionBuffer();
   exerciseHistoryCache = {};
   versionSelections = {};
+  selectedSwaps = {};
 }
 
 function logTabVisit(tab) {
@@ -3751,7 +3778,8 @@ function buildPlyoFeedback(id, ex) {
     '</div>';
 }
 
-var versionSelections = {};  // id -> 'original' or 'upgrade'
+var versionSelections = {};
+  selectedSwaps = {};  // id -> 'original' or 'upgrade'
 
 function selectVersion(id, version) {
   versionSelections[id] = version;
@@ -3822,16 +3850,18 @@ function saveSetToBuffer(exId, setNum, rpe, recWeight) {
   var weightEl = document.getElementById(exId + '_l' + setNum);
   var reps   = repsEl   ? parseInt(repsEl.value)   : null;
   var weight = weightEl ? parseFloat(weightEl.value) : null;
-  sessionBuffer.sets.push({
+  var setObj = {
     exId:      exId,
     exKey:     info.key,
     exName:    info.name,
     setNum:    setNum,
     reps:      isNaN(reps)   ? null : reps,
     weight:    isNaN(weight) ? null : weight,
-    rpe:       rpe,
+    rpe:       (rpe !== null && rpe !== undefined && !isNaN(rpe)) ? rpe : null,
     recWeight: recWeight || null
-  });
+  };
+  console.log('Set buffered:', JSON.stringify(setObj));
+  sessionBuffer.sets.push(setObj);
 }
 
 // ── Save exercise perf (agility/plyo/build) when feedback changes ────────
@@ -4024,12 +4054,52 @@ var currentModuleSession = null;
 // ─── CONDITIONING INTERFERENCE & SESSION TRACKING ──────────────────────────
 
 function checkAllWarmup() {
-  var cbs = document.querySelectorAll('.wu-cb');
+  var cbs = document.querySelectorAll('.warmup-cb');
+  if (!cbs.length) return;
   var allChecked = Array.from(cbs).every(function(cb){ return cb.checked; });
   cbs.forEach(function(cb) {
     cb.checked = !allChecked;
-    if (cb.checked) sessionLog.warmupChecked = cbs.length;
-    else sessionLog.warmupChecked = 0;
+  });
+  sessionLog.warmupChecked = allChecked ? 0 : cbs.length;
+}
+
+
+// ─── SWAP SELECTION ─────────────────────────────────────────────────────
+var selectedSwaps = {};  // exId -> swapName string
+
+function selectSwap(exId, btn) {
+  var swapName  = btn.getAttribute('data-swap');
+  var origName  = btn.getAttribute('data-original');
+
+  // Toggle: tap selected swap again to deselect
+  if (selectedSwaps[exId] === swapName) {
+    delete selectedSwaps[exId];
+    swapName = origName;
+  } else {
+    selectedSwaps[exId] = swapName;
+  }
+
+  // Update the exercise name in the header
+  var block = document.getElementById('ex-block-' + exId);
+  if (block) {
+    var nameEl = block.querySelector('.ex-name');
+    if (nameEl) nameEl.textContent = swapName;
+  }
+
+  // Re-style all swap buttons to show which is selected
+  var btns = document.querySelectorAll('.swap-btn-' + exId);
+  btns.forEach(function(b) {
+    var isSel = selectedSwaps[exId] && b.getAttribute('data-swap') === selectedSwaps[exId];
+    b.style.background   = isSel ? 'var(--green-bg)'   : 'var(--bg-pill)';
+    b.style.color        = isSel ? 'var(--green)'       : 'var(--t2)';
+    b.style.borderColor  = isSel ? 'var(--green-line)'  : 'rgba(255,255,255,.08)';
+  });
+
+  // Update any already-buffered sets for this exercise
+  sessionBuffer.sets.forEach(function(s) {
+    if (s.exId === exId) {
+      s.exName = selectedSwaps[exId] ? swapName + ' (swap for ' + origName + ')' : origName;
+    }
   });
 }
 
