@@ -1,0 +1,100 @@
+.maxGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.maxCard {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 14px;
+}
+
+.maxCardLabel {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-bottom: 8px;
+}
+
+.maxInput {
+  background: var(--bg-input);
+  border: none;
+  border-radius: var(--r2);
+  padding: 12px 10px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--t1);
+  width: 100%;
+  min-height: var(--tap-min);
+}
+.maxInput:focus { outline: 2px solid var(--green); }
+
+.dayItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  margin-bottom: 8px;
+  min-height: var(--tap);
+}
+.dayN    { font-family: var(--font-display); font-size: 22px; color: var(--t3); min-width: 30px; }
+.dayName { flex: 1; font-size: 18px; font-weight: 500; color: var(--t1); }
+.dayBtn  {
+  width: 44px; height: 44px;
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  color: var(--t2);
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s;
+}
+.dayBtn:active   { background: var(--bg-raised); }
+.dayBtn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+.group {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+  min-height: var(--tap);
+}
+.row:last-child { border-bottom: none; }
+.rowLabel { font-size: 17px; color: var(--t1); }
+.rowSub   { font-size: 14px; color: var(--t2); margin-top: 3px; }
+
+/* iOS-style toggle */
+.toggle { position: relative; width: 52px; height: 32px; flex-shrink: 0; }
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.track {
+  position: absolute; inset: 0;
+  background: var(--bg-pill);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.track::before {
+  content: '';
+  position: absolute;
+  width: 26px; height: 26px;
+  background: #fff;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: transform 0.22s var(--ease-spring);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.toggle input:checked + .track { background: var(--green); }
+.toggle input:checked + .track::before { transform: translateX(20px); }

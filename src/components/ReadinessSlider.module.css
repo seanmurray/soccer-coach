@@ -1,0 +1,94 @@
+/* Slider row used in the readiness card. Layout: label | − | range | + | value. */
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 6px 0;
+  margin-bottom: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+.row:last-child { border-bottom: none; }
+
+.label {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--t1);
+  flex-shrink: 0;
+  min-width: 90px;
+}
+
+.subLabel {
+  display: block;
+  font-size: 13px;
+  color: var(--t3);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+.range {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-pill);
+  outline: none;
+  cursor: pointer;
+}
+.range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+.range::-moz-range-thumb {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.adj {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  color: var(--t1);
+  font-size: 22px;
+  font-weight: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.adj:active { background: var(--bg-raised); }
+
+.value {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--green);
+  width: 52px;
+  min-width: 52px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.value.alt { color: var(--blue); }

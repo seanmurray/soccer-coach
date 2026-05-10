@@ -1,0 +1,75 @@
+/* ─── DESIGN TOKENS ───────────────────────────────────────── */
+/* Source of truth for color, radii, spacing, typography, motion. */
+/* All component styles must consume these — never hardcode. */
+
+:root {
+  /* Backgrounds */
+  --bg:        #0a0a0a;
+  --bg-card:   #141414;
+  --bg-raised: #1c1c1e;
+  --bg-input:  #242426;
+  --bg-pill:   #2c2c2e;
+
+  /* Text */
+  --t1: #f5f5f5;
+  --t2: #adadad;
+  --t3: #636366;
+  --t4: #3a3a3c;
+
+  /* Accents */
+  --green:       #30d158;
+  --green-bg:    rgba(48, 209, 88, 0.12);
+  --green-line:  rgba(48, 209, 88, 0.3);
+  --amber:       #ffd60a;
+  --amber-bg:    rgba(255, 214, 10, 0.1);
+  --amber-line:  rgba(255, 214, 10, 0.25);
+  --red:         #ff453a;
+  --red-bg:      rgba(255, 69, 58, 0.1);
+  --orange:      #ff9500;
+  --orange-bg:   rgba(255, 149, 0, 0.08);
+  --orange-line: rgba(255, 149, 0, 0.2);
+  --blue:        #0a84ff;
+  --purple:      #bf5af2;
+  --purple-bg:   rgba(191, 90, 242, 0.1);
+  --purple-line: rgba(191, 90, 242, 0.25);
+
+  /* Mode tints — match v9 banners exactly */
+  --mode-full-bg:    rgba(48, 209, 88, 0.1);
+  --mode-full-line:  rgba(48, 209, 88, 0.3);
+  --mode-mod1-bg:    rgba(48, 209, 88, 0.06);
+  --mode-mod1-line:  rgba(48, 209, 88, 0.18);
+  --mode-mod1-fg:    #62e890;
+  --mode-mod2-bg:    rgba(255, 214, 10, 0.08);
+  --mode-mod2-line:  rgba(255, 214, 10, 0.2);
+  --mode-mod3-bg:    rgba(255, 149, 0, 0.08);
+  --mode-mod3-line:  rgba(255, 149, 0, 0.2);
+  --mode-rec-bg:     rgba(255, 69, 58, 0.08);
+  --mode-rec-line:   rgba(255, 69, 58, 0.2);
+
+  /* Radii */
+  --r1: 10px;
+  --r2: 14px;
+  --r3: 18px;
+  --r4: 24px;
+
+  /* Safe-area insets */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+
+  /* Touch target minimum (52 for primary, 44 floor) */
+  --tap: 52px;
+  --tap-min: 44px;
+
+  /* Layout */
+  --app-max-w: 430px;
+  --bottom-nav-h: 68px;
+
+  /* Type families */
+  --font-display: 'Bebas Neue', -apple-system, sans-serif;
+  --font-body:    'DM Sans', -apple-system, sans-serif;
+  --font-mono:    'DM Mono', ui-monospace, monospace;
+
+  /* Motion: iOS-flavored springs */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-sheet:  cubic-bezier(0.16, 1, 0.3, 1);
+}
