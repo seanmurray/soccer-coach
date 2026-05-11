@@ -1,169 +1,170 @@
-// Periodization, prescription, readiness — pure functions extracted from
-// soccer_performance_coach_v9.html. No DOM, no state, no I/O — these are
-// what the workout-builder + readiness UI both consume.
+// Periodization, prescription, readiness — pure functions.
 //
-// Spec sections: §5 (readiness), §7 (periodization), §10 (rest timer).
+// MESOCYCLE STRUCTURE (revised 2026-05):
+//
+// 15-week macro repeating: each of the three triphasic blocks is a 4-week
+// step-loading microcycle followed by a 1-week deload.
+//
+//   Wks 1-4   Accumulation  (W1 intro · W2 base · W3 peak · W4 back-off)
+//   Wk  5     Deload
+//   Wks 6-9   Transmutation (same step pattern)
+//   Wk  10    Deload
+//   Wks 11-14 Realization   (same step pattern)
+//   Wk  15    Deload
+//
+// Step loading: intensity is multiplied by [.95, 1.00, 1.05, .85] across W1-W4.
+// W3 is the peak; W4 is a planned back-off before deload — matches what
+// masters-friendly programs (and OTA's revised SPS) prescribe.
+//
+// Spec §7 had a 9-week meso with one deload. That was leaving a 44-year-old
+// athlete under one true rest every two months. The new shape gives a deload
+// every 5 weeks while keeping triphasic block order intact.
 
 import { EX_TO_MAX_KEY } from '../data/exercises';
 
-// ─── PHASE ─────────────────────────────────────────────────
-// 9-week triphasic cycle: weeks 1-2 accumulation, 3-5 transmutation,
-// 6-8 realization, 9 deload. Cycles indefinitely after week 9.
-export function getPhase(week) {
-  const w = ((week - 1) % 9) + 1;
-  if (w <= 2) return 'accumulation';
-  if (w <= 5) return 'transmutation';
-  if (w <= 8) return 'realization';
-  return 'deload';
-}
+const MESO_LEN = 15;
+const PHASE_LEN = 4;            // 4 working weeks per phase
+const DELOAD_OFFSETS = [5, 10, 15];
 
-const PHASE_LABELS = {
-  accumulation:   'Accumulation',
-  transmutation:  'Transmutation',
-  realization:    'Realization',
-  deload:         'Deload',
+// Step-loading intensity multiplier within a phase, by weekInPhase (1-4).
+// Applied to the phase's base intensity %.
+export const INTENSITY_MULT = { 1: 0.95, 2: 1.00, 3: 1.05, 4: 0.85 };
+
+// Phase recipe: base % of 1RM per lift, base reps, base sets, tempo. The
+// week-specific output multiplies pct by INTENSITY_MULT[weekInPhase].
+const PHASE_RECIPE = {
+  accumulation: {
+    reps: 4,
+    sets: 5,
+    tempo: { bench: '[5|1|X]', trapbar: '[3|1|X]', blgsq: '[4|2|X]' },
+    basePct: { bench: 0.80, trapbar: 0.80, blgsq: 0.77 },
+    note: 'Eccentric block: long lower, brief pause, explosive concentric. Bypasses GTO inhibition and builds tendon elasticity.',
+  },
+  transmutation: {
+    reps: 3,
+    sets: 5,
+    tempo: { bench: '[1|5|X]', trapbar: '[1|4|X]', blgsq: '[1|5|X]' },
+    basePct: { bench: 0.85, trapbar: 0.85, blgsq: 0.82 },
+    note: 'Isometric block: long pause at the sticking point. Trains force production from a dead stop.',
+  },
+  realization: {
+    reps: 2,
+    sets: 6,
+    tempo: { bench: '[1|1|X]', trapbar: '[1|1|X]', blgsq: '[1|1|X]' },
+    basePct: { bench: 0.87, trapbar: 0.87, blgsq: 0.84 },
+    note: 'Concentric / contrast block: maximum explosive intent. Pair each set with a jump for PAP.',
+    contrast: {
+      bench:   'After each set: 2 approach box jumps or broad jumps at max effort. 90 sec between pairs.',
+      trapbar: 'After each heavy trap bar set: 1 max box jump. 90 sec rest. Heavy load potentiates CNS — the jump should feel lighter than normal.',
+      blgsq:   'After each set: 1 single-leg broad jump each leg at max effort.',
+    },
+  },
+  deload: {
+    reps: 5,
+    sets: 4,
+    tempo: { bench: '[1|1|1]', trapbar: '[1|1|1]', blgsq: '[2|1|1]' },
+    basePct: { bench: 0.50, trapbar: 0.50, blgsq: 0.50 },
+    note: 'Deload — movement quality only. 50% intensity. Let the previous block consolidate.',
+  },
 };
 
-export const getPhaseLabel = (week) => PHASE_LABELS[getPhase(week)];
+// Mode multipliers applied to the final pct. Reps + sets are constant across
+// modes (the mode affects intent + load, not the prescription shape).
+//
+// full   — prescribed intensity
+// mod1   — minor fatigue, −15% off intensity
+// mod2   — moderate fatigue, −25%, cap RPE 7.5
+// mod3   — high fatigue, ~55% (motor pattern only)
+// recovery — active recovery, 40-50%
+const MODE_MULT = { full: 1.00, mod1: 0.85, mod2: 0.75, mod3: 0.55, recovery: 0.45 };
+
+// ─── PHASE LOOKUP ──────────────────────────────────────────
+// Returns { phase, weekInPhase, weekInMeso, isDeload, mesoIndex, label }.
+//   phase       — 'accumulation' | 'transmutation' | 'realization' | 'deload'
+//   weekInPhase — 1-4 for work weeks, 0 for deload
+//   isDeload    — true on weeks 5, 10, 15 (relative to start of meso)
+//   label       — short human-readable label, e.g. "Accum W2", "Deload"
+export function getPhaseInfo(week) {
+  const w = ((week - 1) % MESO_LEN) + 1;
+  const mesoIndex = Math.floor((week - 1) / MESO_LEN);
+
+  if (DELOAD_OFFSETS.includes(w)) {
+    return { phase: 'deload', weekInPhase: 0, weekInMeso: w, isDeload: true, mesoIndex, label: 'Deload' };
+  }
+  if (w <= PHASE_LEN) {
+    return { phase: 'accumulation', weekInPhase: w, weekInMeso: w, isDeload: false, mesoIndex, label: `Accum W${w}` };
+  }
+  if (w <= 9) {
+    const wip = w - 5;
+    return { phase: 'transmutation', weekInPhase: wip, weekInMeso: w, isDeload: false, mesoIndex, label: `Trans W${wip}` };
+  }
+  const wip = w - 10;
+  return { phase: 'realization', weekInPhase: wip, weekInMeso: w, isDeload: false, mesoIndex, label: `Real W${wip}` };
+}
+
+// Legacy helpers — kept for back-compat with code that imports getPhase /
+// getPhaseLabel directly.
+export const getPhase = (week) => getPhaseInfo(week).phase;
+export const getPhaseLabel = (week) => getPhaseInfo(week).label;
 
 // ─── STRENGTH PRESCRIPTION ─────────────────────────────────
-// Returns { sets, reps, pct, tempo, note, contrast? } for the main strength
-// lift, scaled by phase × week × mode. Mirrors v9 getStrengthPrescription.
-//
-// Mode mapping: full → full, mod1 → modified+15% interpolation, mod2 →
-// modified, mod3/recovery → recovery. The mod1 interpolation lifts pct
-// 60% of the way back toward full to model the "−15% off full" intent.
+// Returns { sets, reps, pct, tempo, note, contrast?, target_rpe }.
 export function getStrengthPrescription(exKey, week, mode) {
-  const phase = getPhase(week);
-  const w = ((week - 1) % 9) + 1;
-
-  const p = {
-    accumulation: {
-      full: {
-        bench:   { sets: 5, reps: w === 1 ? 4 : 3, pct: w === 1 ? 0.78 : 0.82, tempo: '[5|1|X]', note: 'Eccentric block: 5 sec lower, 1 sec pause, explosive up. Accumulation = eccentric emphasis — bypasses GTO inhibition, builds tendon elasticity.' },
-        trapbar: { sets: 5, reps: w === 1 ? 4 : 3, pct: w === 1 ? 0.78 : 0.82, tempo: '[3|1|X]', note: 'Eccentric block: 3 sec controlled lower to floor, 1 sec pause, drive through floor explosively. Deadlift eccentric is shorter than squat — 3 sec is appropriate and matches OTA Soccer Performance System prescription.' },
-        blgsq:   { sets: 5, reps: w === 1 ? 5 : 4, pct: w === 1 ? 0.75 : 0.78, tempo: '[4|2|X]', note: 'Eccentric block: 4 sec lower, 2 sec pause at bottom, explosive up. Unilateral movements get a longer eccentric — harder to control, more injury-prevention benefit. OTA SPS uses this exact prescription.' },
-      },
-      modified: {
-        bench:   { sets: 4, reps: 4, pct: 0.68, tempo: '[3|1|X]', note: 'Cap RPE 7' },
-        trapbar: { sets: 4, reps: 4, pct: 0.68, tempo: '[3|1|X]', note: 'Cap RPE 7' },
-        blgsq:   { sets: 3, reps: 6, pct: 0.65, tempo: '[3|1|X]', note: 'Cap RPE 7' },
-      },
-      recovery: {
-        bench:   { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: '50% — technique only' },
-        trapbar: { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: '50% — technique only' },
-        blgsq:   { sets: 2, reps: 8, pct: 0.45, tempo: '[2|1|1]', note: 'Very light' },
-      },
-    },
-    transmutation: {
-      full: {
-        bench:   { sets: 5, reps: w <= 4 ? 3 : 2, pct: w <= 4 ? 0.82 : 0.87, tempo: '[1|5|X]', note: '5 sec iso pause at sticking point' },
-        trapbar: { sets: 5, reps: w <= 4 ? 3 : 2, pct: w <= 4 ? 0.82 : 0.87, tempo: '[1|4|X]', note: 'Iso pause at knee height' },
-        blgsq:   { sets: 5, reps: w <= 4 ? 4 : 3, pct: w <= 4 ? 0.80 : 0.85, tempo: '[1|5|X]', note: '5 sec iso at parallel' },
-      },
-      modified: {
-        bench:   { sets: 4, reps: 3, pct: 0.72, tempo: '[1|3|X]', note: 'Cap RPE 7' },
-        trapbar: { sets: 4, reps: 3, pct: 0.72, tempo: '[1|3|X]', note: 'Cap RPE 7' },
-        blgsq:   { sets: 3, reps: 5, pct: 0.68, tempo: '[1|3|X]', note: 'Cap RPE 7' },
-      },
-      recovery: {
-        bench:   { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: 'Deload' },
-        trapbar: { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: 'Deload' },
-        blgsq:   { sets: 2, reps: 8, pct: 0.45, tempo: '[1|1|1]', note: 'Very light' },
-      },
-    },
-    realization: {
-      full: {
-        bench:   { sets: 6, reps: w <= 7 ? 3 : 2, pct: w <= 7 ? 0.85 : 0.88, tempo: '[1|1|X]', note: 'Max concentric intent', contrast: 'After each set: 2 approach box jumps or broad jumps at max effort. 90 sec rest between pairs.' },
-        trapbar: { sets: 6, reps: w <= 7 ? 3 : 2, pct: w <= 7 ? 0.85 : 0.88, tempo: '[1|1|X]', note: 'Contrast — pair with box jump', contrast: 'After each heavy trap bar set: 1 max box jump. 90 sec rest. The heavy set potentiates CNS — the jump should feel lighter than normal.' },
-        blgsq:   { sets: 5, reps: w <= 7 ? 4 : 3, pct: w <= 7 ? 0.83 : 0.86, tempo: '[1|1|X]', note: 'Explosive concentric', contrast: 'After each set: 1 single-leg broad jump each leg at max effort.' },
-      },
-      modified: {
-        bench:   { sets: 4, reps: 3, pct: 0.75, tempo: '[1|1|X]', note: 'Cap RPE 7 — still explosive' },
-        trapbar: { sets: 4, reps: 3, pct: 0.75, tempo: '[1|1|X]', note: 'Cap RPE 7' },
-        blgsq:   { sets: 3, reps: 5, pct: 0.72, tempo: '[1|1|X]', note: 'Cap RPE 7' },
-      },
-      recovery: {
-        bench:   { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: 'Deload' },
-        trapbar: { sets: 3, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: 'Deload' },
-        blgsq:   { sets: 2, reps: 8, pct: 0.45, tempo: '[1|1|1]', note: 'Very light' },
-      },
-    },
-    deload: {
-      full: {
-        bench:   { sets: 4, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: '50% — movement quality' },
-        trapbar: { sets: 4, reps: 5, pct: 0.50, tempo: '[1|1|1]', note: '50%' },
-        blgsq:   { sets: 3, reps: 8, pct: 0.50, tempo: '[2|1|1]', note: 'Light' },
-      },
-      modified: {
-        bench:   { sets: 3, reps: 5, pct: 0.45, tempo: '[1|1|1]', note: 'Very light' },
-        trapbar: { sets: 3, reps: 5, pct: 0.45, tempo: '[1|1|1]', note: 'Very light' },
-        blgsq:   { sets: 2, reps: 8, pct: 0.40, tempo: '[1|1|1]', note: 'Very light' },
-      },
-      recovery: {
-        bench:   { sets: 2, reps: 5, pct: 0.40, tempo: '[1|1|1]', note: 'Minimal' },
-        trapbar: { sets: 2, reps: 5, pct: 0.40, tempo: '[1|1|1]', note: 'Minimal' },
-        blgsq:   { sets: 2, reps: 6, pct: 0.40, tempo: '[1|1|1]', note: 'Minimal' },
-      },
-    },
-  };
+  const info = getPhaseInfo(week);
+  const recipe = PHASE_RECIPE[info.phase];
 
   const exMap = { bench_press: 'bench', floor_press: 'bench', trapbar_dl: 'trapbar', blg_split_sq: 'blgsq' };
   const key = exMap[exKey] || 'bench';
 
-  const prescMode = ({ full: 'full', mod1: 'mod1adj', mod2: 'modified', mod3: 'recovery', recovery: 'recovery' })[mode] || 'full';
-  const phasePrx = p[phase] || p.accumulation;
+  // Within-phase step loading; deload weeks bypass the multiplier.
+  const stepMult = info.isDeload ? 1 : (INTENSITY_MULT[info.weekInPhase] ?? 1);
+  const modeMult = MODE_MULT[mode] ?? 1;
 
-  // mod1 = full lift minus 15% — interpolate between full and modified.
-  if (prescMode === 'mod1adj') {
-    const modBase = phasePrx.modified?.[key] ?? phasePrx.full[key];
-    const fullBase = phasePrx.full?.[key] ?? null;
-    if (modBase && fullBase) {
-      const adjPct = fullBase.pct - (fullBase.pct - modBase.pct) * 0.6;
-      const merged = {
-        ...modBase,
-        pct: Math.round(adjPct * 100) / 100,
-        sets: modBase.sets,
-        note: modBase.note + ' (mod1: –15%)',
-      };
-      return { ...merged, target_rpe: deriveTargetRpe(merged, prescMode) };
-    }
-    const fallback = modBase || phasePrx.full[key];
-    return { ...fallback, target_rpe: deriveTargetRpe(fallback, prescMode) };
-  }
+  const pct = Math.round(recipe.basePct[key] * stepMult * modeMult * 100) / 100;
+  const target_rpe = deriveTargetRpe(info.phase, mode, info.weekInPhase);
 
-  const prxMode = phasePrx[prescMode] ? prescMode : 'full';
-  const modeBlock = phasePrx[prxMode];
-  const base = modeBlock?.[key] ?? p.accumulation.full.bench;
-  // Attach the intended RPE target so the SetTable adjustment logic can read
-  // it instead of guessing from the prescription note. mod2 / mod3 lift caps
-  // come from the note text "Cap RPE 7" / "Cap RPE 7.5".
-  return { ...base, target_rpe: deriveTargetRpe(base, prescMode) };
+  const out = {
+    sets: recipe.sets,
+    reps: recipe.reps,
+    pct,
+    tempo: recipe.tempo[key],
+    note: stepNoteFor(info, recipe.note),
+    target_rpe,
+  };
+  if (recipe.contrast?.[key]) out.contrast = recipe.contrast[key];
+  return out;
 }
 
-// Pulls a target RPE out of the prescription. Order of preference:
-//   1. An explicit `cap RPE X` mention in the note (modified / mod1 blocks).
-//   2. Phase-specific defaults: accumulation/realization ~8, transmutation ~8,
-//      deload ~6 (movement quality, not max effort).
-//   3. Hard default of 8.
-function deriveTargetRpe(prx, prescMode) {
-  if (prx?.note) {
-    const m = prx.note.match(/cap rpe\s+(\d+(?:\.\d+)?)/i);
-    if (m) return Number(m[1]);
-  }
-  if (prescMode === 'recovery' || prescMode === 'mod1adj') return 7;
+function stepNoteFor(info, baseNote) {
+  if (info.isDeload) return baseNote;
+  const labels = {
+    1: 'Week 1 — intro load, dial in technique. ',
+    2: 'Week 2 — base load. ',
+    3: 'Week 3 — peak intensity. Drive output. ',
+    4: 'Week 4 — back-off before deload. Lighter load, full intent. ',
+  };
+  return (labels[info.weekInPhase] ?? '') + baseNote;
+}
+
+function deriveTargetRpe(phase, mode, weekInPhase) {
+  if (mode === 'mod2') return 7.5;
+  if (mode === 'mod3' || mode === 'recovery') return 7;
+  if (phase === 'deload') return 6;
+  // Within a work phase, push RPE in W3 (peak) and pull back in W4.
+  if (weekInPhase === 3) return 8.5;
+  if (weekInPhase === 4) return 7.5;
   return 8;
 }
 
-// Recommended load = max × pct, rounded to nearest 2.5 lbs. Returns 0 if the
-// max isn't set — UI should show a placeholder in that case.
+// ─── LOAD CALC ─────────────────────────────────────────────
+// Recommended load = max × pct, rounded to nearest 2.5 lbs.
 export function calcLoad(exKey, pct, maxes) {
   const k = EX_TO_MAX_KEY[exKey];
   if (!k || !maxes?.[k] || !pct) return 0;
   return Math.round((maxes[k] * pct) / 2.5) * 2.5;
 }
 
-// Render a tempo string like "[5|1|X]" into a humanized phase breakdown.
+// Render "[5|1|X]" → "Eccentric: 5 sec · Iso: 1 sec · Concentric: explosive".
 export function tempoExplain(tempo) {
   const clean = tempo.replace(/[[\]]/g, '');
   const parts = clean.split('|');
@@ -175,7 +176,7 @@ export function tempoExplain(tempo) {
 }
 
 // ─── READINESS ─────────────────────────────────────────────
-// Composite readiness score → training mode. Spec §5.
+// Composite readiness → training mode. Spec §5.
 export function computeMode({ rec, slp, body, mot, battery, stress }) {
   const stressInv = Math.max(0, ((60 - stress) / 60) * 100);
   const score =

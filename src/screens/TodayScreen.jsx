@@ -7,6 +7,8 @@ import { DaySelector } from '../components/DaySelector';
 import { ModuleRow } from '../components/ModuleRow';
 import { AiInsightCard } from '../components/AiInsightCard';
 import { WeekBar } from '../components/WeekBar';
+import { MaxSuggestion } from '../components/MaxSuggestion';
+import { ACWRCard } from '../components/ACWRCard';
 import { useSessionStore } from '../stores/sessionStore';
 import { MODE_INSIGHTS } from '../data/sessions';
 
@@ -37,6 +39,12 @@ export function TodayScreen({ onStartSession, onOpenModule }) {
       </div>
 
       <ModeBanner mode={mode} />
+
+      {/* Long-term context: training-load trend (ACWR) and any
+          backfill suggestions for working maxes from recent set history. */}
+      <ACWRCard />
+      <MaxSuggestion />
+
       <ReadinessSliders />
 
       <div className={`overline ${styles.label}`}>Session</div>

@@ -1,0 +1,65 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--green);
+}
+.card.zoneIdle    { border-left-color: var(--t4); }
+.card.zoneLow     { border-left-color: var(--blue); }
+.card.zoneOk      { border-left-color: var(--green); }
+.card.zoneCaution { border-left-color: var(--amber); }
+.card.zoneHigh    { border-left-color: var(--red); }
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+.ratio {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+.zoneIdle .ratio    { color: var(--t3); }
+.zoneLow .ratio     { color: var(--blue); }
+.zoneOk .ratio      { color: var(--green); }
+.zoneCaution .ratio { color: var(--amber); }
+.zoneHigh .ratio    { color: var(--red); }
+
+.zoneLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.zoneIdle .zoneLabel    { color: var(--t3); }
+.zoneLow .zoneLabel     { color: var(--blue); }
+.zoneOk .zoneLabel      { color: var(--green); }
+.zoneCaution .zoneLabel { color: var(--amber); }
+.zoneHigh .zoneLabel    { color: var(--red); }
+
+.text {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+
+.detail {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--t3);
+  margin-top: 6px;
+}

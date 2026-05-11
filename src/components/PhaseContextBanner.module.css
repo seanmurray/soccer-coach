@@ -20,3 +20,11 @@
   color: var(--t2);
   line-height: 1.6;
 }
+
+.subtext {
+  font-size: 14px;
+  color: var(--green);
+  line-height: 1.5;
+  margin-top: 8px;
+  font-weight: 500;
+}

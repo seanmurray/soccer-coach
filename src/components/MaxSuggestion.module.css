@@ -1,0 +1,62 @@
+.card {
+  background: var(--bg-card);
+  border: 0.5px solid var(--amber-line);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--r3);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 8px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+.row:last-child { border-bottom: none; }
+
+.text {
+  font-size: 15px;
+  color: var(--t2);
+  line-height: 1.5;
+}
+.text strong { color: var(--t1); font-weight: 600; }
+.text .delta { color: var(--green); font-family: var(--font-mono); }
+
+.actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.btn {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 100px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--green-bg);
+  color: var(--green);
+  border: 0.5px solid var(--green-line);
+  transition: all 0.15s;
+}
+.btn:active { background: var(--green); color: #0a0a0a; }
+
+.dismiss {
+  background: var(--bg-pill);
+  color: var(--t3);
+  border-color: rgba(255, 255, 255, 0.06);
+}
