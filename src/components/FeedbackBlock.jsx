@@ -76,11 +76,12 @@ export function FeedbackBlock({
         <div className={styles.val}>RPE {effort}</div>
       </div>
       <div className={styles.row}>
-        <div className={styles.label}>Ease · <span style={{ color: 'var(--t3)', fontWeight: 400 }}>{EASE_LABELS[ease]}</span></div>
+        <div className={styles.label}>Ease</div>
         <input type="range" min="1" max="5" step="1" value={ease} className={styles.range}
           onChange={(e) => { setEase(Number(e.target.value)); dirty(); }} />
         <div className={styles.val}>{ease}/5</div>
       </div>
+      <div className={styles.easeHint}>{ease} = {EASE_LABELS[ease]}</div>
       {measure && (
         <div className={styles.measureRow}>
           <div className={styles.label}>{measure.label}</div>

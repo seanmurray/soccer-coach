@@ -97,12 +97,24 @@ export default function App() {
     setTab('history');
   };
 
+  // Render every screen and toggle visibility with `hidden`. Keeping mounted
+  // preserves local state — your in-progress SetTable rows survive a quick
+  // hop to the History tab and back, and likewise the inner Workout sub-tabs
+  // (warmup/agility/etc.) keep their state.
   return (
     <QueryClientProvider client={queryClient}>
-      {tab === 'today'    && <TodayScreen onStartSession={handleStart} onOpenModule={(i) => setModuleIndex(i)} />}
-      {tab === 'workout'  && <WorkoutScreen onFinish={handleFinish} />}
-      {tab === 'history'  && <HistoryScreen />}
-      {tab === 'settings' && <SettingsScreen />}
+      <div hidden={tab !== 'today'}>
+        <TodayScreen onStartSession={handleStart} onOpenModule={(i) => setModuleIndex(i)} />
+      </div>
+      <div hidden={tab !== 'workout'}>
+        <WorkoutScreen onFinish={handleFinish} />
+      </div>
+      <div hidden={tab !== 'history'}>
+        <HistoryScreen />
+      </div>
+      <div hidden={tab !== 'settings'}>
+        <SettingsScreen />
+      </div>
 
       <RestTimer />
       <ModuleSheet moduleIndex={moduleIndex} onClose={() => setModuleIndex(null)} />

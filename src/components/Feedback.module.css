@@ -24,24 +24,40 @@
   text-transform: uppercase;
   color: var(--t2);
   flex-shrink: 0;
-  /* Wide enough for "EASE · TOO EASY" — Bebas Neue at 17px caps. */
-  min-width: 130px;
+  white-space: nowrap;
+  /* Just wide enough for "EFFORT" / "QUALITY"; descriptive ease label
+     moves to a caption row below so we don't blow out the row width. */
+  min-width: 80px;
 }
 
 .val {
   font-family: var(--font-mono);
   font-size: 17px;
   color: var(--green);
-  /* Wide enough for the longest val we show: "RPE 8.5" (~85px in DM Mono). */
-  min-width: 92px;
+  /* Sized to the longest content "RPE 8.5"; nowrap prevents wrapping. */
+  min-width: 72px;
   text-align: right;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .range {
   flex: 1;
   accent-color: var(--green);
   height: 4px;
+  /* Range inputs have a browser-default size (~160px) that blocks flex
+     shrinking unless we explicitly drop the min. Without this the whole
+     row overflows narrow phones. */
+  min-width: 0;
+}
+
+.easeHint {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t3);
+  padding: 4px 0 8px;
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
 }
 
 .measureRow {

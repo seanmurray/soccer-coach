@@ -78,8 +78,6 @@ export function WorkoutScreen({ onFinish }) {
   });
   const cueText = cue ?? (cueError ? fallback : fallback);
 
-  const TabBody = TAB_COMPONENTS[tab];
-
   return (
     <main className="screen">
       <div className={styles.header}>
@@ -104,7 +102,19 @@ export function WorkoutScreen({ onFinish }) {
         ))}
       </div>
 
-      <div>{TabBody && <TabBody />}</div>
+      {/* Render every sub-tab — toggle visibility with `hidden` so each tab's
+          local state (SetTable rows, expansion flags, feedback drafts) is
+          preserved when the user hops between agility ↔ strength ↔ build to
+          peek ahead. */}
+      {tabs.map((t) => {
+        const Body = TAB_COMPONENTS[t.id];
+        if (!Body) return null;
+        return (
+          <div key={t.id} hidden={tab !== t.id}>
+            <Body />
+          </div>
+        );
+      })}
 
       <AiInsightCard label="Session Cue" loading={cueLoading}>
         {cueText || 'Start a session to load a coaching cue.'}

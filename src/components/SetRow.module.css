@@ -55,7 +55,10 @@
   font-size: 17px;
   color: var(--t2);
   width: 100%;
+  /* text-align applies to the options list; the displayed selected value
+     needs text-align-last to center on iOS Safari. */
   text-align: center;
+  text-align-last: center;
   -webkit-appearance: none;
   appearance: none;
   cursor: pointer;
