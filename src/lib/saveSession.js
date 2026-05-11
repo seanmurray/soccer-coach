@@ -1,0 +1,169 @@
+// Persist a finished session to Supabase.
+//
+// Writes (in order):
+//   1. soccer_sessions  — the header row, returns the new id
+//   2. soccer_sets       — each buffered strength/build set, FK = session id
+//   3. soccer_exercise_perf — agility/plyo/cond feedback rows, FK = session id
+//   4. soccer_module_usage — module open/close records, FK = session id
+//
+// Columns here are kept aligned with the live Supabase schema (verified
+// 2026-05). Notes on schema vs spec drift:
+//
+//   - `soccer_sessions` does NOT have a top-level `phase` column. Phase
+//     lives on `soccer_sets` / `soccer_exercise_perf` and is also stamped
+//     into `soccer_sessions.metadata.phase` for the history screen.
+//   - Free-form session telemetry (warmup completion, tabs visited) goes
+//     into `soccer_sessions.metadata` (jsonb, added 2026-05).
+//   - `performed_at` is a DATE on every soccer_* table, not a timestamp. We
+//     send YYYY-MM-DD strings to avoid implicit-cast surprises.
+//   - `opened_at` / `closed_at` on `soccer_module_usage` ARE timestamptz —
+//     those keep the full ISO string.
+//
+// Also mirrors the day type to localStorage so the conditioning interference
+// banner can read it on the next session (spec §14).
+//
+// Returns { ok, error, sessionId }.
+
+import { supabase } from './supabase';
+import { getPhase } from './periodization';
+
+const LAST_DAY_KEY = 'last_session_day_type';
+
+const toDateString = (input) => {
+  const d = input ? new Date(input) : new Date();
+  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+};
+
+export async function saveSession({
+  // Readiness inputs at session time
+  rec, slp, body, mot, battery, stress,
+  mode, dayType, week,
+  // Buffers
+  setsBuffer = [],
+  exercisePerfBuffer = [],
+  moduleUsageBuffer = [],
+  warmupChecked = [],
+  warmupTotal = 0,
+  frcShortChecked = [],
+  frcShortTotal = 0,
+  frcFullChecked = [],
+  frcFullTotal = 0,
+  tabsVisited = [],
+  sessionStartedAt,
+  // Post-session inputs
+  sessionRpe = 7.5,
+  energy = 3,
+  aiDebrief = null,
+}) {
+  if (!supabase) {
+    return { ok: false, error: new Error('Supabase client not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.') };
+  }
+
+  const performedAt = toDateString(sessionStartedAt);
+  const phase = getPhase(week);
+
+  const headerRow = {
+    performed_at: performedAt,
+    day_type: dayType,
+    week_num: week,
+    mode,
+    recovery_pct: rec,
+    sleep_pct: slp,
+    body_feel: body,
+    motivation: mot,
+    battery_pct: battery,
+    stress_score: stress,
+    session_rpe: sessionRpe,
+    energy,
+    ai_debrief: aiDebrief,
+    metadata: {
+      phase,
+      tabs_visited: tabsVisited,
+      warmup_checked_count: warmupChecked.length,
+      warmup_total: warmupTotal,
+      frc_short_checked_count: frcShortChecked.length,
+      frc_short_total: frcShortTotal,
+      frc_short_checked: frcShortChecked,
+      frc_full_checked_count: frcFullChecked.length,
+      frc_full_total: frcFullTotal,
+      frc_full_checked: frcFullChecked,
+      sets_logged: setsBuffer.length,
+      exercises_logged: exercisePerfBuffer.length,
+      modules_used: moduleUsageBuffer.length,
+      session_started_at: sessionStartedAt,
+    },
+  };
+
+  const { data: session, error: sessionError } = await supabase
+    .from('soccer_sessions')
+    .insert(headerRow)
+    .select('id')
+    .single();
+
+  if (sessionError) return { ok: false, error: sessionError };
+  const sessionId = session.id;
+
+  // Sets — flatten, attach FK + performed_at, write in one batch.
+  if (setsBuffer.length > 0) {
+    const setsRows = setsBuffer.map((s) => ({
+      session_id: sessionId,
+      performed_at: toDateString(s.performed_at ?? performedAt),
+      day_type: s.day_type ?? dayType,
+      week_num: s.week_num ?? week,
+      exercise_key: s.exercise_key,
+      exercise_name: s.exercise_name,
+      set_num: s.set_num,
+      actual_reps: s.actual_reps,
+      actual_weight: s.actual_weight,
+      rpe: s.rpe,
+      rec_weight: s.rec_weight,
+      phase: s.phase ?? phase,
+      mode: s.mode ?? mode,
+    }));
+    const { error } = await supabase.from('soccer_sets').insert(setsRows);
+    if (error) return { ok: false, error };
+  }
+
+  // Exercise feedback (agility, plyo, cond).
+  if (exercisePerfBuffer.length > 0) {
+    const perfRows = exercisePerfBuffer.map((p) => ({
+      session_id: sessionId,
+      performed_at: toDateString(p.performed_at ?? performedAt),
+      day_type: p.day_type ?? dayType,
+      week_num: p.week_num ?? week,
+      phase: p.phase ?? phase,
+      mode: p.mode ?? mode,
+      exercise_key: p.exercise_key,
+      exercise_name: p.exercise_name,
+      exercise_type: p.exercise_type,
+      quality: p.quality,
+      effort_rpe: p.effort_rpe,
+      ease: p.ease,
+      notes: p.notes,
+    }));
+    const { error } = await supabase.from('soccer_exercise_perf').insert(perfRows);
+    if (error) return { ok: false, error };
+  }
+
+  // Module usage. opened_at/closed_at are timestamptz, performed_at is date.
+  if (moduleUsageBuffer.length > 0) {
+    const modRows = moduleUsageBuffer.map((m) => ({
+      session_id: sessionId,
+      performed_at: toDateString(m.opened_at ?? performedAt),
+      module_id: m.module_id,
+      module_label: m.module_label,
+      opened_at: m.opened_at,
+      closed_at: m.closed_at,
+      duration_seconds: m.duration_seconds,
+      exercises_done: m.exercises_done,
+      exercises_total: m.exercises_total,
+    }));
+    const { error } = await supabase.from('soccer_module_usage').insert(modRows);
+    if (error) return { ok: false, error };
+  }
+
+  // Mirror to localStorage for the conditioning interference banner.
+  try { localStorage.setItem(LAST_DAY_KEY, dayType); } catch { /* ignore */ }
+
+  return { ok: true, error: null, sessionId };
+}

@@ -1,0 +1,22 @@
+.box {
+  border-left: 3px solid var(--green);
+  background: var(--bg-card);
+  border-radius: 0 var(--r2) var(--r2) 0;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  margin-bottom: 6px;
+}
+
+.text {
+  font-size: 16px;
+  color: var(--t2);
+  line-height: 1.6;
+}

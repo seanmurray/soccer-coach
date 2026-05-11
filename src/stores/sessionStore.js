@@ -42,6 +42,8 @@ export const useSessionStore = create((set, get) => ({
   exercisePerfBuffer: [],
   moduleUsageBuffer: [],
   warmupChecked: [],
+  frcShortChecked: [],   // indices of FRC pre-session items checked
+  frcFullChecked: [],    // indices of FRC post-conditioning items checked
   tabsVisited: [],
   sessionStartedAt: null,
 
@@ -50,6 +52,8 @@ export const useSessionStore = create((set, get) => ({
     exercisePerfBuffer: [],
     moduleUsageBuffer: [],
     warmupChecked: [],
+    frcShortChecked: [],
+    frcFullChecked: [],
     tabsVisited: [],
     sessionStartedAt: new Date().toISOString(),
   }),
@@ -64,6 +68,13 @@ export const useSessionStore = create((set, get) => ({
     return { warmupChecked: [...next] };
   }),
 
+  setFrcChecked: (variant, idx, checked) => set((s) => {
+    const field = variant === 'full' ? 'frcFullChecked' : 'frcShortChecked';
+    const next = new Set(s[field]);
+    if (checked) next.add(idx); else next.delete(idx);
+    return { [field]: [...next] };
+  }),
+
   logTabVisit: (tab) => set((s) =>
     s.tabsVisited.includes(tab) ? s : { tabsVisited: [...s.tabsVisited, tab] }
   ),
@@ -73,6 +84,8 @@ export const useSessionStore = create((set, get) => ({
     exercisePerfBuffer: [],
     moduleUsageBuffer: [],
     warmupChecked: [],
+    frcShortChecked: [],
+    frcFullChecked: [],
     tabsVisited: [],
     sessionStartedAt: null,
   }),

@@ -1,4 +1,5 @@
 import styles from './ReadinessSlider.module.css';
+import { useShallow } from 'zustand/react/shallow';
 import { useSessionStore } from '../stores/sessionStore';
 
 // Six readiness inputs per spec §4 / §5.
@@ -15,9 +16,14 @@ const ROWS = [
 
 export function ReadinessSliders() {
   const setReadiness = useSessionStore((s) => s.setReadiness);
-  const values = useSessionStore((s) => ({
-    rec: s.rec, slp: s.slp, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
-  }));
+  // useShallow does an Object.is compare per-key so the selector's new object
+  // wrapper doesn't trigger a re-render every time. Without it, Zustand's
+  // useSyncExternalStore sees a fresh snapshot every render → infinite loop.
+  const values = useSessionStore(
+    useShallow((s) => ({
+      rec: s.rec, slp: s.slp, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
+    }))
+  );
 
   const adjust = (row, delta) => {
     const next = Math.max(row.min, Math.min(row.max, values[row.key] + delta));

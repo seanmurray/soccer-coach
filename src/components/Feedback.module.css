@@ -1,0 +1,112 @@
+/* Per-exercise feedback for agility / plyo. */
+
+.area {
+  background: var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 16px;
+  margin-top: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+.row:last-of-type { border-bottom: none; }
+
+.label {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--t2);
+  flex-shrink: 0;
+  /* Wide enough for "EASE · TOO EASY" — Bebas Neue at 17px caps. */
+  min-width: 130px;
+}
+
+.val {
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--green);
+  /* Wide enough for the longest val we show: "RPE 8.5" (~85px in DM Mono). */
+  min-width: 92px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.range {
+  flex: 1;
+  accent-color: var(--green);
+  height: 4px;
+}
+
+.measureRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
+}
+
+.measureInput {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r1);
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--t1);
+  text-align: center;
+  min-height: var(--tap-min);
+}
+.measureInput:focus { outline: 2px solid var(--green); }
+
+.measureUnit {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--t3);
+  min-width: 30px;
+}
+
+.notes {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r2);
+  padding: 14px;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--t1);
+  resize: vertical;
+  min-height: 64px;
+  display: block;
+}
+.notes::placeholder { color: var(--t3); }
+.notes:focus { outline: none; border-color: var(--green); }
+
+.saveRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.save {
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--green);
+  color: #0a0a0a;
+  border: none;
+}
+.save:disabled { opacity: 0.4; }
+.save.saved { background: var(--bg-pill); color: var(--green); }

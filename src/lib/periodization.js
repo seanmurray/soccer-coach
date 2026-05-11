@@ -120,19 +120,39 @@ export function getStrengthPrescription(exKey, week, mode) {
     const fullBase = phasePrx.full?.[key] ?? null;
     if (modBase && fullBase) {
       const adjPct = fullBase.pct - (fullBase.pct - modBase.pct) * 0.6;
-      return {
+      const merged = {
         ...modBase,
         pct: Math.round(adjPct * 100) / 100,
         sets: modBase.sets,
         note: modBase.note + ' (mod1: –15%)',
       };
+      return { ...merged, target_rpe: deriveTargetRpe(merged, prescMode) };
     }
-    return modBase || phasePrx.full[key];
+    const fallback = modBase || phasePrx.full[key];
+    return { ...fallback, target_rpe: deriveTargetRpe(fallback, prescMode) };
   }
 
   const prxMode = phasePrx[prescMode] ? prescMode : 'full';
   const modeBlock = phasePrx[prxMode];
-  return modeBlock?.[key] ?? p.accumulation.full.bench;
+  const base = modeBlock?.[key] ?? p.accumulation.full.bench;
+  // Attach the intended RPE target so the SetTable adjustment logic can read
+  // it instead of guessing from the prescription note. mod2 / mod3 lift caps
+  // come from the note text "Cap RPE 7" / "Cap RPE 7.5".
+  return { ...base, target_rpe: deriveTargetRpe(base, prescMode) };
+}
+
+// Pulls a target RPE out of the prescription. Order of preference:
+//   1. An explicit `cap RPE X` mention in the note (modified / mod1 blocks).
+//   2. Phase-specific defaults: accumulation/realization ~8, transmutation ~8,
+//      deload ~6 (movement quality, not max effort).
+//   3. Hard default of 8.
+function deriveTargetRpe(prx, prescMode) {
+  if (prx?.note) {
+    const m = prx.note.match(/cap rpe\s+(\d+(?:\.\d+)?)/i);
+    if (m) return Number(m[1]);
+  }
+  if (prescMode === 'recovery' || prescMode === 'mod1adj') return 7;
+  return 8;
 }
 
 // Recommended load = max × pct, rounded to nearest 2.5 lbs. Returns 0 if the

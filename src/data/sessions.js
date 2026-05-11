@@ -110,8 +110,10 @@ export const SESSIONS = {
   // mod3: high fatigue — technique maintenance only, 55% load, bodyweight plyos.
   mod3: {
     acc: { agility: ['a_skips', 'b_skips', 'wall_starts'], plyo: ['pogo_jumps', 'snap_downs'], strength: ['bench_press'], build: ['walking_lunge_db', 'half_kneel_rot_chop'] },
-    // NOTE: cable_woodchop below is referenced but not defined in EX. Known v9 bug.
-    lat: { agility: ['lat_power_shuffle'], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'cable_woodchop'] },
+    // v9 referenced `cable_woodchop` here, which never existed in EX.
+    // Substituting `half_kneel_rot_chop` — same movement family (cable rotation
+    // chop) and an appropriate fit for mod3's "technique only" prescription.
+    lat: { agility: ['lat_power_shuffle'], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'half_kneel_rot_chop'] },
     lin: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['bench_press'], build: ['walking_lunge_db', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_lunge_db', 'single_leg_hip_thrust'] },
     cond: {
