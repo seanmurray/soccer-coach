@@ -16,6 +16,25 @@
 import { DAY_TYPE_INFO, MODE_DATA } from '../data/sessions';
 import { getPhaseLabel } from './periodization';
 
+// Build the readiness lines, skipping any field the user marked as
+// "no data" (null). Surfaces an explicit note when objective inputs are
+// missing so the model doesn't lean confidently on subjective signal.
+function readinessLines({ rec, slp, body, mot, battery, stress }) {
+  const lines = ['Readiness:'];
+  if (rec     != null) lines.push(`  Recovery ${rec}%`);
+  if (slp     != null) lines.push(`  Sleep ${slp}%`);
+  if (body    != null) lines.push(`  Body feel ${body}/5`);
+  if (mot     != null) lines.push(`  Motivation ${mot}/5`);
+  if (battery != null) lines.push(`  Battery ${battery}% (Athlytic)`);
+  if (stress  != null) lines.push(`  Stress ${stress}/60 (Athlytic)`);
+
+  const objectiveMissing = [rec, slp, battery, stress].every((v) => v == null);
+  if (objectiveMissing) {
+    lines.push('  (No objective recovery data today — likely didn\'t wear watch overnight.)');
+  }
+  return lines;
+}
+
 // ─── SESSION CUE ────────────────────────────────────────────
 export function buildSessionCuePrompt({
   rec, slp, body, mot, battery, stress,
@@ -36,13 +55,7 @@ export function buildSessionCuePrompt({
     `Day: ${dayLabel} (${dayType})`,
     `Week: ${week} (${phase} phase)`,
     `Mode: ${modeLabel} (${mode})`,
-    'Readiness:',
-    `  Recovery ${rec}%`,
-    `  Sleep ${slp}%`,
-    `  Body feel ${body}/5`,
-    `  Motivation ${mot}/5`,
-    `  Battery ${battery}% (Athlytic)`,
-    `  Stress ${stress}/60 (Athlytic)`,
+    ...readinessLines({ rec, slp, body, mot, battery, stress }),
   ].join('\n');
 
   return {
@@ -140,7 +153,7 @@ export function buildDebriefPrompt({
     `Warmup: ${warmupChecked.length}/${warmupTotal} items checked`,
     '',
     'Readiness going in:',
-    `  Recovery ${rec}% · Sleep ${slp}% · Body ${body}/5 · Motivation ${mot}/5 · Battery ${battery}% · Stress ${stress}/60`,
+    ...readinessLines({ rec, slp, body, mot, battery, stress }).slice(1).map((l) => l.trim()),
     '',
     'Post-session: ' + `RPE ${sessionRpe} · Energy ${energy}/5`,
     '',

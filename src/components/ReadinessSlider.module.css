@@ -92,3 +92,38 @@
 }
 
 .value.alt { color: var(--blue); }
+.value.excluded { color: var(--t4); }
+
+/* Skip / include toggle — small chip on the right of each row. */
+.skip {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  border: 0.5px solid rgba(255, 255, 255, 0.08);
+  color: var(--t3);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 4px;
+}
+.skip:active { background: var(--bg-raised); }
+.skip.on {
+  background: var(--amber-bg);
+  border-color: var(--amber-line);
+  color: var(--amber);
+}
+
+.row.excluded .range {
+  opacity: 0.35;
+  pointer-events: none;
+}
+.row.excluded .adj {
+  opacity: 0.35;
+  pointer-events: none;
+}

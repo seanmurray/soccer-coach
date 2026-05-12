@@ -19,15 +19,37 @@ const initialReadiness = {
 
 export const useSessionStore = create((set, get) => ({
   // ── Readiness ──
+  // Each value may be `null` to indicate "no data available" (e.g. didn't
+  // wear the watch overnight). computeMode reweights based on present
+  // inputs. _readinessLast caches the most recent non-null value for each
+  // field so toggling exclude → include restores what the user last set.
   ...initialReadiness,
+  _readinessLast: { ...initialReadiness },
   mode: 'full',
   score: 0,
 
   setReadiness: (key, value) => {
-    set({ [key]: value });
+    const patch = { [key]: value };
+    if (value != null) {
+      patch._readinessLast = { ...get()._readinessLast, [key]: value };
+    }
+    set(patch);
     const s = get();
     const { mode, score } = computeMode(s);
     set({ mode, score });
+  },
+
+  // Toggle whether a readiness input is excluded from the score. Excluding
+  // sets the value to null; re-including restores the last non-null value
+  // (or the initial default if there's never been one).
+  toggleReadinessExclude: (key) => {
+    const cur = get()[key];
+    if (cur == null) {
+      const last = get()._readinessLast[key] ?? initialReadiness[key];
+      get().setReadiness(key, last);
+    } else {
+      get().setReadiness(key, null);
+    }
   },
 
   // ── Day + week ──

@@ -176,22 +176,62 @@ export function tempoExplain(tempo) {
 }
 
 // ─── READINESS ─────────────────────────────────────────────
+//
 // Composite readiness → training mode. Spec §5.
-export function computeMode({ rec, slp, body, mot, battery, stress }) {
-  const stressInv = Math.max(0, ((60 - stress) / 60) * 100);
-  const score =
-    battery * 0.28 +
-    stressInv * 0.12 +
-    rec * 0.25 +
-    slp * 0.18 +
-    (body / 5) * 10 +
-    (mot / 5) * 7;
+//
+// Each input has a weight; together they sum to 100 when all six are
+// present. When one or more inputs are null (e.g. no watch overnight =
+// no battery/stress/recovery/sleep), we drop those terms AND drop their
+// weight from the denominator so the remaining inputs still scale to 0-100.
+//
+// Edge case: if every objective input is missing and only self-reports remain,
+// the score will lean heavily on body+mot. That's the right behavior — the
+// user is telling us they have no objective signal today — but it makes the
+// thresholds sensitive. We add a small safety: when no objective inputs are
+// present at all, cap the mode at mod1 so we never recommend a "full" session
+// on pure subjective feel.
 
-  if (score >= 72) return { mode: 'full',     score };
-  if (score >= 58) return { mode: 'mod1',     score };
-  if (score >= 45) return { mode: 'mod2',     score };
-  if (score >= 30) return { mode: 'mod3',     score };
-  return                { mode: 'recovery', score };
+const READINESS_WEIGHTS = {
+  battery:  { weight: 28, normalize: (v) => v },                         // 0-100 → 0-100
+  stress:   { weight: 12, normalize: (v) => Math.max(0, ((60 - v) / 60) * 100) }, // 0-60 → inverted 0-100
+  rec:      { weight: 25, normalize: (v) => v },                         // 0-100
+  slp:      { weight: 18, normalize: (v) => v },                         // 0-100
+  body:     { weight: 10, normalize: (v) => (v / 5) * 100 },             // 1-5 → 0-100
+  mot:      { weight: 7,  normalize: (v) => (v / 5) * 100 },             // 1-5 → 0-100
+};
+
+const OBJECTIVE_KEYS = ['battery', 'stress', 'rec', 'slp'];
+
+export function computeMode(inputs) {
+  let weightedSum = 0;
+  let weightTotal = 0;
+  let presentObjective = 0;
+
+  for (const [key, { weight, normalize }] of Object.entries(READINESS_WEIGHTS)) {
+    const v = inputs[key];
+    if (v == null) continue;
+    weightedSum += normalize(v) * weight;
+    weightTotal += weight;
+    if (OBJECTIVE_KEYS.includes(key)) presentObjective += 1;
+  }
+
+  // Nothing at all → idle baseline (e.g. before user touches the sliders).
+  if (weightTotal === 0) return { mode: 'mod1', score: 0, presentObjective };
+
+  const score = weightedSum / weightTotal; // already on 0-100 because weights are percent points
+
+  let mode;
+  if (score >= 72) mode = 'full';
+  else if (score >= 58) mode = 'mod1';
+  else if (score >= 45) mode = 'mod2';
+  else if (score >= 30) mode = 'mod3';
+  else mode = 'recovery';
+
+  // Cap at mod1 when we have zero objective signal — never recommend a full
+  // session purely off self-reported feel.
+  if (presentObjective === 0 && (mode === 'full')) mode = 'mod1';
+
+  return { mode, score, presentObjective };
 }
 
 // ─── REST TIMER ────────────────────────────────────────────
