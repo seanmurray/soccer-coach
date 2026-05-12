@@ -5,6 +5,7 @@ import { BottomNav } from './components/BottomNav';
 import { TodayScreen } from './screens/TodayScreen';
 import { WorkoutScreen } from './screens/WorkoutScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
+import { ProgressScreen } from './screens/ProgressScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { RestTimer } from './components/RestTimer';
 import { ModuleSheet } from './components/ModuleSheet';
@@ -78,8 +79,13 @@ export default function App() {
     }
     setFinishSheetOpen(false);
 
-    // Refresh the History list so the new row shows up immediately.
+    // Refresh the History list + PR / progression queries so the new row,
+    // PR badges, and chart points all show up immediately.
     queryClient.invalidateQueries({ queryKey: ['soccer_sessions'] });
+    queryClient.invalidateQueries({ queryKey: ['pr_timeline'] });
+    queryClient.invalidateQueries({ queryKey: ['progress_series'] });
+    queryClient.invalidateQueries({ queryKey: ['max_suggestions'] });
+    queryClient.invalidateQueries({ queryKey: ['acwr'] });
 
     // Fire the debrief in the background — non-blocking. When it returns
     // it updates ai_debrief on the row and invalidates queries again so
@@ -111,6 +117,9 @@ export default function App() {
       </div>
       <div hidden={tab !== 'history'}>
         <HistoryScreen />
+      </div>
+      <div hidden={tab !== 'progress'}>
+        <ProgressScreen />
       </div>
       <div hidden={tab !== 'settings'}>
         <SettingsScreen />

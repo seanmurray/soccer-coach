@@ -4,6 +4,7 @@ const TABS = [
   { id: 'today',    label: 'Today',    icon: '◐' },
   { id: 'workout',  label: 'Workout',  icon: '⚡' },
   { id: 'history',  label: 'History',  icon: '◫' },
+  { id: 'progress', label: 'Progress', icon: '↗' },
   { id: 'settings', label: 'Settings', icon: '⚙' },
 ];
 

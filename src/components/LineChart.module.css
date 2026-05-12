@@ -1,0 +1,56 @@
+.wrap {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 16px 12px 8px;
+  margin-bottom: 12px;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 4px 8px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--t1);
+}
+
+.summary {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--t3);
+}
+.summary strong { color: var(--green); font-weight: 600; }
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.axis    { stroke: var(--t4); stroke-width: 0.5; }
+.tick    { fill: var(--t3); font-family: var(--font-mono); font-size: 10px; }
+.gridline{ stroke: rgba(255, 255, 255, 0.05); stroke-width: 0.5; }
+
+.line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dot { fill: var(--bg-card); stroke-width: 2; }
+.dotPR { fill: var(--amber); stroke: var(--amber); }
+
+.empty {
+  padding: 32px 12px;
+  text-align: center;
+  color: var(--t3);
+  font-size: 14px;
+}

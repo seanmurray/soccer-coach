@@ -6,6 +6,9 @@ import { DAY_TYPE_INFO, MODE_DATA } from '../data/sessions';
 import { getPhaseLabel } from '../lib/periodization';
 import { useDebriefStore } from '../stores/debriefStore';
 import { retryDebrief } from '../lib/debrief';
+import { usePRTimeline } from '../hooks/usePRTimeline';
+import { prsForSession } from '../lib/prs';
+import { PRSummaryBadge, PRBadgeList } from '../components/PRBadge';
 
 const DATE_FMT = { weekday: 'short', month: 'short', day: 'numeric' };
 
@@ -32,6 +35,7 @@ const modeBadgeClass = (mode) => {
 
 export function HistoryScreen() {
   const { data: sessions, isLoading, error } = useSessions();
+  const { data: prTimeline } = usePRTimeline();
 
   if (isLoading) {
     return (
@@ -72,16 +76,17 @@ export function HistoryScreen() {
   return (
     <main className="screen">
       <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
-      {sessions.map((s) => <SessionCard key={s.id} session={s} />)}
+      {sessions.map((s) => <SessionCard key={s.id} session={s} prTimeline={prTimeline} />)}
     </main>
   );
 }
 
-function SessionCard({ session }) {
+function SessionCard({ session, prTimeline }) {
   const [expanded, setExpanded] = useState(false);
   const dayInfo = DAY_TYPE_INFO[session.day_type];
   const modeLabel = MODE_DATA[session.mode]?.label ?? session.mode ?? '—';
   const phase = session.metadata?.phase ?? (session.week_num ? getPhaseLabel(session.week_num) : null);
+  const prs = prTimeline ? prsForSession(prTimeline, session.id) : [];
 
   return (
     <div className={styles.item}>
@@ -105,6 +110,7 @@ function SessionCard({ session }) {
         </div>
         <div className={styles.headRight}>
           <span className={`${styles.badge} ${modeBadgeClass(session.mode)}`}>{modeLabel}</span>
+          <PRSummaryBadge count={prs.length} />
         </div>
       </div>
 
@@ -116,12 +122,12 @@ function SessionCard({ session }) {
         {session.energy != null && <div className={styles.stat}>Energy <strong>{session.energy}/5</strong></div>}
       </div>
 
-      {expanded && <SessionDetail sessionId={session.id} session={session} />}
+      {expanded && <SessionDetail sessionId={session.id} session={session} prs={prs} />}
     </div>
   );
 }
 
-function SessionDetail({ sessionId, session }) {
+function SessionDetail({ sessionId, session, prs = [] }) {
   const { data, isLoading, error } = useSessionDetail(sessionId);
 
   if (isLoading) {
@@ -168,6 +174,13 @@ function SessionDetail({ sessionId, session }) {
 
   return (
     <div className={styles.detail}>
+      {prs.length > 0 && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>Personal records</div>
+          <PRBadgeList prs={prs} />
+        </div>
+      )}
+
       {exerciseKeys.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Sets</div>
