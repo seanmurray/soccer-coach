@@ -13,6 +13,7 @@ import { supabase } from '../lib/supabase';
 import { estimate1RM } from '../lib/maxEstimator';
 import { parseMeasurement } from '../lib/measurementParse';
 import { EX_TO_MAX_KEY } from '../data/exercises';
+import { metricFor } from '../data/conditioningProtocols';
 
 export function useProgressSeries() {
   return useQuery({
@@ -81,9 +82,17 @@ export function useProgressSeries() {
           value: v.value,
         })).filter((p) => p.date);
         points.sort((a, b) => (a.date < b.date ? -1 : 1));
-        markPRs(points);
+        const cond = metricFor(exKey);
+        const higherIsBetter = cond?.higherIsBetter ?? true;
+        markPRs(points, higherIsBetter);
         const first = Object.values(byId)[0];
-        measureSeries[exKey] = { name: first.name, unit: first.unit, points };
+        measureSeries[exKey] = {
+          name: first.name,
+          unit: cond?.displayUnit ?? first.unit,
+          higherIsBetter,
+          inputMode: cond?.inputMode ?? 'decimal',
+          points,
+        };
       }
 
       // ── Session RPE over time — for overall load trending ─────────────
@@ -96,11 +105,14 @@ export function useProgressSeries() {
   });
 }
 
-// Walks a date-sorted point array and flips isPR=true on each new running max.
-function markPRs(points) {
-  let best = -Infinity;
+// Walks a date-sorted point array and flips isPR=true on each new running
+// best. For lower-is-better metrics (rower split, court sprint time, total
+// time), "best" is the running minimum.
+function markPRs(points, higherIsBetter = true) {
+  let best = higherIsBetter ? -Infinity : Infinity;
   for (const p of points) {
-    if (p.value > best) {
+    const improved = higherIsBetter ? p.value > best : p.value < best;
+    if (improved) {
       p.isPR = true;
       best = p.value;
     } else {

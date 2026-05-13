@@ -25,16 +25,33 @@ export function LineChart({
   data = [],
   color = '#30d158',
   emptyHint = 'No data yet — log this metric to see the trend.',
+  // For pace / time metrics, lower numbers are better. The chart still
+  // plots the raw value (we don't invert the y-axis), but "Best" and the
+  // delta sign respect direction.
+  higherIsBetter = true,
+  // When the metric is mm:ss style, format the summary value as pace.
+  formatValue,
 }) {
   const sorted = [...data].sort((a, b) => (a.date < b.date ? -1 : 1));
 
   // Compute the series stats up front so we can show summary text even if
   // the chart itself ends up empty.
   const values = sorted.map((d) => d.value);
-  const best = values.length ? Math.max(...values) : null;
+  const best = values.length
+    ? (higherIsBetter ? Math.max(...values) : Math.min(...values))
+    : null;
   const last = values.length ? sorted[sorted.length - 1].value : null;
   const first = values.length ? sorted[0].value : null;
-  const delta = first != null && last != null ? last - first : null;
+  // Delta = improvement, so lower-is-better metrics flip the sign.
+  const delta = first != null && last != null
+    ? (higherIsBetter ? last - first : first - last)
+    : null;
+
+  const fmt = (n) => {
+    if (n == null) return '—';
+    if (formatValue) return formatValue(n);
+    return Number.isInteger(n) ? String(n) : n.toFixed(1);
+  };
 
   if (sorted.length === 0) {
     return (
@@ -72,11 +89,14 @@ export function LineChart({
 
   const path = sorted.map((d, i) => `${i === 0 ? 'M' : 'L'} ${xFor(i)} ${yFor(d.value)}`).join(' ');
 
-  // Format delta string. Direction-aware: + for gain, − for drop.
+  // Format delta string. Direction-aware: + for improvement (regardless of
+  // whether higher or lower is better), − for regression.
   const deltaStr = (() => {
     if (delta == null || sorted.length < 2) return null;
     const sign = delta > 0 ? '+' : delta < 0 ? '−' : '';
-    return `${sign}${Math.abs(delta).toFixed(unit === 'lbs' ? 0 : 1)} ${unit}`;
+    const abs = Math.abs(delta);
+    const formatted = formatValue ? formatValue(abs) : abs.toFixed(unit === 'lbs' ? 0 : 1);
+    return `${sign}${formatted} ${unit}`;
   })();
 
   return (
@@ -84,7 +104,7 @@ export function LineChart({
       <div className={styles.head}>
         <div className={styles.title}>{title}</div>
         <div className={styles.summary}>
-          Best <strong>{Number.isInteger(best) ? best : best?.toFixed(1)} {unit}</strong>
+          Best <strong>{fmt(best)} {unit}</strong>
           {deltaStr ? <> · {deltaStr} over {sorted.length} sessions</> : null}
         </div>
       </div>

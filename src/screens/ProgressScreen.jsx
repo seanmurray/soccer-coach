@@ -3,6 +3,7 @@ import styles from './ProgressScreen.module.css';
 import { useProgressSeries } from '../hooks/useProgressSeries';
 import { LineChart } from '../components/LineChart';
 import { MAXES_CONFIG, EX } from '../data/exercises';
+import { formatMetricValue, metricFor, isConditioningKey } from '../data/conditioningProtocols';
 
 // Long-term progression view. Two groups, picked from a top tab bar:
 //   • Strength — e1RM per main lift (Brzycki / RIR)
@@ -12,10 +13,9 @@ import { MAXES_CONFIG, EX } from '../data/exercises';
 const GROUPS = ['strength', 'jumps', 'cond'];
 const GROUP_LABEL = { strength: 'Strength', jumps: 'Jumps', cond: 'Conditioning' };
 
-// Exercise keys that belong on the Conditioning group instead of Jumps.
-// All start with `cond_` (from the generic protocols) or are explicit:
-const COND_EX_KEYS = new Set(['norwegian_4x4']);
-const isConditioningKey = (k) => k.startsWith('cond_') || COND_EX_KEYS.has(k);
+// isConditioningKey is sourced from data/conditioningProtocols so the
+// definition stays in one place (every registered conditioning protocol +
+// the legacy `cond_*` prefix from earlier free-form picks).
 
 const LIFT_LABEL = Object.fromEntries(MAXES_CONFIG.map((m) => [m.key, m.label]));
 
@@ -44,6 +44,10 @@ export function ProgressScreen() {
         title: EX[exKey]?.name ?? series.name ?? exKey,
         unit: series.unit,
         points: series.points,
+        higherIsBetter: series.higherIsBetter ?? true,
+        formatValue: series.inputMode === 'pace'
+          ? (v) => formatMetricValue(v, metricFor(exKey))
+          : undefined,
         isCond: isConditioningKey(exKey),
       }));
   }, [data]);
@@ -135,6 +139,8 @@ export function ProgressScreen() {
               unit={c.unit}
               data={c.points}
               color="#bf5af2"
+              higherIsBetter={c.higherIsBetter}
+              formatValue={c.formatValue}
             />
           ))
         )
@@ -142,7 +148,7 @@ export function ProgressScreen() {
 
       {group === 'cond' && (
         condCharts.length === 0 ? (
-          <div className={styles.empty}>No conditioning measurements yet — log a Norwegian 4×4 (or other measured protocol) to start tracking pace over time.</div>
+          <div className={styles.empty}>No conditioning measurements yet — log a Norwegian 4×4 (or any measured protocol) to start tracking pace over time.</div>
         ) : (
           condCharts.map((c) => (
             <LineChart
@@ -151,6 +157,8 @@ export function ProgressScreen() {
               unit={c.unit}
               data={c.points}
               color="#ff9500"
+              higherIsBetter={c.higherIsBetter}
+              formatValue={c.formatValue}
             />
           ))
         )

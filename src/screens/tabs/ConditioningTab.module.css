@@ -139,3 +139,56 @@
 }
 .logBtn:disabled { opacity: 0.4; }
 .logBtn.saved { background: var(--bg-pill); color: var(--green); }
+
+/* Generic single-metric input row */
+.metricRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+}
+
+.metricLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--t3);
+  min-width: 0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metricInput {
+  flex: 0 0 110px;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r1);
+  padding: 10px 8px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--t1);
+  text-align: center;
+  min-height: var(--tap-min);
+}
+.metricInput:focus { outline: 2px solid var(--green); }
+
+.metricUnit {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--t3);
+  min-width: 56px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.metricHint {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--t3);
+  text-align: right;
+  margin-top: -4px;
+  margin-bottom: 4px;
+}

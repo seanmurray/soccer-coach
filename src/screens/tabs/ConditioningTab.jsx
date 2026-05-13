@@ -5,6 +5,7 @@ import { FrcBlock } from '../../components/FrcBlock';
 import { SESSIONS } from '../../data/sessions';
 import { FRC_FULL } from '../../data/frc';
 import { useSessionStore } from '../../stores/sessionStore';
+import { SingleMetricCard } from './SingleMetricCard';
 
 // Conditioning protocols: pick 1-2 from the list. Selected protocols get
 // buffered into exercisePerf so we know which ones the user actually did.
@@ -22,7 +23,7 @@ export function ConditioningTab() {
   const [selected, setSelected] = useState(() => new Set());
 
   const protocolKey = (p) =>
-    'cond_' + p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    p.exercise_key ?? ('cond_' + p.name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, ''));
 
   const toggleGeneric = (i) => {
     setSelected((prev) => {
@@ -58,7 +59,10 @@ export function ConditioningTab() {
 
       {protocols.map((p, i) => {
         if (p.kind === 'norwegian_4x4') {
-          return <Norwegian4x4Card key={p.name} protocol={p} />;
+          return <Norwegian4x4Card key={p.exercise_key ?? p.name} protocol={p} />;
+        }
+        if (p.kind === 'single_metric') {
+          return <SingleMetricCard key={p.exercise_key ?? p.name} protocol={p} />;
         }
         const isSel = selected.has(i);
         return (

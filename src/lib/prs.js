@@ -17,6 +17,7 @@
 import { estimate1RM } from './maxEstimator';
 import { parseMeasurement } from './measurementParse';
 import { EX_TO_MAX_KEY } from '../data/exercises';
+import { metricFor } from '../data/conditioningProtocols';
 
 // Returns the e1RM for a soccer_sets row, or null if the row lacks weight/reps.
 function setE1RM(s) {
@@ -79,15 +80,19 @@ export function buildPRTimeline({ sets = [], perf = [], sessionsOrder = [] }) {
   for (const p of orderedPerf) {
     const m = parseMeasurement(p.notes);
     if (!m) continue;
+    const cond = metricFor(p.exercise_key);
+    const higherIsBetter = cond?.higherIsBetter ?? true;
     const prev = bestMeasure[p.exercise_key];
-    if (!prev || m.value > prev.value) {
-      bestMeasure[p.exercise_key] = { value: m.value, unit: m.unit, sessionId: p.session_id };
+    const improved = !prev || (higherIsBetter ? m.value > prev.value : m.value < prev.value);
+    if (improved) {
+      bestMeasure[p.exercise_key] = { value: m.value, unit: m.unit, sessionId: p.session_id, higherIsBetter };
       (measurePRs[p.session_id] ??= []).push({
         exerciseKey: p.exercise_key,
         exerciseName: p.exercise_name,
         value: m.value,
-        unit: m.unit,
+        unit: cond?.displayUnit ?? m.unit,
         previousBest: prev?.value ?? null,
+        higherIsBetter,
       });
     }
   }
@@ -108,11 +113,18 @@ export function prsForSession(timeline, sessionId) {
     });
   }
   for (const pr of (timeline.measurePRs[sessionId] ?? [])) {
+    // Delta string respects direction: improvements are positive, regressions
+    // wouldn't make it here (only PRs do) but the sign reflects "got better".
+    let deltaStr = 'first PR';
+    if (pr.previousBest != null) {
+      const raw = pr.higherIsBetter ? pr.value - pr.previousBest : pr.previousBest - pr.value;
+      deltaStr = `+${Math.abs(raw).toFixed(1)} ${pr.unit}`;
+    }
     out.push({
       kind: 'measure',
       label: pr.exerciseName,
       value: `${pr.value} ${pr.unit}`,
-      delta: pr.previousBest != null ? `+${(pr.value - pr.previousBest).toFixed(1)} ${pr.unit}` : 'first PR',
+      delta: deltaStr,
     });
   }
   return out;

@@ -36,14 +36,76 @@ export const SESSIONS = {
       build: ['blg_split_sq', 'walking_lunge_db', 'the_grappler', 'cable_press_rotation'],
     },
     cond: {
+      // Soccer-specific conditioning — protocols adapted to user's equipment
+      // (no soccer field). Sources: Bangsbo speed-endurance research, Buchheit
+      // 30-15 IFT, HIIT Science RSA literature.
       protocols: [
-        { name: 'Norwegian 4x4', desc: '4 rounds: 4 min @ 85-95% HRmax / 3 min active recovery. The gold-standard VO2max protocol. Aim for the same speed on all 4 work intervals — if rep 4 was easier than rep 1, push harder next time.', rpe: 9, tags: ['cond'], kind: 'norwegian_4x4' },
-        { name: 'Assault bike — tabata', desc: '8 rounds: 20 sec all-out / 10 sec rest. 90-100% max output each interval.', rpe: 9, tags: ['cond'] },
-        { name: 'Curved treadmill sprint intervals', desc: '6×30 sec sprint / 90 sec walk. No motor — your legs drive it.', rpe: 8, tags: ['cond', 'acc'] },
-        { name: 'Rower — 500m repeats', desc: '4×500m, rest = work time ×1.5. Consistent splits — not faster first, dying last.', rpe: 8, tags: ['cond'] },
-        { name: 'SkiErg — 1 min on / 2 min off', desc: '5 rounds at 85-90% max effort.', rpe: 8, tags: ['cond'] },
-        { name: 'Basketball court repeat sprints', desc: '8×full court sprint / walk back.', rpe: 9, tags: ['cond', 'acc'] },
-        { name: 'Assault bike + court sprint combo', desc: '4 rounds: 30s bike sprint + immediately 1 full court sprint.', rpe: 9, tags: ['cond', 'acc'] },
+        {
+          exercise_key: 'norwegian_4x4',
+          name: 'Norwegian 4×4',
+          desc: '4 rounds: 4 min @ 85-95% HRmax / 3 min recovery. Gold-standard VO2max protocol — the engine upgrade that lets you sustain second-half output. Treadmill works fine. Same speed all 4 intervals — if rep 4 felt easier than rep 1, push harder next time.',
+          rpe: 9, tags: ['cond'], kind: 'norwegian_4x4',
+        },
+        {
+          exercise_key: 'bangsbo_speed_endurance',
+          name: 'Bangsbo Speed Endurance (Production)',
+          desc: '6 rounds: 30 sec near-max sprint / 2:30 walk. Bangsbo "production" protocol — builds the anaerobic capacity to repeat hard efforts late in matches. Curved treadmill is ideal; motorized works at 90% of your true sprint speed.',
+          rpe: 9, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'thirty_fifteen_ift',
+          name: '30-15 Intermittent Fitness Test',
+          desc: 'Buchheit 30-15 IFT. 30 sec running / 15 sec walk, treadmill speed increases each stage. Top sustainable stage speed (VIFT) is the soccer-specific aerobic-anaerobic benchmark — used by elite clubs to prescribe HIIT load. Run until you can\'t hold the stage speed for the full 30s.',
+          rpe: 10, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'treadmill_rsa',
+          name: 'Treadmill RSA Intervals',
+          desc: '10 rounds: 30 sec sprint / 30 sec walk (1:1 work:rest). Repeat-sprint ability — the single most-trained quality for soccer. Short recovery forces lactate clearance. Same speed all 10 reps.',
+          rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'curved_tm_sprint',
+          name: 'Curved treadmill sprint intervals',
+          desc: '6 rounds: 30 sec sprint / 90 sec walk. Self-propelled — your legs drive it. Closer to overground sprint mechanics than motorized treadmill.',
+          rpe: 8, tags: ['cond', 'acc'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'court_sprint_repeats',
+          name: 'Court repeat sprints',
+          desc: '10 rounds: full court sprint / walk back. Closest you\'ll get to actual match RSA without a pitch. Average sprint time should stay within 5% of your first rep — bigger drop-off = the deconditioning you\'re here to fix.',
+          rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'skierg_1on2off',
+          name: 'SkiErg — 1 min on / 2 min off',
+          desc: '5 rounds at 85-90% max effort. Recruits upper body + posterior chain — useful counterweight to lower-body-dominant soccer load. Log the average 500m split.',
+          rpe: 8, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'rower_500m_repeats',
+          name: 'Rower — 500m repeats',
+          desc: '4×500m, rest = work time × 1.5. Consistent splits — not faster first, dying last. Best balance of metabolic stress and joint friendliness.',
+          rpe: 8, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'assault_bike_tabata',
+          name: 'Assault bike — tabata',
+          desc: '8 rounds: 20 sec all-out / 10 sec rest. 90-100% max output each interval. Highest anaerobic stress per minute of any protocol — use sparingly.',
+          rpe: 9, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'bike_court_combo',
+          name: 'Bike + court sprint combo',
+          desc: '4 rounds: 30s bike sprint + immediately 1 full court sprint. Pre-fatigues the legs before the sprint — trains the late-match scenario where you have to find another gear with tired legs. Log total elapsed time.',
+          rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'treadmill_zone2',
+          name: 'Treadmill Zone 2 steady',
+          desc: '20-30 min @ 75-80% HRmax. Aerobic base — improves recovery capacity between sprints and total session volume tolerance. Nasal-breathing pace if possible.',
+          rpe: 5, tags: ['cond'], kind: 'single_metric',
+        },
       ],
     },
   },
@@ -87,10 +149,30 @@ export const SESSIONS = {
     },
     cond: {
       protocols: [
-        { name: 'Norwegian 4x4 (capped intent)', desc: '4 rounds: 4 min @ 80-85% HRmax / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.', rpe: 7.5, tags: ['cond'], kind: 'norwegian_4x4' },
-        { name: 'Assault bike — aerobic intervals', desc: '6 rounds: 30 sec moderate / 90 sec easy. RPE 6-7 — not all-out. Aerobic development without high CNS cost.', rpe: 6, tags: ['cond'] },
-        { name: 'Rower — steady state', desc: '15-20 min at RPE 6. Consistent pace, nasal breathing if possible.', rpe: 6, tags: ['cond'] },
-        { name: 'Easy court jog', desc: '15-20 min light jog. Movement prep, not conditioning.', rpe: 5, tags: ['cond'] },
+        {
+          exercise_key: 'norwegian_4x4',
+          name: 'Norwegian 4×4 (capped intent)',
+          desc: '4 rounds: 4 min @ 80-85% HRmax / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.',
+          rpe: 7.5, tags: ['cond'], kind: 'norwegian_4x4',
+        },
+        {
+          exercise_key: 'assault_bike_tabata',
+          name: 'Assault bike — aerobic intervals',
+          desc: '6 rounds: 30 sec moderate / 90 sec easy. RPE 6-7 — not all-out. Aerobic development without high CNS cost.',
+          rpe: 6, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'rower_500m_repeats',
+          name: 'Rower — steady state',
+          desc: '15-20 min at RPE 6. Consistent pace, nasal breathing if possible. Log your average 500m split.',
+          rpe: 6, tags: ['cond'], kind: 'single_metric',
+        },
+        {
+          exercise_key: 'treadmill_zone2_easy',
+          name: 'Treadmill easy jog',
+          desc: '15-20 min light jog at RPE 5. Movement prep / aerobic flush, not real conditioning. Log your average mph.',
+          rpe: 5, tags: ['cond'], kind: 'single_metric',
+        },
       ],
     },
   },
