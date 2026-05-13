@@ -1,13 +1,19 @@
 // 1RM estimator + auto-progression suggestions.
 //
-// METHOD
-//   For each completed set: figure out how many reps the user could have done
-//   to true failure (RPE 10) — i.e. effective reps. Then Brzycki the estimate.
+// METHOD — Tuchscherer RPE chart (Reactive Training Systems)
 //
-//     effectiveReps = actualReps + (10 - actualRpe)         // RIR-adjusted
-//     e1RM          = weight / (1.0278 - 0.0278 × effReps)  // Brzycki
+//   Empirically-derived 2D lookup mapping (reps, RPE) → %1RM. More accurate
+//   than Brzycki + RIR for the realistic range we live in (1-8 reps @ RPE
+//   7-9): the chart bakes in the non-linear relationship between RPE drop
+//   and reps in reserve that a formula misses.
 //
-//   We cap effectiveReps at 10 (Brzycki accuracy degrades past that).
+//   e1RM = weight / (chart[reps][rpe] / 100)
+//
+//   Edge cases:
+//     - rpe outside [6, 10]: clamp
+//     - reps > 10: clamp to 10-rep row (very conservative — past 10 reps,
+//       1RM extrapolation is unreliable for any method)
+//     - reps < 1 or weight missing: null
 //
 // AGGREGATION
 //   Take the recent (last ~3 sessions) sets per main lift, compute e1RM per
@@ -25,16 +31,46 @@
 
 import { EX_TO_MAX_KEY } from '../data/exercises';
 
-const BRZYCKI_CAP = 10;
+// Tuchscherer RPE → %1RM chart. Rows are reps (1-10), columns are RPE
+// values (6 through 10, in 0.5 steps).
+//
+// The numbers below are the canonical values widely cited in RTS materials
+// (Tuchscherer 2008, "Reactive Training Manual") and used in tools like
+// StrengthLog, Boostcamp, FitnessVolt.
+const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
+
+const TUCHSCHERER_CHART = {
+  //          6    6.5   7    7.5   8    8.5   9    9.5  10
+  1:  [86.3, 87.8, 89.2, 90.7, 92.2, 93.9, 95.5, 97.8, 100.0],
+  2:  [83.7, 85.0, 86.3, 87.8, 89.2, 90.7, 92.2, 93.9, 95.5],
+  3:  [81.1, 82.4, 83.7, 85.0, 86.3, 87.8, 89.2, 90.7, 92.2],
+  4:  [78.6, 79.9, 81.1, 82.4, 83.7, 85.0, 86.3, 87.8, 89.2],
+  5:  [76.2, 77.4, 78.6, 79.9, 81.1, 82.4, 83.7, 85.0, 86.3],
+  6:  [73.9, 75.1, 76.2, 77.4, 78.6, 79.9, 81.1, 82.4, 83.7],
+  7:  [70.7, 72.3, 73.9, 75.1, 76.2, 77.4, 78.6, 79.9, 81.1],
+  8:  [68.0, 69.4, 70.7, 72.3, 73.9, 75.1, 76.2, 77.4, 78.6],
+  9:  [65.3, 66.7, 68.0, 69.4, 70.7, 72.3, 73.9, 75.1, 76.2],
+  10: [62.6, 64.0, 65.3, 66.7, 68.0, 69.4, 70.7, 72.3, 73.9],
+};
+
+// Look up the %1RM for (reps, rpe). Clamps out-of-range inputs.
+// Returns null if the inputs are unusable (no reps, no weight).
+function pctOfOneRM(reps, rpe) {
+  if (reps == null || reps < 1) return null;
+  const r = Math.min(10, Math.max(1, Math.round(reps)));
+  const clampedRpe = Math.min(10, Math.max(6, rpe ?? 8));
+  // Snap to nearest 0.5 — matches what the UI RPE picker offers anyway.
+  const snappedRpe = Math.round(clampedRpe * 2) / 2;
+  const colIdx = RPE_VALUES.indexOf(snappedRpe);
+  if (colIdx === -1) return null;
+  return TUCHSCHERER_CHART[r][colIdx];
+}
 
 export function estimate1RM(weight, reps, rpe) {
   if (!weight || !reps) return null;
-  const effRpe = Math.min(10, Math.max(5, rpe ?? 8));
-  const effReps = Math.min(BRZYCKI_CAP, reps + (10 - effRpe));
-  if (effReps <= 0) return null;
-  const denom = 1.0278 - 0.0278 * effReps;
-  if (denom <= 0) return null;
-  return weight / denom;
+  const pct = pctOfOneRM(reps, rpe);
+  if (pct == null || pct <= 0) return null;
+  return weight / (pct / 100);
 }
 
 const median = (xs) => {
