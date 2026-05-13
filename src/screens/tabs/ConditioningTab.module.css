@@ -54,3 +54,88 @@
   padding-top: 14px;
   margin-bottom: 12px;
 }
+
+/* Norwegian 4x4 structured-input grid */
+.intervalGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin: 12px 0 4px;
+}
+
+.intervalCell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.intervalLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+.intervalInput {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--r1);
+  padding: 10px 4px;
+  font-family: var(--font-mono);
+  font-size: 17px;
+  color: var(--t1);
+  text-align: center;
+  min-height: var(--tap-min);
+}
+.intervalInput:focus { outline: 2px solid var(--green); }
+
+.intervalUnit {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--t3);
+}
+
+.avgRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  background: var(--green-bg);
+  border: 0.5px solid var(--green-line);
+  border-radius: var(--r2);
+}
+
+.avgLabel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.avgValue {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  color: var(--green);
+}
+
+.logBtn {
+  margin-top: 10px;
+  width: 100%;
+  height: 44px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--green);
+  color: #0a0a0a;
+  border: none;
+}
+.logBtn:disabled { opacity: 0.4; }
+.logBtn.saved { background: var(--bg-pill); color: var(--green); }

@@ -37,6 +37,7 @@ export function BuildTab() {
     return (
       <ExerciseBlock
         key={k}
+        exerciseKey={k}
         name={eff.displayName}
         originalName={ex.name}
         target={ex.target ?? `${ACCESSORY_DEFAULT.sets}×${ACCESSORY_DEFAULT.reps}`}

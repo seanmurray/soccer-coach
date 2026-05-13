@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import styles from './ExerciseBlock.module.css';
+import { ExerciseNote } from './ExerciseNote';
 
 // Expandable card: header (name/target/load/tempo) on top, optional cue +
 // body content (children) inside when expanded. Wraps the strength sets,
@@ -7,6 +8,7 @@ import styles from './ExerciseBlock.module.css';
 
 export function ExerciseBlock({
   name,
+  exerciseKey,   // optional — when provided, renders a persistent form-cue note
   target,        // e.g. "4×3" or "5×3 @ 185"
   load,          // optional rec load string (e.g. "185 lbs")
   tempo,         // optional tempo string e.g. "[5|1|X]"
@@ -72,6 +74,8 @@ export function ExerciseBlock({
               <strong>Contrast set:</strong> {contrast}
             </div>
           )}
+
+          {exerciseKey && <ExerciseNote exerciseKey={exerciseKey} exerciseName={originalName ?? name} />}
 
           {upgrade && onToggleUpgrade && (
             <div className={styles.upgradeSection}>

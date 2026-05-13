@@ -9,6 +9,7 @@ import { AiInsightCard } from '../components/AiInsightCard';
 import { WeekBar } from '../components/WeekBar';
 import { MaxSuggestion } from '../components/MaxSuggestion';
 import { ACWRCard } from '../components/ACWRCard';
+import { CNSBudgetCard } from '../components/CNSBudgetCard';
 import { useSessionStore } from '../stores/sessionStore';
 import { MODE_INSIGHTS } from '../data/sessions';
 
@@ -40,9 +41,11 @@ export function TodayScreen({ onStartSession, onOpenModule }) {
 
       <ModeBanner mode={mode} />
 
-      {/* Long-term context: training-load trend (ACWR) and any
-          backfill suggestions for working maxes from recent set history. */}
+      {/* Long-term context: training-load trend (ACWR), short-window CNS
+          fatigue, and any backfill suggestions for working maxes from
+          recent set history. */}
       <ACWRCard />
+      <CNSBudgetCard />
       <MaxSuggestion />
 
       <ReadinessSliders />

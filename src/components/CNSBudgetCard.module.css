@@ -1,0 +1,66 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--green);
+}
+.card.zoneGreen { border-left-color: var(--green); }
+.card.zoneOkay  { border-left-color: var(--blue); }
+.card.zoneAmber { border-left-color: var(--amber); }
+.card.zoneRed   { border-left-color: var(--red); }
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+.zoneLabel {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.zoneGreen .zoneLabel { color: var(--green); }
+.zoneOkay  .zoneLabel { color: var(--blue); }
+.zoneAmber .zoneLabel { color: var(--amber); }
+.zoneRed   .zoneLabel { color: var(--red); }
+
+.total {
+  font-family: var(--font-display);
+  font-size: 32px;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+.zoneGreen .total { color: var(--green); }
+.zoneOkay  .total { color: var(--blue); }
+.zoneAmber .total { color: var(--amber); }
+.zoneRed   .total { color: var(--red); }
+
+.text {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.breakdown {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--t3);
+}
+.breakdown span strong { color: var(--t2); font-weight: 600; }

@@ -9,8 +9,13 @@ import { MAXES_CONFIG, EX } from '../data/exercises';
 //   • Jumps    — measured plyo distances + heights
 // Plus a session-RPE chart at the bottom for overall load trend.
 
-const GROUPS = ['strength', 'jumps'];
-const GROUP_LABEL = { strength: 'Strength', jumps: 'Jumps' };
+const GROUPS = ['strength', 'jumps', 'cond'];
+const GROUP_LABEL = { strength: 'Strength', jumps: 'Jumps', cond: 'Conditioning' };
+
+// Exercise keys that belong on the Conditioning group instead of Jumps.
+// All start with `cond_` (from the generic protocols) or are explicit:
+const COND_EX_KEYS = new Set(['norwegian_4x4']);
+const isConditioningKey = (k) => k.startsWith('cond_') || COND_EX_KEYS.has(k);
 
 const LIFT_LABEL = Object.fromEntries(MAXES_CONFIG.map((m) => [m.key, m.label]));
 
@@ -39,8 +44,12 @@ export function ProgressScreen() {
         title: EX[exKey]?.name ?? series.name ?? exKey,
         unit: series.unit,
         points: series.points,
+        isCond: isConditioningKey(exKey),
       }));
   }, [data]);
+
+  const jumpsCharts = useMemo(() => measureCharts.filter((c) => !c.isCond), [measureCharts]);
+  const condCharts  = useMemo(() => measureCharts.filter((c) =>  c.isCond), [measureCharts]);
 
   if (isLoading) {
     return (
@@ -116,16 +125,32 @@ export function ProgressScreen() {
       )}
 
       {group === 'jumps' && (
-        measureCharts.length === 0 ? (
+        jumpsCharts.length === 0 ? (
           <div className={styles.empty}>No measurement data yet — log a distance or height in the feedback notes on a plyo to start tracking.</div>
         ) : (
-          measureCharts.map((c) => (
+          jumpsCharts.map((c) => (
             <LineChart
               key={c.exKey}
               title={c.title}
               unit={c.unit}
               data={c.points}
               color="#bf5af2"
+            />
+          ))
+        )
+      )}
+
+      {group === 'cond' && (
+        condCharts.length === 0 ? (
+          <div className={styles.empty}>No conditioning measurements yet — log a Norwegian 4×4 (or other measured protocol) to start tracking pace over time.</div>
+        ) : (
+          condCharts.map((c) => (
+            <LineChart
+              key={c.exKey}
+              title={c.title}
+              unit={c.unit}
+              data={c.points}
+              color="#ff9500"
             />
           ))
         )

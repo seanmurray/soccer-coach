@@ -55,6 +55,7 @@ export function StrengthTab() {
     return (
       <ExerciseBlock
         key={k}
+        exerciseKey={k}
         name={eff.displayName}
         originalName={ex.name}
         target={target}

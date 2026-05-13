@@ -9,7 +9,7 @@
 // measurement was logged.
 
 const TAG_RE = /\[([^\]]+)\]/;
-const NUMERIC_TAG_RE = /^(\d+(?:\.\d+)?)\s*(in|cm|lbs|kg|sec|s|m)$/i;
+const NUMERIC_TAG_RE = /^(\d+(?:\.\d+)?)\s*(in|cm|lbs|kg|sec|s|m|mph|kmh|kph)$/i;
 
 export function parseMeasurement(notes) {
   if (!notes) return null;

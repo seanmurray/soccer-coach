@@ -86,6 +86,7 @@ export default function App() {
     queryClient.invalidateQueries({ queryKey: ['progress_series'] });
     queryClient.invalidateQueries({ queryKey: ['max_suggestions'] });
     queryClient.invalidateQueries({ queryKey: ['acwr'] });
+    queryClient.invalidateQueries({ queryKey: ['cns_budget'] });
 
     // Fire the debrief in the background — non-blocking. When it returns
     // it updates ai_debrief on the row and invalidates queries again so

@@ -10,18 +10,20 @@
 .row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 14px 16px;
+  /* Slightly tighter gaps + a hair less side padding so the skip toggle fits
+     on a 390px iPhone without overflowing. */
+  gap: 6px;
+  padding: 14px 12px;
   border-bottom: 0.5px solid rgba(255, 255, 255, 0.06);
 }
 .row:last-child { border-bottom: none; }
 
 .label {
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--t1);
   flex-shrink: 0;
-  min-width: 90px;
+  min-width: 78px;
 }
 
 .subLabel {
@@ -34,6 +36,10 @@
 
 .range {
   flex: 1;
+  /* Same fix as Feedback row — flex items have min-width:auto by default and
+     range inputs ship a ~160px intrinsic size that blocks shrinking. Without
+     this the row blows out the right edge of a narrow viewport. */
+  min-width: 0;
   -webkit-appearance: none;
   appearance: none;
   height: 4px;
@@ -62,13 +68,13 @@
 }
 
 .adj {
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: var(--r1);
   background: var(--bg-pill);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
   color: var(--t1);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 300;
   display: flex;
   align-items: center;
@@ -83,12 +89,12 @@
 
 .value {
   font-family: var(--font-mono);
-  font-size: 18px;
+  font-size: 16px;
   color: var(--green);
-  width: 52px;
-  min-width: 52px;
+  min-width: 44px;
   text-align: right;
   flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .value.alt { color: var(--blue); }
@@ -96,8 +102,8 @@
 
 /* Skip / include toggle — small chip on the right of each row. */
 .skip {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: var(--r1);
   background: var(--bg-pill);
   border: 0.5px solid rgba(255, 255, 255, 0.08);
@@ -110,7 +116,7 @@
   flex-shrink: 0;
   cursor: pointer;
   transition: all 0.15s;
-  margin-left: 4px;
+  margin-left: 2px;
 }
 .skip:active { background: var(--bg-raised); }
 .skip.on {

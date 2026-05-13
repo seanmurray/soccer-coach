@@ -31,6 +31,7 @@ export function PlyometricsTab() {
     return (
       <ExerciseBlock
         key={k}
+        exerciseKey={k}
         name={eff.displayName}
         originalName={ex.name}
         target={ex.target}

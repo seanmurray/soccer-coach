@@ -37,6 +37,7 @@ export const SESSIONS = {
     },
     cond: {
       protocols: [
+        { name: 'Norwegian 4x4', desc: '4 rounds: 4 min @ 85-95% HRmax / 3 min active recovery. The gold-standard VO2max protocol. Aim for the same speed on all 4 work intervals — if rep 4 was easier than rep 1, push harder next time.', rpe: 9, tags: ['cond'], kind: 'norwegian_4x4' },
         { name: 'Assault bike — tabata', desc: '8 rounds: 20 sec all-out / 10 sec rest. 90-100% max output each interval.', rpe: 9, tags: ['cond'] },
         { name: 'Curved treadmill sprint intervals', desc: '6×30 sec sprint / 90 sec walk. No motor — your legs drive it.', rpe: 8, tags: ['cond', 'acc'] },
         { name: 'Rower — 500m repeats', desc: '4×500m, rest = work time ×1.5. Consistent splits — not faster first, dying last.', rpe: 8, tags: ['cond'] },
@@ -86,6 +87,7 @@ export const SESSIONS = {
     },
     cond: {
       protocols: [
+        { name: 'Norwegian 4x4 (capped intent)', desc: '4 rounds: 4 min @ 80-85% HRmax / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.', rpe: 7.5, tags: ['cond'], kind: 'norwegian_4x4' },
         { name: 'Assault bike — aerobic intervals', desc: '6 rounds: 30 sec moderate / 90 sec easy. RPE 6-7 — not all-out. Aerobic development without high CNS cost.', rpe: 6, tags: ['cond'] },
         { name: 'Rower — steady state', desc: '15-20 min at RPE 6. Consistent pace, nasal breathing if possible.', rpe: 6, tags: ['cond'] },
         { name: 'Easy court jog', desc: '15-20 min light jog. Movement prep, not conditioning.', rpe: 5, tags: ['cond'] },
