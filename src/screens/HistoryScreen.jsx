@@ -191,17 +191,25 @@ function SessionDetail({ sessionId, session, prs = [], onRequestDelete }) {
   }, {});
   const exerciseKeys = Object.keys(grouped);
 
-  if (
+  const isEmpty =
     exerciseKeys.length === 0 &&
     exercisePerf.length === 0 &&
     moduleUsage.length === 0 &&
-    !session?.ai_debrief
-  ) {
+    !session?.ai_debrief;
+
+  if (isEmpty) {
     return (
       <div className={styles.detail}>
         <div style={{ fontSize: 14, color: 'var(--t3)', padding: '12px 0' }}>
           No detail logged for this session.
         </div>
+        {onRequestDelete && (
+          <div className={styles.dangerZone}>
+            <button type="button" className={styles.deleteBtn} onClick={onRequestDelete}>
+              Delete this session
+            </button>
+          </div>
+        )}
       </div>
     );
   }

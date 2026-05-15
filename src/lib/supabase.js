@@ -1,5 +1,7 @@
 // Supabase client. Personal-use app, anon-key only. RLS allows anon
-// insert/select on every soccer_* table (spec §12).
+// insert/select on every soccer_* table; delete is allowed on
+// soccer_sessions + its child tables (soccer_sets, soccer_exercise_perf,
+// soccer_module_usage) so the History screen can remove sessions.
 
 import { createClient } from '@supabase/supabase-js';
 
