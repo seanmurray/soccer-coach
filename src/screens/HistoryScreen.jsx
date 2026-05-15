@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import styles from './HistoryScreen.module.css';
-import { useSessions, useSessionDetail } from '../hooks/useSessions';
+import sheetStyles from '../components/PostSessionSheet.module.css';
+import { useSessions, useSessionDetail, useDeleteSession } from '../hooks/useSessions';
 import { DAY_TYPE_INFO, MODE_DATA } from '../data/sessions';
 import { getPhaseLabel } from '../lib/periodization';
 import { useDebriefStore } from '../stores/debriefStore';
@@ -36,6 +37,18 @@ const modeBadgeClass = (mode) => {
 export function HistoryScreen() {
   const { data: sessions, isLoading, error } = useSessions();
   const { data: prTimeline } = usePRTimeline();
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const deleteMutation = useDeleteSession();
+
+  const onConfirmDelete = async () => {
+    if (!pendingDelete) return;
+    try {
+      await deleteMutation.mutateAsync(pendingDelete.id);
+      setPendingDelete(null);
+    } catch (err) {
+      console.error('[history] delete failed', err);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -76,12 +89,26 @@ export function HistoryScreen() {
   return (
     <main className="screen">
       <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
-      {sessions.map((s) => <SessionCard key={s.id} session={s} prTimeline={prTimeline} />)}
+      {sessions.map((s) => (
+        <SessionCard
+          key={s.id}
+          session={s}
+          prTimeline={prTimeline}
+          onRequestDelete={() => setPendingDelete(s)}
+        />
+      ))}
+      <DeleteConfirmSheet
+        session={pendingDelete}
+        deleting={deleteMutation.isPending}
+        error={deleteMutation.error}
+        onCancel={() => setPendingDelete(null)}
+        onConfirm={onConfirmDelete}
+      />
     </main>
   );
 }
 
-function SessionCard({ session, prTimeline }) {
+function SessionCard({ session, prTimeline, onRequestDelete }) {
   const [expanded, setExpanded] = useState(false);
   const dayInfo = DAY_TYPE_INFO[session.day_type];
   const modeLabel = MODE_DATA[session.mode]?.label ?? session.mode ?? '—';
@@ -122,12 +149,19 @@ function SessionCard({ session, prTimeline }) {
         {session.energy != null && <div className={styles.stat}>Energy <strong>{session.energy}/5</strong></div>}
       </div>
 
-      {expanded && <SessionDetail sessionId={session.id} session={session} prs={prs} />}
+      {expanded && (
+        <SessionDetail
+          sessionId={session.id}
+          session={session}
+          prs={prs}
+          onRequestDelete={onRequestDelete}
+        />
+      )}
     </div>
   );
 }
 
-function SessionDetail({ sessionId, session, prs = [] }) {
+function SessionDetail({ sessionId, session, prs = [], onRequestDelete }) {
   const { data, isLoading, error } = useSessionDetail(sessionId);
 
   if (isLoading) {
@@ -254,7 +288,77 @@ function SessionDetail({ sessionId, session, prs = [] }) {
       )}
 
       <DebriefSection session={session} />
+
+      {onRequestDelete && (
+        <div className={styles.dangerZone}>
+          <button
+            type="button"
+            className={styles.deleteBtn}
+            onClick={onRequestDelete}
+          >
+            Delete this session
+          </button>
+        </div>
+      )}
     </div>
+  );
+}
+
+// Bottom-sheet confirmation for destructive delete. Reuses PostSessionSheet
+// styles for visual consistency; CTA is destructive (red) instead of green.
+function DeleteConfirmSheet({ session, deleting, error, onCancel, onConfirm }) {
+  const open = !!session;
+  const dateLabel = session ? formatDate(session.performed_at) : '';
+  const dayLabel = session ? (DAY_TYPE_INFO[session.day_type]?.sub ?? session.day_type ?? '') : '';
+
+  return (
+    <>
+      <div
+        className={`${sheetStyles.overlay} ${open ? sheetStyles.open : ''}`}
+        onClick={() => !deleting && onCancel?.()}
+        aria-hidden
+      />
+      <div
+        className={`${sheetStyles.sheet} ${open ? sheetStyles.open : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Delete session"
+      >
+        <div className={sheetStyles.handle} />
+        <div className={sheetStyles.header}>
+          <div className={sheetStyles.title}>Delete session?</div>
+          <div className={sheetStyles.sub}>{dateLabel} · {dayLabel}</div>
+        </div>
+        <div className={sheetStyles.body}>
+          <div style={{ fontSize: 15, color: 'var(--t2)', lineHeight: 1.5, marginBottom: 4 }}>
+            This permanently removes the session, all logged sets, exercise feedback, and module usage. It cannot be undone.
+          </div>
+          {error && (
+            <div className={styles.error} style={{ marginTop: 12 }}>
+              Delete failed: {error.message ?? String(error)}
+            </div>
+          )}
+          <div className={sheetStyles.actions}>
+            <button
+              type="button"
+              className={sheetStyles.secondary}
+              onClick={onCancel}
+              disabled={deleting}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className={`${sheetStyles.cta} ${styles.ctaDestructive}`}
+              onClick={onConfirm}
+              disabled={deleting}
+            >
+              {deleting ? 'Deleting…' : 'Delete'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 

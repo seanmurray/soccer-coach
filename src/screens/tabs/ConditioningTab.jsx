@@ -17,7 +17,11 @@ import { SingleMetricCard } from './SingleMetricCard';
 export function ConditioningTab() {
   const mode = useSessionStore((s) => s.mode);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
-  const protocols = SESSIONS.full.cond.protocols;
+  // Stable sort: recommended-for-current-mode first, original order preserved within each group.
+  const protocols = SESSIONS.full.cond.protocols
+    .map((p, i) => ({ p, i, rec: p.recommendedModes?.includes(mode) ?? true }))
+    .sort((a, b) => (b.rec - a.rec) || (a.i - b.i))
+    .map(({ p }) => p);
 
   const [selected, setSelected] = useState(() => new Set());
 

@@ -3,8 +3,9 @@
 // useSessions() — list view, returns recent soccer_sessions newest-first.
 // useSessionDetail(id) — expanded view, returns sets + exercise_perf +
 //   module_usage rows for one session in three parallel queries.
+// useDeleteSession() — mutation that removes a session + its children.
 
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '../lib/supabase';
 
 const SESSIONS_LIMIT = 50;
@@ -22,6 +23,43 @@ export function useSessions() {
         .limit(SESSIONS_LIMIT);
       if (error) throw error;
       return data ?? [];
+    },
+  });
+}
+
+// Delete a session and its children. Child rows go first because of the
+// session_id FK on soccer_sets / soccer_exercise_perf / soccer_module_usage.
+// The final `.select('id')` lets us catch the case where RLS silently denied
+// the delete — a successful Supabase response with zero rows means nothing
+// was actually removed.
+export function useDeleteSession() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (sessionId) => {
+      const childTables = ['soccer_module_usage', 'soccer_exercise_perf', 'soccer_sets'];
+      for (const table of childTables) {
+        const { error } = await supabase.from(table).delete().eq('session_id', sessionId);
+        if (error) throw error;
+      }
+      const { data, error } = await supabase
+        .from('soccer_sessions')
+        .delete()
+        .eq('id', sessionId)
+        .select('id');
+      if (error) throw error;
+      if (!data || data.length === 0) {
+        throw new Error('Session not deleted — RLS may have denied the operation.');
+      }
+      return sessionId;
+    },
+    onSuccess: (sessionId) => {
+      queryClient.invalidateQueries({ queryKey: ['soccer_sessions'] });
+      queryClient.invalidateQueries({ queryKey: ['soccer_session_detail', sessionId] });
+      queryClient.invalidateQueries({ queryKey: ['pr_timeline'] });
+      queryClient.invalidateQueries({ queryKey: ['progress_series'] });
+      queryClient.invalidateQueries({ queryKey: ['max_suggestions'] });
+      queryClient.invalidateQueries({ queryKey: ['acwr'] });
+      queryClient.invalidateQueries({ queryKey: ['cns_budget'] });
     },
   });
 }
