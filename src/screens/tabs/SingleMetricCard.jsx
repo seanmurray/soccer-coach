@@ -11,7 +11,7 @@ import { useSessionStore } from '../../stores/sessionStore';
 //
 // Stored notes format:  `[8.5 mph]`  /  `[105 sec]`  /  `[280 W]`
 // measurementParse picks the first numeric tag for the chart pipeline.
-export function SingleMetricCard({ protocol }) {
+export function SingleMetricCard({ protocol, warning }) {
   const dayType = useSessionStore((s) => s.dayType);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
   const metric = metricFor(protocol.exercise_key);
@@ -48,7 +48,7 @@ export function SingleMetricCard({ protocol }) {
   const displayUnit = metric?.displayUnit ?? metric?.unit ?? '';
 
   return (
-    <div className={styles.protocol}>
+    <div className={`${styles.protocol} ${warning ? styles.notRecommended : ''}`}>
       <div className={styles.head}>
         <div>
           <div className={styles.name}>{protocol.name}</div>
@@ -57,6 +57,7 @@ export function SingleMetricCard({ protocol }) {
       </div>
       <div className={styles.body}>
         <div className={styles.desc}>{protocol.desc}</div>
+        {warning && <div className={styles.warning}>{warning}</div>}
 
         {metric && (
           <>

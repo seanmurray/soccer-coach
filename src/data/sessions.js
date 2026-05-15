@@ -39,72 +39,102 @@ export const SESSIONS = {
       // Soccer-specific conditioning — protocols adapted to user's equipment
       // (no soccer field). Sources: Bangsbo speed-endurance research, Buchheit
       // 30-15 IFT, HIIT Science RSA literature.
+      //
+      // recommendedModes: which readiness tiers this protocol is appropriate for.
+      // Rationale: three dimensions gate each protocol —
+      //   (1) CNS cost: near-max sprint mechanics on a fatigued CNS produce
+      //       compensated movement, not adaptation, and raise injury risk.
+      //   (2) Running load: running creates greater strength/conditioning
+      //       interference than cycling, rowing, or SkiErg; biased out at mod2+.
+      //   (3) Test vs training: the 30-15 IFT is a benchmark; a fatigued result
+      //       is invalid data. Full-readiness only.
       protocols: [
         {
           exercise_key: 'norwegian_4x4',
           name: 'Norwegian 4×4',
           desc: '4 rounds: 4 min @ 85-95% HRmax / 3 min recovery. Gold-standard VO2max protocol — the engine upgrade that lets you sustain second-half output. Treadmill works fine. Same speed all 4 intervals — if rep 4 felt easier than rep 1, push harder next time.',
           rpe: 9, tags: ['cond'], kind: 'norwegian_4x4',
+          recommendedModes: ['full', 'mod1'],
+          notRecommendedReason: 'Running-based conditioning increases strength interference at reduced readiness. Prefer bike, rower, or SkiErg today.',
         },
         {
           exercise_key: 'bangsbo_speed_endurance',
           name: 'Bangsbo Speed Endurance (Production)',
           desc: '6 rounds: 30 sec near-max sprint / 2:30 walk. Bangsbo "production" protocol — builds the anaerobic capacity to repeat hard efforts late in matches. Curved treadmill is ideal; motorized works at 90% of your true sprint speed.',
           rpe: 9, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full'],
+          notRecommendedReason: 'Near-max sprint efforts on a fatigued CNS produce compensated mechanics, not adaptation. Injury risk rises without corresponding benefit.',
         },
         {
           exercise_key: 'thirty_fifteen_ift',
           name: '30-15 Intermittent Fitness Test',
           desc: 'Buchheit 30-15 IFT. 30 sec running / 15 sec walk, treadmill speed increases each stage. Top sustainable stage speed (VIFT) is the soccer-specific aerobic-anaerobic benchmark — used by elite clubs to prescribe HIIT load. Run until you can\'t hold the stage speed for the full 30s.',
           rpe: 10, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full'],
+          notRecommendedReason: 'Benchmark test — a fatigued result is invalid data and won\'t reflect true fitness. A low score today is noise, not signal. Run it fresh.',
         },
         {
           exercise_key: 'treadmill_rsa',
           name: 'Treadmill RSA Intervals',
           desc: '10 rounds: 30 sec sprint / 30 sec walk (1:1 work:rest). Repeat-sprint ability — the single most-trained quality for soccer. Short recovery forces lactate clearance. Same speed all 10 reps.',
           rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1'],
+          notRecommendedReason: 'Running-based RSA at this readiness level risks compensated sprint patterns and adds musculoskeletal load your recovery can\'t absorb. Prefer non-running conditioning today.',
         },
         {
           exercise_key: 'curved_tm_sprint',
           name: 'Curved treadmill sprint intervals',
           desc: '6 rounds: 30 sec sprint / 90 sec walk. Self-propelled — your legs drive it. Closer to overground sprint mechanics than motorized treadmill.',
           rpe: 8, tags: ['cond', 'acc'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1'],
+          notRecommendedReason: 'Running-based conditioning at moderate-to-high fatigue creates more stress than adaptation. Bike or rower provides equivalent metabolic load at lower tissue cost.',
         },
         {
           exercise_key: 'court_sprint_repeats',
           name: 'Court repeat sprints',
           desc: '10 rounds: full court sprint / walk back. Closest you\'ll get to actual match RSA without a pitch. Average sprint time should stay within 5% of your first rep — bigger drop-off = the deconditioning you\'re here to fix.',
           rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+          recommendedModes: ['full'],
+          notRecommendedReason: 'High-impact RSA on fatigued legs compounds musculoskeletal stress. Sprint quality degrades faster than the aerobic benefit justifies — you\'ll just be training compensations.',
         },
         {
           exercise_key: 'skierg_1on2off',
           name: 'SkiErg — 1 min on / 2 min off',
           desc: '5 rounds at 85-90% max effort. Recruits upper body + posterior chain — useful counterweight to lower-body-dominant soccer load. Log the average 500m split.',
           rpe: 8, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1', 'mod2'],
+          notRecommendedReason: 'Interval-intensity work exceeds your recovery capacity at this readiness level. Zone 2 only today.',
         },
         {
           exercise_key: 'rower_500m_repeats',
           name: 'Rower — 500m repeats',
           desc: '4×500m, rest = work time × 1.5. Consistent splits — not faster first, dying last. Best balance of metabolic stress and joint friendliness.',
           rpe: 8, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1', 'mod2'],
+          notRecommendedReason: 'Interval-intensity work exceeds your recovery capacity at this readiness level. Zone 2 only today.',
         },
         {
           exercise_key: 'assault_bike_tabata',
           name: 'Assault bike — tabata',
           desc: '8 rounds: 20 sec all-out / 10 sec rest. 90-100% max output each interval. Highest anaerobic stress per minute of any protocol — use sparingly.',
           rpe: 9, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1', 'mod2'],
+          notRecommendedReason: 'Maximum anaerobic output is contraindicated at this readiness level. If you want to use the bike today, keep it Zone 2.',
         },
         {
           exercise_key: 'bike_court_combo',
           name: 'Bike + court sprint combo',
           desc: '4 rounds: 30s bike sprint + immediately 1 full court sprint. Pre-fatigues the legs before the sprint — trains the late-match scenario where you have to find another gear with tired legs. Log total elapsed time.',
           rpe: 9, tags: ['cond', 'acc'], kind: 'single_metric',
+          recommendedModes: ['full'],
+          notRecommendedReason: 'Pre-fatigued sprinting compounds stress on already-stressed tissue. This protocol requires a fresh neuromuscular system to produce adaptation rather than breakdown.',
         },
         {
           exercise_key: 'treadmill_zone2',
           name: 'Treadmill Zone 2 steady',
           desc: '20-30 min @ 75-80% HRmax. Aerobic base — improves recovery capacity between sprints and total session volume tolerance. Nasal-breathing pace if possible.',
           rpe: 5, tags: ['cond'], kind: 'single_metric',
+          recommendedModes: ['full', 'mod1', 'mod2', 'mod3', 'recovery'],
         },
       ],
     },
@@ -185,8 +215,8 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'build_ups'], plyo: ['box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'walking_lunge_db'] },
     cond: {
       protocols: [
-        { name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR 130-150. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'] },
-        { name: 'SkiErg — easy steady state', desc: '15 min easy. Breathing should be controlled throughout.', rpe: 5, tags: ['cond'] },
+        { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR 130-150. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
+        { exercise_key: 'skierg_1on2off', name: 'SkiErg — easy steady state', desc: '15 min easy. Breathing should be controlled throughout.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
       ],
     },
   },
@@ -202,8 +232,7 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_lunge_db', 'single_leg_hip_thrust'] },
     cond: {
       protocols: [
-        { name: 'Easy bike — active recovery', desc: '15 min very easy cycling. RPE 3-4. This is movement, not conditioning. HR should stay under 120.', rpe: 3, tags: ['cond'] },
-        { name: 'Walking — active recovery', desc: '15-20 min walk. No intensity. Promotes circulation and tissue recovery.', rpe: 2, tags: ['cond'] },
+        { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. HR should stay under 130.', rpe: 3, tags: ['cond'], kind: 'single_metric' },
       ],
     },
   },
@@ -213,7 +242,7 @@ export const SESSIONS = {
     lat: { agility: [], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['the_grappler'] },
     lin: { agility: [], plyo: [], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['single_leg_hip_thrust'] },
-    cond: { protocols: [{ name: 'Easy bike (HR < 130)', desc: '15-20 min light aerobic — recovery flush only.', rpe: 4, tags: ['cond'] }] },
+    cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR < 130. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric' }] },
   },
 };
 

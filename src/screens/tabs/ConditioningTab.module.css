@@ -5,6 +5,21 @@
   overflow: hidden;
 }
 
+.notRecommended {
+  box-shadow: inset 3px 0 0 var(--amber);
+}
+
+.warning {
+  font-size: 13px;
+  color: var(--amber);
+  line-height: 1.5;
+  padding: 9px 12px;
+  background: var(--amber-bg);
+  border: 0.5px solid var(--amber-line);
+  border-radius: var(--r1);
+  margin-bottom: 12px;
+}
+
 .head {
   display: flex;
   align-items: center;

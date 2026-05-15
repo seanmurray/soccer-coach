@@ -17,9 +17,8 @@ import { SingleMetricCard } from './SingleMetricCard';
 export function ConditioningTab() {
   const mode = useSessionStore((s) => s.mode);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
-  const protocols = SESSIONS[mode]?.cond?.protocols ?? SESSIONS.full.cond.protocols;
+  const protocols = SESSIONS.full.cond.protocols;
 
-  // Generic-selection state for non-structured protocols.
   const [selected, setSelected] = useState(() => new Set());
 
   const protocolKey = (p) =>
@@ -58,15 +57,18 @@ export function ConditioningTab() {
       </div>
 
       {protocols.map((p, i) => {
+        const isRecommended = p.recommendedModes?.includes(mode) ?? true;
+        const warning = !isRecommended ? p.notRecommendedReason : null;
+
         if (p.kind === 'norwegian_4x4') {
-          return <Norwegian4x4Card key={p.exercise_key ?? p.name} protocol={p} />;
+          return <Norwegian4x4Card key={p.exercise_key ?? p.name} protocol={p} warning={warning} />;
         }
         if (p.kind === 'single_metric') {
-          return <SingleMetricCard key={p.exercise_key ?? p.name} protocol={p} />;
+          return <SingleMetricCard key={p.exercise_key ?? p.name} protocol={p} warning={warning} />;
         }
         const isSel = selected.has(i);
         return (
-          <div key={p.name} className={styles.protocol}>
+          <div key={p.name} className={`${styles.protocol} ${warning ? styles.notRecommended : ''}`}>
             <div className={styles.head}>
               <div>
                 <div className={styles.name}>{p.name}</div>
@@ -82,6 +84,7 @@ export function ConditioningTab() {
             </div>
             <div className={styles.body}>
               <div className={styles.desc}>{p.desc}</div>
+              {warning && <div className={styles.warning}>{warning}</div>}
             </div>
           </div>
         );
@@ -103,7 +106,7 @@ export function ConditioningTab() {
 // First tag is the primary measurement (avg mph) — measurementParse picks
 // that up so the value flows into the Progress charts under exercise_key
 // = 'norwegian_4x4'.
-function Norwegian4x4Card({ protocol }) {
+function Norwegian4x4Card({ protocol, warning }) {
   const dayType = useSessionStore((s) => s.dayType);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
 
@@ -142,7 +145,7 @@ function Norwegian4x4Card({ protocol }) {
   };
 
   return (
-    <div className={styles.protocol}>
+    <div className={`${styles.protocol} ${warning ? styles.notRecommended : ''}`}>
       <div className={styles.head}>
         <div>
           <div className={styles.name}>{protocol.name}</div>
@@ -151,6 +154,7 @@ function Norwegian4x4Card({ protocol }) {
       </div>
       <div className={styles.body}>
         <div className={styles.desc}>{protocol.desc}</div>
+        {warning && <div className={styles.warning}>{warning}</div>}
 
         <div className={styles.intervalGrid}>
           {[1, 2, 3, 4].map((n, i) => (
