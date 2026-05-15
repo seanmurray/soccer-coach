@@ -2,6 +2,7 @@ import { useState } from 'react';
 import styles from './ConditioningTab.module.css';
 import { metricFor, parseMetricInput, formatMetricValue } from '../../data/conditioningProtocols';
 import { useSessionStore } from '../../stores/sessionStore';
+import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
 
 // Generic single-metric conditioning card. Used for every conditioning
 // protocol except Norwegian 4×4 (which has its own structured per-interval
@@ -93,6 +94,7 @@ export function SingleMetricCard({ protocol, warning }) {
             </button>
           </>
         )}
+        <ExerciseHistoryInline exerciseKey={protocol.exercise_key} kind="conditioning" />
       </div>
     </div>
   );

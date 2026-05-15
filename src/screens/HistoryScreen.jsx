@@ -10,18 +10,7 @@ import { retryDebrief } from '../lib/debrief';
 import { usePRTimeline } from '../hooks/usePRTimeline';
 import { prsForSession } from '../lib/prs';
 import { PRSummaryBadge, PRBadgeList } from '../components/PRBadge';
-
-const DATE_FMT = { weekday: 'short', month: 'short', day: 'numeric' };
-
-const formatDate = (iso) => {
-  if (!iso) return '—';
-  // performed_at is a date column → "YYYY-MM-DD". Building a Date from that
-  // directly produces midnight UTC, which can shift a day in some timezones.
-  // Construct the date manually so the displayed day matches what was logged.
-  const [y, m, d] = iso.split('-').map(Number);
-  const date = new Date(y, (m ?? 1) - 1, d ?? 1);
-  return date.toLocaleDateString(undefined, DATE_FMT);
-};
+import { formatDate } from '../lib/dateFormat';
 
 const modeBadgeClass = (mode) => {
   switch (mode) {

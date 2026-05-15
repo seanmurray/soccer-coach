@@ -1,6 +1,7 @@
 import { ExerciseBlock } from '../../components/ExerciseBlock';
 import { SetTable } from '../../components/SetTable';
 import { FeedbackBlock } from '../../components/FeedbackBlock';
+import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
 import { EX } from '../../data/exercises';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useSwapsStore, applySwap } from '../../stores/swapsStore';
@@ -59,6 +60,7 @@ export function BuildTab() {
         ) : (
           <FeedbackBlock exerciseKey={k} exerciseName={eff.savedName} exerciseType="build" />
         )}
+        <ExerciseHistoryInline exerciseKey={k} kind={useSetTable ? 'sets' : 'feedback'} />
       </ExerciseBlock>
     );
   });

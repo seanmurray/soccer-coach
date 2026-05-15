@@ -1,5 +1,6 @@
 import { ExerciseBlock } from '../../components/ExerciseBlock';
 import { SetTable } from '../../components/SetTable';
+import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
 import { EX } from '../../data/exercises';
 import { useSessionStore } from '../../stores/sessionStore';
 import { useSettingsStore } from '../../stores/settingsStore';
@@ -91,6 +92,7 @@ export function StrengthTab() {
           recOverride={effectiveRec}
           recOverridePresent={recOverridePresent}
         />
+        <ExerciseHistoryInline exerciseKey={k} kind="sets" />
       </ExerciseBlock>
     );
   });

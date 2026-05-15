@@ -6,6 +6,7 @@ import { SESSIONS } from '../../data/sessions';
 import { FRC_FULL } from '../../data/frc';
 import { useSessionStore } from '../../stores/sessionStore';
 import { SingleMetricCard } from './SingleMetricCard';
+import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
 
 // Conditioning protocols: pick 1-2 from the list. Selected protocols get
 // buffered into exercisePerf so we know which ones the user actually did.
@@ -192,6 +193,7 @@ function Norwegian4x4Card({ protocol, warning }) {
         >
           {saved ? 'Logged ✓' : 'Log 4×4 intervals'}
         </button>
+        <ExerciseHistoryInline exerciseKey={protocol.exercise_key} kind="conditioning" />
       </div>
     </div>
   );
