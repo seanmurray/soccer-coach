@@ -8,6 +8,17 @@
 import { create } from 'zustand';
 import { computeMode } from '../lib/periodization';
 
+const WEEK_KEY = 'soccer-coach-week';
+
+function readPersistedWeek() {
+  try {
+    const v = Number(localStorage.getItem(WEEK_KEY));
+    return Number.isFinite(v) && v >= 1 ? v : 1;
+  } catch {
+    return 1;
+  }
+}
+
 const initialReadiness = {
   rec: 72,
   slp: 72,
@@ -64,10 +75,18 @@ export const useSessionStore = create((set, get) => ({
   },
 
   // ── Day + week ──
+  // The week pointer is persisted to localStorage (the rest of this store
+  // stays in-memory by design). Before this it reset to 1 on every reload,
+  // forcing a manual scroll to the right week each session. "Complete Week"
+  // and the WeekBar arrows both write through setWeek.
   dayType: 'acc',     // 'acc' | 'lat' | 'lin' | 'vel' | 'cond'
-  week: 1,
+  week: readPersistedWeek(),
   setDayType: (d) => set({ dayType: d }),
-  setWeek: (w) => set({ week: Math.max(1, w) }),
+  setWeek: (w) => {
+    const week = Math.max(1, w);
+    set({ week });
+    try { localStorage.setItem(WEEK_KEY, String(week)); } catch { /* ignore */ }
+  },
 
   // ── In-flight workout buffers ──
   // Sets buffer: per-set strength/build records waiting to flush to Supabase.

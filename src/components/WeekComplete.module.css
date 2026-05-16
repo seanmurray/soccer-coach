@@ -1,0 +1,128 @@
+.card {
+  background: var(--bg-card);
+  border-radius: var(--r3);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  border-left: 3px solid var(--green);
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: 0.04em;
+  color: var(--t1);
+}
+.phase {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+
+.days {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.day {
+  flex: 1;
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: var(--r2);
+  background: var(--bg-input);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.dayDone { background: var(--green-bg); color: var(--green); }
+.dayCond { opacity: 0.55; }
+
+.completeBtn {
+  width: 100%;
+  height: 46px;
+  border-radius: var(--r2);
+  background: var(--green);
+  color: #0a0a0a;
+  font-family: var(--font-display);
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  transition: transform 0.15s, opacity 0.15s;
+}
+.completeBtn:active { transform: scale(0.98); opacity: 0.9; }
+
+/* ── Sheet extras (shell reuses PostSessionSheet.module.css) ── */
+.checklist {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.checkRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: var(--r2);
+  background: var(--bg-input);
+  font-size: 15px;
+  color: var(--t2);
+}
+.checkDone   { color: var(--green); }
+.checkMissing {
+  color: var(--red);
+  background: var(--red-bg);
+  border: 0.5px solid rgba(255, 69, 58, 0.25);
+}
+
+.blockNote {
+  font-size: 14px;
+  color: var(--red);
+  line-height: 1.5;
+  margin: 8px 0 4px;
+}
+
+.rpePreview {
+  display: flex;
+  gap: 16px;
+  padding: 12px;
+  border-radius: var(--r2);
+  background: var(--bg-input);
+  margin: 4px 0;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--t3);
+}
+.rpePreview strong { color: var(--t1); font-weight: 600; }
+
+.note {
+  width: 100%;
+  min-height: 72px;
+  background: var(--bg-input);
+  border: none;
+  border-radius: var(--r2);
+  padding: 12px;
+  font-size: 15px;
+  color: var(--t1);
+  font-family: inherit;
+  resize: vertical;
+}
+.note:focus { outline: 2px solid var(--green); }
+
+.sectionLabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin: 14px 0 6px;
+}

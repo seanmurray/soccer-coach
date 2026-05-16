@@ -10,6 +10,7 @@ import { retryDebrief } from '../lib/debrief';
 import { usePRTimeline } from '../hooks/usePRTimeline';
 import { prsForSession } from '../lib/prs';
 import { PRSummaryBadge, PRBadgeList } from '../components/PRBadge';
+import { WeekLog } from '../components/WeekComplete';
 import { formatDate } from '../lib/dateFormat';
 
 const modeBadgeClass = (mode) => {
@@ -78,6 +79,7 @@ export function HistoryScreen() {
   return (
     <main className="screen">
       <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
+      <WeekLog />
       {sessions.map((s) => (
         <SessionCard
           key={s.id}
