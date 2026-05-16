@@ -81,6 +81,50 @@ function driftForSet({ targetReps, targetRpe, actualReps, actualWeight, actualRp
   return { drift: roundToPlate(Math.abs(rpeDelta) * 3), why: `RPE ${rpe} vs target ${targetRpe} — small bump` };
 }
 
+// Session-to-session carryover.
+//
+// The intra-session engine resets every session: set 1 = max × phase% ×
+// mode (calcRec), discarding what you actually lifted last time. Classic
+// APRE's distinguishing feature is exactly that carryover. This closes the
+// loop: nudge THIS session's starting weight by how the last session's top
+// working set actually went, relative to its rep/RPE target.
+//
+// We apply the drift to calcRec (this week's correct intensity), NOT to
+// last week's absolute weight — phase%/mode differ week to week, so calcRec
+// stays the source of truth for intensity; the prior session only corrects
+// for a stale stored max. Bounded to ±SEED_CAP_PCT so one anomalous session
+// (a grinder, a sandbagged set) can't run the recommendation away.
+const SEED_CAP_PCT = 0.12;
+
+export function seedBaseRec({ calcRec, prescription, lastTop }) {
+  if (calcRec == null || calcRec <= 0) return calcRec;
+  if (!prescription || !lastTop || lastTop.weight == null) return calcRec;
+
+  const { drift } = driftForSet({
+    targetReps: prescription.reps,
+    targetRpe: prescription.target_rpe ?? 8,
+    actualReps: lastTop.reps,
+    actualWeight: calcRec, // scale bump/drop magnitudes to this week's load
+    actualRpe: lastTop.rpe,
+  });
+  if (!drift) return calcRec;
+
+  const cap = calcRec * SEED_CAP_PCT;
+  const bounded = Math.max(-cap, Math.min(cap, drift));
+  return roundToPlate(calcRec + bounded);
+}
+
+// Pick the top working set from a session's set list: heaviest weight, then
+// most reps at that weight. Returns { weight, reps, rpe } or null.
+export function topSet(sets) {
+  const valid = (sets ?? []).filter((s) => s.actual_weight != null && s.actual_weight > 0);
+  if (!valid.length) return null;
+  const topWeight = Math.max(...valid.map((s) => s.actual_weight));
+  const atTop = valid.filter((s) => s.actual_weight === topWeight);
+  const best = atTop.reduce((a, b) => ((b.actual_reps ?? 0) > (a.actual_reps ?? 0) ? b : a));
+  return { weight: topWeight, reps: best.actual_reps, rpe: best.rpe };
+}
+
 // Compute the next set's recommended weight given baseRec + history.
 //
 // Returns { rec, note }:

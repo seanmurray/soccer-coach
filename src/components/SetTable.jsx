@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { SetRow, SetTableHeader, AdaptNote } from './SetRow';
 import { calcLoad, getPhase } from '../lib/periodization';
-import { computeNextRec } from '../lib/setAdjust';
+import { computeNextRec, seedBaseRec, topSet } from '../lib/setAdjust';
+import { useExerciseHistory } from '../hooks/useExerciseHistory';
 import { useSessionStore } from '../stores/sessionStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useRestTimer } from '../stores/restTimerStore';
@@ -39,12 +40,21 @@ export function SetTable({
   const baseReps = prescription?.reps ?? 5;
   const targetRPE = prescription?.target_rpe ?? 8;
 
+  // Last completed session for this exercise (set-level). Cheap: React Query
+  // dedupes this against the ExerciseHistoryInline query (same key). During
+  // an active session, soccer_sets only holds PAST sessions (current sets are
+  // buffered in the store and flush on finish), so [0] is genuinely last time.
+  const { data: history } = useExerciseHistory(exerciseKey, 'sets');
+  const lastTop = history?.[0] ? topSet(history[0].sets) : null;
+
   // Base recommendation source:
-  //   - if the parent passed an explicit override (swap-aware path), use it
-  //   - otherwise fall back to the original exercise's max × pct
+  //   - swap-aware override path: use the parent's pre-scaled rec untouched
+  //   - otherwise: max × phase% × mode, then seed from last session's top
+  //     working set (bounded carryover — closes the APRE loop)
+  const calcRec = showWeight ? calcLoad(exerciseKey, prescription?.pct, maxes) : 0;
   const baseRec = recOverridePresent
     ? (recOverride ?? null)
-    : (showWeight ? calcLoad(exerciseKey, prescription?.pct, maxes) : 0);
+    : (showWeight ? seedBaseRec({ calcRec, prescription, lastTop }) : 0);
 
   // Per-row state. RPE pre-fills to the target so the user only changes it
   // when the set actually felt different (spec response, item 3).
