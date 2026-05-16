@@ -8,6 +8,21 @@
 // Exercise keys here MUST exist in src/data/exercises.js EX dict — except for
 // the v9 leftover `cable_woodchop` referenced under mod3.lat.build, which is
 // missing from EX. Treat that as a known data bug to resolve in the next pass.
+//
+// ─── HEART-RATE PRESCRIPTIONS ──────────────────────────────────────────────
+// Conditioning HR targets below are absolute bpm, not %HRmax, computed for
+// this athlete (age 44). HRmax basis:
+//   Tanaka 2001   208 − 0.7·age  = 177  (most-validated population formula)
+//   Nes 2013      211 − 0.64·age = 183  (HUNT cohort; better for trained adults)
+//   Fox/Haskell   220 − age      = 176  (underestimates trained masters; not used)
+// Athlete reports ~180 bpm is a hard-but-submaximal effort, so true HRmax is
+// at least ~183. Working HRmax = 185 bpm (just above Nes, consistent with the
+// submaximal-180 data point). Adjust WORKING_HRMAX if a true max is ever tested.
+//
+// Zone table (×185, rounded to nearest 5 for prose):
+//   60% ≈110  65% ≈120  70% ≈130  75% ≈140  80% ≈150
+//   85% ≈157  90% ≈167  95% ≈176  100% =185
+export const WORKING_HRMAX = 185;
 
 export const SESSIONS = {
   full: {
@@ -52,7 +67,7 @@ export const SESSIONS = {
         {
           exercise_key: 'norwegian_4x4',
           name: 'Norwegian 4×4',
-          desc: '4 rounds: 4 min @ 85-95% HRmax / 3 min recovery. Gold-standard VO2max protocol — the engine upgrade that lets you sustain second-half output. Treadmill works fine. Same speed all 4 intervals — if rep 4 felt easier than rep 1, push harder next time.',
+          desc: '4 rounds: 4 min @ 157-176 bpm / 3 min recovery. Gold-standard VO2max protocol — the engine upgrade that lets you sustain second-half output. Treadmill works fine. Same speed all 4 intervals — if rep 4 felt easier than rep 1, push harder next time.',
           rpe: 9, tags: ['cond'], kind: 'norwegian_4x4',
           recommendedModes: ['full', 'mod1'],
           notRecommendedReason: 'Running-based conditioning increases strength interference at reduced readiness. Prefer bike, rower, or SkiErg today.',
@@ -132,7 +147,7 @@ export const SESSIONS = {
         {
           exercise_key: 'treadmill_zone2',
           name: 'Treadmill Zone 2 steady',
-          desc: '20-30 min @ 75-80% HRmax. Aerobic base — improves recovery capacity between sprints and total session volume tolerance. Nasal-breathing pace if possible.',
+          desc: '20-30 min @ 140-150 bpm. Aerobic base — improves recovery capacity between sprints and total session volume tolerance. Nasal-breathing pace if possible.',
           rpe: 5, tags: ['cond'], kind: 'single_metric',
           recommendedModes: ['full', 'mod1', 'mod2', 'mod3', 'recovery'],
         },
@@ -147,7 +162,7 @@ export const SESSIONS = {
     lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps', 'v_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'nordic_curl', 'the_grappler'] },
     lin: { agility: ['pro_shuttle', 'figure_8_drill', 'lat_power_shuffle'], plyo: ['lateral_bounds'], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips', 'alternating_bounds', 'build_ups'], plyo: ['sl_broad_jump', 'box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'single_leg_hip_thrust'] },
-    cond: { protocols: [{ name: 'Easy bike or court jog', desc: '20 min at RPE 5-6 — aerobic flush. HR 130-150.', rpe: 5, tags: ['cond'] }] },
+    cond: { protocols: [{ name: 'Easy bike or court jog', desc: '20 min at RPE 5-6 — aerobic flush. HR ~120-140 bpm.', rpe: 5, tags: ['cond'] }] },
   },
 
   // mod1: minor fatigue — same exercise selection as full, trim 1 set from
@@ -182,7 +197,7 @@ export const SESSIONS = {
         {
           exercise_key: 'norwegian_4x4',
           name: 'Norwegian 4×4 (capped intent)',
-          desc: '4 rounds: 4 min @ 80-85% HRmax / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.',
+          desc: '4 rounds: 4 min @ 148-157 bpm / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.',
           rpe: 7.5, tags: ['cond'], kind: 'norwegian_4x4',
         },
         {
@@ -215,7 +230,7 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'build_ups'], plyo: ['box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'walking_lunge_db'] },
     cond: {
       protocols: [
-        { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR 130-150. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
+        { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR ~120-140 bpm. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
         { exercise_key: 'skierg_1on2off', name: 'SkiErg — easy steady state', desc: '15 min easy. Breathing should be controlled throughout.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
       ],
     },
@@ -232,7 +247,7 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_lunge_db', 'single_leg_hip_thrust'] },
     cond: {
       protocols: [
-        { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. HR should stay under 130.', rpe: 3, tags: ['cond'], kind: 'single_metric' },
+        { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. Keep HR under ~115 bpm.', rpe: 3, tags: ['cond'], kind: 'single_metric' },
       ],
     },
   },
@@ -242,7 +257,7 @@ export const SESSIONS = {
     lat: { agility: [], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['the_grappler'] },
     lin: { agility: [], plyo: [], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['single_leg_hip_thrust'] },
-    cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR < 130. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric' }] },
+    cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR under ~110 bpm. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric' }] },
   },
 };
 
@@ -267,21 +282,21 @@ export const MODE_INSIGHTS = {
     lat:  'Core lateral work only — shuffle and one cutting drill. One plyo. BSQ at –25% — maintain tempo and form but do not push into high RPE territory. McGill: do not load a system already under stress.',
     lin:  'Two agility drills. One plyo set. Strength at –25%. Use today to practice mechanics, not chase load.',
     vel:  'A/B skips and build-ups only — mechanics work. Box jump stays as single plyo (sub-max effort). Trap bar at –25%.',
-    cond: 'Zone 2 aerobic work only. 20 min max. HR 130-150. This is an aerobic flush — supports recovery rather than creating new training stress. No sprint intervals at this readiness level.',
+    cond: 'Zone 2 aerobic work only. 20 min max. HR ~120-140 bpm. This is an aerobic flush — supports recovery rather than creating new training stress. No sprint intervals at this readiness level.',
   },
   mod3: {
     acc:  'High fatigue — tissue stress elevated. Mechanics work only: A/B skips, wall starts. Pogo jumps for lower leg stiffness — low CNS cost. Strength at 55%: motor pattern maintenance, not training stimulus. McGill: loading a fatigued system creates injury risk without corresponding adaptation.',
     lat:  'Pogo jumps and light skaters — no max landing demand. Shuffle only. BSQ at 55% — 3 sets, technique focus. Single rotation build exercise.',
     lin:  'Mechanics skips only. Pogo jumps. Bench at 55%. Your job today is to show up and move — not to train.',
     vel:  'High knee run and A/B skips. Pogo jumps. Trap bar at 55% — hip hinge pattern maintenance only. SBS data: strength maintenance requires only ~30-40% of the volume needed to build it.',
-    cond: 'Active recovery movement only. Easy bike at RPE 3-4 or a walk. The goal is circulation and tissue recovery, not a training effect. HR under 120.',
+    cond: 'Active recovery movement only. Easy bike at RPE 3-4 or a walk. The goal is circulation and tissue recovery, not a training effect. Keep HR under ~115 bpm.',
   },
   recovery: {
     acc:  'Active recovery. Light skip work for mechanics, very light lifting. 30 min max. Nothing that creates new DOMS.',
     lat:  'Pogo jumps and bodyweight skaters at low intensity. Hip mobility module strongly recommended today.',
     lin:  'Skip agility. Light rotation work and core. Back prehab module ideal.',
     vel:  'A/B skips for mechanics — not speed. Light trap bar for hip hinge pattern only.',
-    cond: 'Easy bike Zone 2 only. 15 min. No intervals, no sprints, no elevated HR.',
+    cond: 'Easy bike Zone 2 only. 15 min. No intervals, no sprints — keep HR under ~110 bpm.',
   },
 };
 
