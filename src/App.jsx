@@ -10,6 +10,7 @@ import { SettingsScreen } from './screens/SettingsScreen';
 import { RestTimer } from './components/RestTimer';
 import { ModuleSheet } from './components/ModuleSheet';
 import { PostSessionSheet } from './components/PostSessionSheet';
+import { ReadinessBaselineSync } from './components/ReadinessBaselineSync';
 import { useSessionStore } from './stores/sessionStore';
 import { useSwapsStore } from './stores/swapsStore';
 import { useUpgradesStore } from './stores/upgradesStore';
@@ -87,6 +88,8 @@ export default function App() {
     queryClient.invalidateQueries({ queryKey: ['max_suggestions'] });
     queryClient.invalidateQueries({ queryKey: ['acwr'] });
     queryClient.invalidateQueries({ queryKey: ['cns_budget'] });
+    queryClient.invalidateQueries({ queryKey: ['sprint_exposure'] });
+    queryClient.invalidateQueries({ queryKey: ['readiness_baseline'] });
 
     // Fire the debrief in the background — non-blocking. When it returns
     // it updates ai_debrief on the row and invalidates queries again so
@@ -110,6 +113,7 @@ export default function App() {
   // (warmup/agility/etc.) keep their state.
   return (
     <QueryClientProvider client={queryClient}>
+      <ReadinessBaselineSync />
       <div hidden={tab !== 'today'}>
         <TodayScreen onStartSession={handleStart} onOpenModule={(i) => setModuleIndex(i)} />
       </div>

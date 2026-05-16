@@ -190,27 +190,56 @@ export function tempoExplain(tempo) {
 // thresholds sensitive. We add a small safety: when no objective inputs are
 // present at all, cap the mode at mod1 so we never recommend a "full" session
 // on pure subjective feel.
+//
+// HRV-TREND (2nd arg `baseline`): the autonomic markers — battery & stress
+// from Athlytic — mean more as a deviation from YOUR rolling norm than as
+// absolute numbers (the HRV-monitoring evidence: rolling baseline + CV beats
+// isolated readings). When a baseline { battery:{mean,sd}, stress:{mean,sd} }
+// is supplied and the SD is large enough to trust, battery/stress are scored
+// by how far today sits from your personal mean (±1 SD ≈ ±20 pts around the
+// 50 midpoint) instead of by their raw value. rec/slp/body/mot keep absolute
+// scoring. No baseline (or too-flat history) → original absolute behavior.
 
-const READINESS_WEIGHTS = {
-  battery:  { weight: 28, normalize: (v) => v },                         // 0-100 → 0-100
-  stress:   { weight: 12, normalize: (v) => Math.max(0, ((60 - v) / 60) * 100) }, // 0-60 → inverted 0-100
-  rec:      { weight: 25, normalize: (v) => v },                         // 0-100
-  slp:      { weight: 18, normalize: (v) => v },                         // 0-100
-  body:     { weight: 10, normalize: (v) => (v / 5) * 100 },             // 1-5 → 0-100
-  mot:      { weight: 7,  normalize: (v) => (v / 5) * 100 },             // 1-5 → 0-100
+const WEIGHTS = { battery: 28, stress: 12, rec: 25, slp: 18, body: 10, mot: 7 };
+
+const ABS_NORMALIZE = {
+  battery: (v) => v,                                  // 0-100 → 0-100
+  stress:  (v) => Math.max(0, ((60 - v) / 60) * 100), // 0-60 → inverted 0-100
+  rec:     (v) => v,                                  // 0-100
+  slp:     (v) => v,                                  // 0-100
+  body:    (v) => (v / 5) * 100,                      // 1-5 → 0-100
+  mot:     (v) => (v / 5) * 100,                      // 1-5 → 0-100
 };
+
+// SD floor below which the personal history is too flat to derive a
+// meaningful z-score — fall back to absolute scoring for that metric.
+const MIN_SD = { battery: 3, stress: 2 };
+const DEV_SLOPE = 20; // 1 SD from personal norm = ±20 pts around the 50 midpoint
+
+function normalizeReadiness(key, v, baseline) {
+  const b = baseline?.[key];
+  if ((key === 'battery' || key === 'stress') && b) {
+    const { mean, sd } = b;
+    if (Number.isFinite(mean) && Number.isFinite(sd) && sd >= MIN_SD[key]) {
+      const z = (v - mean) / sd;
+      const signed = key === 'stress' ? -z : z; // higher stress = worse
+      return Math.max(0, Math.min(100, 50 + signed * DEV_SLOPE));
+    }
+  }
+  return ABS_NORMALIZE[key](v);
+}
 
 const OBJECTIVE_KEYS = ['battery', 'stress', 'rec', 'slp'];
 
-export function computeMode(inputs) {
+export function computeMode(inputs, baseline = null) {
   let weightedSum = 0;
   let weightTotal = 0;
   let presentObjective = 0;
 
-  for (const [key, { weight, normalize }] of Object.entries(READINESS_WEIGHTS)) {
+  for (const [key, weight] of Object.entries(WEIGHTS)) {
     const v = inputs[key];
     if (v == null) continue;
-    weightedSum += normalize(v) * weight;
+    weightedSum += normalizeReadiness(key, v, baseline) * weight;
     weightTotal += weight;
     if (OBJECTIVE_KEYS.includes(key)) presentObjective += 1;
   }

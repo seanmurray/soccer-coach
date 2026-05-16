@@ -25,6 +25,10 @@ export const useSessionStore = create((set, get) => ({
   // field so toggling exclude → include restores what the user last set.
   ...initialReadiness,
   _readinessLast: { ...initialReadiness },
+  // Rolling personal baseline for battery/stress, pushed in from
+  // useReadinessBaseline via <ReadinessBaselineSync>. null until it loads
+  // (and on a fresh account) → computeMode uses absolute scoring.
+  _readinessBaseline: null,
   mode: 'full',
   score: 0,
 
@@ -35,7 +39,14 @@ export const useSessionStore = create((set, get) => ({
     }
     set(patch);
     const s = get();
-    const { mode, score } = computeMode(s);
+    const { mode, score } = computeMode(s, s._readinessBaseline);
+    set({ mode, score });
+  },
+
+  setReadinessBaseline: (baseline) => {
+    set({ _readinessBaseline: baseline });
+    const s = get();
+    const { mode, score } = computeMode(s, baseline);
     set({ mode, score });
   },
 
