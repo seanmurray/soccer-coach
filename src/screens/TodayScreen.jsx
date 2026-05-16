@@ -10,6 +10,7 @@ import { WeekBar } from '../components/WeekBar';
 import { MaxSuggestion } from '../components/MaxSuggestion';
 import { ACWRCard } from '../components/ACWRCard';
 import { CNSBudgetCard } from '../components/CNSBudgetCard';
+import { SprintExposureCard } from '../components/SprintExposureCard';
 import { useSessionStore } from '../stores/sessionStore';
 import { MODE_INSIGHTS } from '../data/sessions';
 
@@ -46,6 +47,7 @@ export function TodayScreen({ onStartSession, onOpenModule }) {
           recent set history. */}
       <ACWRCard />
       <CNSBudgetCard />
+      <SprintExposureCard />
       <MaxSuggestion />
 
       <ReadinessSliders />

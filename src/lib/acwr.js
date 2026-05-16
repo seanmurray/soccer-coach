@@ -1,8 +1,14 @@
 // Acute-to-chronic workload ratio.
 //
-// REFERENCE: Gabbett 2016 — running 7d:28d ratio of sessional load. Best-
-// validated injury-risk predictor in team sport. "Sweet spot" 0.8-1.3; >1.5
-// flags a sharp ramp; <0.5 flags significant detraining.
+// REFERENCE: Gabbett 2016 — running 7d:28d ratio of sessional load.
+//
+// IMPORTANT — interpret as a trend signal, NOT an injury oracle. A 2025
+// systematic review + a 10-month RCT found ACWR-based load management
+// produced no injury reduction, and that the ratio "magnifies the effect
+// of acute workload without adding meaningful predictive value" (noise,
+// spurious correlation). So: we lead with ABSOLUTE weekly load and a
+// rising/steady/easing trend; the ratio is shown as secondary context
+// with deliberately descriptive (not risk-scored) language.
 //
 // LOAD MODEL: Foster session-RPE × duration in minutes (classic sRPE).
 //   load = session_rpe × duration_min
@@ -68,12 +74,18 @@ export function computeACWR(sessions, now = Date.now()) {
   const chronicWeekly = chronic / 4;
   let ratio = null;
   let zone = 'idle';
+  let trend = 'steady';
   if (samples >= 2 && chronicWeekly > 0) {
     ratio = acute / chronicWeekly;
     if (ratio < 0.5) zone = 'low';
     else if (ratio <= 1.3) zone = 'ok';
     else if (ratio <= 1.5) zone = 'caution';
     else zone = 'high';
+
+    // Absolute-load trend: this week vs the 4-week weekly average.
+    if (acute > chronicWeekly * 1.1) trend = 'rising';
+    else if (acute < chronicWeekly * 0.9) trend = 'easing';
+    else trend = 'steady';
   }
 
   return {
@@ -82,24 +94,36 @@ export function computeACWR(sessions, now = Date.now()) {
     chronicWeekly: Math.round(chronicWeekly),
     ratio: ratio == null ? null : Math.round(ratio * 100) / 100,
     zone,
+    trend,
     samples,
   };
 }
 
-// Short narrative + the action it suggests.
+// Descriptive narrative — trend language, not risk scoring. The ratio is
+// reported as context, not as a safety verdict (see header note).
 export function acwrNarrative(zone, ratio) {
   switch (zone) {
     case 'idle':
-      return { headline: 'Not enough data yet', text: 'Log a few sessions to see your training load trend.' };
+      return { headline: 'Not enough data yet', text: 'Log a few sessions to see your training-load trend.' };
     case 'low':
-      return { headline: 'Undertrained', text: `Load is ${ratio?.toFixed(2)}× recent average. Push if readiness permits — you have headroom.` };
+      return { headline: 'Light week', text: `This week is running about ${ratio?.toFixed(2)}× your 4-week average — well below your norm. Fine if it's a deload; otherwise you have headroom to push.` };
     case 'ok':
-      return { headline: 'Safe range', text: `Load is ${ratio?.toFixed(2)}× recent average — sweet spot for adaptation without injury risk.` };
+      return { headline: 'Steady', text: `This week tracks close to your 4-week average (${ratio?.toFixed(2)}×). Load is consistent — keep building.` };
     case 'caution':
-      return { headline: 'Ramping fast', text: `Load is ${ratio?.toFixed(2)}× recent average. Approaching the high-risk threshold — finish the week as planned, then deload.` };
+      return { headline: 'Climbing', text: `This week is ${ratio?.toFixed(2)}× your 4-week average — a noticeable jump. Not an injury verdict (the ratio isn't a reliable predictor), but a sharp ramp is worth a lighter day before pushing on.` };
     case 'high':
-      return { headline: 'High risk', text: `Load is ${ratio?.toFixed(2)}× recent average. Above 1.5× is when injuries spike — bias toward recovery today.` };
+      return { headline: 'Sharp ramp', text: `This week is ${ratio?.toFixed(2)}× your 4-week average — a steep increase. The ratio alone doesn't predict injury, but a jump this size usually means recent absolute load is worth easing for a session or two.` };
     default:
       return { headline: '', text: '' };
   }
+}
+
+const TREND_LABEL = {
+  rising: 'load rising vs 4-wk avg',
+  steady: 'load steady vs 4-wk avg',
+  easing: 'load easing vs 4-wk avg',
+};
+
+export function acwrTrendLabel(trend) {
+  return TREND_LABEL[trend] ?? TREND_LABEL.steady;
 }
