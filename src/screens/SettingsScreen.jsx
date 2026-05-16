@@ -4,6 +4,22 @@ import { MAXES_CONFIG } from '../data/exercises';
 import { DAY_TYPE_INFO } from '../data/sessions';
 import { useSettingsStore } from '../stores/settingsStore';
 
+const SEASONS = [
+  { key: 'off',     label: 'Off' },
+  { key: 'pre',     label: 'Pre' },
+  { key: 'in',      label: 'In' },
+  { key: 'playoff', label: 'Playoff' },
+];
+
+// Strength volume only — intensity (load) is preserved across all phases,
+// per the maintenance principle (cut volume, not load, in-season).
+const SEASON_HINT = {
+  off: 'Off-season — full build volume. The window to add strength.',
+  pre: 'Pre-season — program as authored (baseline volume).',
+  in:  'In-season — strength sets cut ~40%, load preserved. Maintains strength while leaving CNS headroom for matches.',
+  playoff: 'Playoff — minimal maintenance dose (sets ~halved), load preserved. Stay fresh.',
+};
+
 export function SettingsScreen() {
   const maxes      = useSettingsStore((s) => s.maxes);
   const setMax     = useSettingsStore((s) => s.setMax);
@@ -12,6 +28,8 @@ export function SettingsScreen() {
   const resetDayOrder = useSettingsStore((s) => s.resetDayOrder);
   const timerPrefs   = useSettingsStore((s) => s.timerPrefs);
   const setTimerPref = useSettingsStore((s) => s.setTimerPref);
+  const season       = useSettingsStore((s) => s.season);
+  const setSeason    = useSettingsStore((s) => s.setSeason);
 
   const moveDay = (idx, dir) => {
     const next = [...dayOrder];
@@ -54,6 +72,21 @@ export function SettingsScreen() {
       <div className={common.btnRow} style={{ marginBottom: 16 }}>
         <button type="button" className={common.ctaSecondary} onClick={resetDayOrder}>Reset</button>
       </div>
+
+      <div className={common.sectionLabel}>Season</div>
+      <div className={styles.segmented}>
+        {SEASONS.map((s) => (
+          <button
+            key={s.key}
+            type="button"
+            className={`${styles.segment} ${season === s.key ? styles.active : ''}`}
+            onClick={() => setSeason(s.key)}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <div className={styles.seasonHint}>{SEASON_HINT[season] ?? ''}</div>
 
       <div className={common.sectionLabel}>Rest Timer</div>
       <div className={styles.group}>

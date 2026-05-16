@@ -14,6 +14,7 @@ export function StrengthTab() {
   const mode = useSessionStore((s) => s.mode);
   const week = useSessionStore((s) => s.week);
   const maxes = useSettingsStore((s) => s.maxes);
+  const season = useSettingsStore((s) => s.season);
   const setSwap = useSwapsStore((s) => s.setSwap);
   const activeSwaps = useSwapsStore((s) => s.active);
 
@@ -32,7 +33,7 @@ export function StrengthTab() {
     const ex = EX[k];
     if (!ex) return null;
 
-    const prx = getStrengthPrescription(k, week, mode);
+    const prx = getStrengthPrescription(k, week, mode, season);
     const rec = calcLoad(k, prx.pct, maxes);
     const target = `${prx.sets}×${prx.reps} @ ${Math.round(prx.pct * 100)}%`;
 

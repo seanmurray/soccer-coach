@@ -78,6 +78,18 @@ const PHASE_RECIPE = {
 // recovery — active recovery, 40-50%
 const MODE_MULT = { full: 1.00, mod1: 0.85, mod2: 0.75, mod3: 0.55, recovery: 0.45 };
 
+// Season volume scaling — applied to SET COUNT only; intensity (pct) is
+// deliberately preserved. The strength-maintenance principle: strength is
+// held with roughly a third of the volume that built it, so in-season you
+// cut volume, not load. 'pre' is the no-op baseline (the program is authored
+// for pre-season). Sets are floored at 2 so nothing collapses to a single
+// working set.
+//   off     — full build volume (off-season is the window to add)
+//   pre     — as-authored baseline
+//   in      — ~40% volume cut, maintain intensity + CNS headroom
+//   playoff — minimal maintenance dose
+const SEASON_VOLUME = { off: 1.0, pre: 1.0, in: 0.6, playoff: 0.5 };
+
 // ─── PHASE LOOKUP ──────────────────────────────────────────
 // Returns { phase, weekInPhase, weekInMeso, isDeload, mesoIndex, label }.
 //   phase       — 'accumulation' | 'transmutation' | 'realization' | 'deload'
@@ -109,7 +121,9 @@ export const getPhaseLabel = (week) => getPhaseInfo(week).label;
 
 // ─── STRENGTH PRESCRIPTION ─────────────────────────────────
 // Returns { sets, reps, pct, tempo, note, contrast?, target_rpe }.
-export function getStrengthPrescription(exKey, week, mode) {
+// `season` ('off'|'pre'|'in'|'playoff') scales set count only; defaults to
+// 'pre' (no-op) so existing callers are unaffected.
+export function getStrengthPrescription(exKey, week, mode, season = 'pre') {
   const info = getPhaseInfo(week);
   const recipe = PHASE_RECIPE[info.phase];
 
@@ -123,8 +137,11 @@ export function getStrengthPrescription(exKey, week, mode) {
   const pct = Math.round(recipe.basePct[key] * stepMult * modeMult * 100) / 100;
   const target_rpe = deriveTargetRpe(info.phase, mode, info.weekInPhase);
 
+  const seasonMult = SEASON_VOLUME[season] ?? 1;
+  const sets = Math.max(2, Math.round(recipe.sets * seasonMult));
+
   const out = {
-    sets: recipe.sets,
+    sets,
     reps: recipe.reps,
     pct,
     tempo: recipe.tempo[key],

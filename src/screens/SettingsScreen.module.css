@@ -57,6 +57,33 @@
 .dayBtn:active   { background: var(--bg-raised); }
 .dayBtn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.segment {
+  padding: 12px 4px;
+  border-radius: var(--r2);
+  background: var(--bg-card);
+  color: var(--t3);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  min-height: var(--tap-min);
+  transition: background 0.15s, color 0.15s;
+}
+.segment.active { background: var(--green); color: #0a0a0a; }
+
+.seasonHint {
+  font-size: 14px;
+  color: var(--t2);
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
 .group {
   background: var(--bg-card);
   border-radius: var(--r3);

@@ -28,6 +28,12 @@ export const useSettingsStore = create(
       setDayOrder: (order) => set({ dayOrder: order }),
       resetDayOrder: () => set({ dayOrder: [...DEFAULT_DAY_ORDER] }),
 
+      // Season phase — scales strength volume (sets), intensity preserved.
+      // 'off' | 'pre' | 'in' | 'playoff'. The program is authored for
+      // pre-season; 'pre' is the no-op baseline.
+      season: 'pre',
+      setSeason: (season) => set({ season }),
+
       // Rest timer prefs
       timerPrefs: initialTimerPrefs,
       setTimerPref: (key, value) =>
