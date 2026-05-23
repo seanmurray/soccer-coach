@@ -1,9 +1,16 @@
 # iOS Shortcut — push a HealthKit workout into the app
 
 Edge function `push-workout` accepts a workout summary from an iOS Shortcut
-and writes a row to `soccer_workouts`. Once configured, this captures both
-Apple Watch sessions and Technogym workouts (via the Mywellness → Apple
-Health bridge), and surfaces them on Today.
+and writes a row to `soccer_workouts`. Once configured, this captures Apple
+Watch sessions automatically — including Technogym treadmill sessions when
+you tap your watch to the console (Apple GymKit) — and surfaces them on
+Today.
+
+The Mywellness phone app is **not** required. When the watch is paired to
+a Technogym Live/MyRun/Excite/Skillrun console via GymKit, the treadmill's
+calibrated speed / distance / incline / heart rate flow through the watch
+and land in Apple Health on workout end. The Shortcut just reads from
+Apple Health.
 
 Mirrors the existing `push-biometrics` setup — same `x-api-key` auth, same
 `SHORTCUTS_API_KEY` env var on the function.
@@ -58,20 +65,24 @@ extra you send isn't lost.
 }
 ```
 
-### Example — Technogym treadmill (via Mywellness → Apple Health bridge)
+### Example — Technogym treadmill via Apple GymKit (watch tap)
 
-Same payload shape; just label `workout_type: "treadmill"`. If Mywellness's
-Apple Health export writes a generic "running" type, that's fine too — the
-ingest doesn't care about exact labels.
+Same payload shape. When the watch is paired to the treadmill via GymKit,
+Apple Health records the workout type as whatever the treadmill reports
+(usually `running` or `walking`) — distance and pace are the treadmill's
+calibrated values, not the watch's estimate. The ingest doesn't care about
+exact labels.
 
 ---
 
 ## Setting up the Shortcut
 
-1. **Enable the Mywellness → Apple Health bridge.**
-   - In the Mywellness iOS app: Settings → Apple Health → enable workout
-     sync. After this, Technogym treadmill sessions land in Apple Health
-     and behave like any other workout.
+1. **For Technogym treadmills: tap your watch to the console** at the start
+   of each session. Apple GymKit pairs the watch and treadmill; on workout
+   end, the calibrated treadmill data + watch HR land in Apple Health
+   automatically. No Mywellness app, no extra setup. (Most modern
+   Technogym consoles — MyRun, Excite, Skillrun, Run Personal — support
+   GymKit; look for the small Apple Watch icon on the screen.)
 
 2. **Create the Shortcut.** In the Shortcuts app on iPhone:
 
@@ -100,6 +111,24 @@ ingest doesn't care about exact labels.
 3. **Automate it.** In Shortcuts → Automation → Create Personal Automation
    → **Workout** → "When ending a workout" → "Run Immediately". Run the
    Shortcut you just built.
+
+---
+
+## What if I don't have my watch / GymKit isn't an option?
+
+A few fallbacks, none of which are wired up by default:
+
+- **Mywellness Cloud API (server-side)** — Technogym exposes a Cloud API
+  for workout history (OAuth2, requires developer credentials). Would be
+  built as a separate `fetch-mywellness` edge function on a cron schedule.
+  More moving parts, but doesn't need the watch or any phone app.
+- **CSV import from the Mywellness web UI** — if you can export workout
+  history from the desktop site, a small import path could parse and
+  insert into `soccer_workouts`.
+- **Manual entry** — the conditioning duration field already exists for
+  variable-prescription protocols.
+
+Tell me if you want either of the first two and I'll build it.
 
 After the next workout ends, you'll see it on the Today screen in the
 **Recent workouts** card within a minute.
