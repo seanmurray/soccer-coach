@@ -11,6 +11,7 @@ import { MaxSuggestion } from '../components/MaxSuggestion';
 import { ACWRCard } from '../components/ACWRCard';
 import { CNSBudgetCard } from '../components/CNSBudgetCard';
 import { SprintExposureCard } from '../components/SprintExposureCard';
+import { RecentWorkoutsCard } from '../components/RecentWorkoutsCard';
 import { MastersSpacingWarning } from '../components/MastersSpacingWarning';
 import { WeekComplete } from '../components/WeekComplete';
 import { useSessionStore } from '../stores/sessionStore';
@@ -52,6 +53,7 @@ export function TodayScreen({ onStartSession, onOpenModule }) {
       <ACWRCard />
       <CNSBudgetCard />
       <SprintExposureCard />
+      <RecentWorkoutsCard />
       <MaxSuggestion />
 
       <ReadinessSliders />
