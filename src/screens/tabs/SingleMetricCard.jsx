@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import styles from './ConditioningTab.module.css';
-import { metricFor, parseMetricInput, formatMetricValue } from '../../data/conditioningProtocols';
+import { metricFor, parseMetricInput, formatMetricValue, VAR_DURATION_KEYS, DURATION_HINT } from '../../data/conditioningProtocols';
 import { useSessionStore } from '../../stores/sessionStore';
 import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
 
@@ -18,6 +18,7 @@ export function SingleMetricCard({ protocol, warning }) {
   const metric = metricFor(protocol.exercise_key);
 
   const [raw, setRaw] = useState('');
+  const [durationRaw, setDurationRaw] = useState('');
   const [saved, setSaved] = useState(false);
 
   // Empty input → null; bad input → null. Parsed → number (decimal seconds
@@ -25,8 +26,24 @@ export function SingleMetricCard({ protocol, warning }) {
   const parsed = metric ? parseMetricInput(raw, metric) : null;
   const canLog = parsed != null && parsed > 0;
 
+  // Variable-prescription protocols (Zone 2, Bangsbo, IFT, bike+court) ask
+  // for an optional duration in minutes — pace tells us intensity, duration
+  // is the dose. Fixed-prescription protocols don't need it.
+  const wantsDuration = VAR_DURATION_KEYS.has(protocol.exercise_key);
+  const durationMin = (() => {
+    if (!wantsDuration || durationRaw === '') return null;
+    const n = Number(durationRaw);
+    return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+  })();
+
   const onLog = () => {
     if (!canLog) return;
+    // Encode duration as a second tag inside the same bracket so
+    // parseMeasurement still finds the metric tag as the first numeric value.
+    //   "[8.5 mph]"           — no duration
+    //   "[8.5 mph · 25 min]"  — with duration
+    const tags = [`${parsed} ${metric.unit.toLowerCase()}`];
+    if (durationMin != null) tags.push(`${durationMin} min`);
     pushPerf({
       exercise_key: protocol.exercise_key,
       exercise_name: protocol.name,
@@ -35,9 +52,7 @@ export function SingleMetricCard({ protocol, warning }) {
       quality: null,
       effort_rpe: protocol.rpe,
       ease: null,
-      // unit stored in lowercase — parser & display reconcile via the
-      // metric def's displayUnit.
-      notes: `[${parsed} ${metric.unit.toLowerCase()}]`,
+      notes: `[${tags.join(' · ')}]`,
       performed_at: new Date().toISOString(),
     });
     setSaved(true);
@@ -81,6 +96,24 @@ export function SingleMetricCard({ protocol, warning }) {
             {parsed != null && metric.inputMode === 'pace' && (
               <div className={styles.metricHint}>
                 = {formatMetricValue(parsed, metric)} ({parsed} sec)
+              </div>
+            )}
+
+            {wantsDuration && (
+              <div className={styles.metricRow}>
+                <div className={styles.metricLabel}>Duration (optional)</div>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  step="1"
+                  min="1"
+                  max="120"
+                  placeholder={DURATION_HINT[protocol.exercise_key] ?? '20'}
+                  className={styles.metricInput}
+                  value={durationRaw}
+                  onChange={(e) => { setDurationRaw(e.target.value); setSaved(false); }}
+                />
+                <div className={styles.metricUnit}>min</div>
               </div>
             )}
 

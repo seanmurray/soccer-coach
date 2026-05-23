@@ -1,7 +1,7 @@
 import styles from './ExerciseHistoryInline.module.css';
 import { useExerciseHistory } from '../hooks/useExerciseHistory';
 import { formatDate } from '../lib/dateFormat';
-import { parseMeasurement } from '../lib/measurementParse';
+import { parseMeasurement, parseDurationMin } from '../lib/measurementParse';
 import { metricFor, formatMetricValue } from '../data/conditioningProtocols';
 
 // Inline "Recent" block — last 3 sessions of one exercise.
@@ -70,6 +70,7 @@ function summarizeFeedback(row) {
 function summarizeConditioning(row, exerciseKey) {
   const parsed = parseMeasurement(row.notes);
   const metric = metricFor(exerciseKey);
+  const durationMin = parseDurationMin(row.notes);
 
   let measurement = null;
   if (parsed) {
@@ -82,6 +83,7 @@ function summarizeConditioning(row, exerciseKey) {
   }
 
   const parts = [];
+  if (durationMin != null) parts.push(`${durationMin} min`);
   if (measurement) parts.push(measurement);
   if (row.effortRpe != null) parts.push(`RPE ${row.effortRpe}`);
   return parts.length ? parts.join(' · ') : '—';

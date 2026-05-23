@@ -34,6 +34,25 @@ const toDateString = (input) => {
   return d.toISOString().slice(0, 10); // YYYY-MM-DD
 };
 
+// Defensive normalize: every persisted day_type must be one of these codes.
+// Catches any future writer that hands in a display label like 'Acceleration'
+// (we had three legacy rows from a pre-refactor path that did this — fixed
+// in-place, but this guard stops it from coming back).
+const DAY_CODES = ['acc', 'lat', 'lin', 'vel', 'cond'];
+const LABEL_TO_CODE = {
+  Acceleration: 'acc',
+  'Lateral COD': 'lat',
+  'Linear Agility': 'lin',
+  'Max Velocity': 'vel',
+  Conditioning: 'cond',
+};
+const normalizeDayType = (d) => {
+  if (!d) return d;
+  if (DAY_CODES.includes(d)) return d;
+  const code = LABEL_TO_CODE[d] ?? d.toString().toLowerCase().slice(0, 3);
+  return DAY_CODES.includes(code) ? code : d;
+};
+
 export async function saveSession({
   // Readiness inputs at session time
   rec, slp, body, mot, battery, stress,
@@ -61,10 +80,11 @@ export async function saveSession({
 
   const performedAt = toDateString(sessionStartedAt);
   const phase = getPhase(week);
+  const dayTypeCode = normalizeDayType(dayType);
 
   const headerRow = {
     performed_at: performedAt,
-    day_type: dayType,
+    day_type: dayTypeCode,
     week_num: week,
     mode,
     recovery_pct: rec,
@@ -108,7 +128,7 @@ export async function saveSession({
     const setsRows = setsBuffer.map((s) => ({
       session_id: sessionId,
       performed_at: toDateString(s.performed_at ?? performedAt),
-      day_type: s.day_type ?? dayType,
+      day_type: normalizeDayType(s.day_type ?? dayTypeCode),
       week_num: s.week_num ?? week,
       exercise_key: s.exercise_key,
       exercise_name: s.exercise_name,
@@ -129,7 +149,7 @@ export async function saveSession({
     const perfRows = exercisePerfBuffer.map((p) => ({
       session_id: sessionId,
       performed_at: toDateString(p.performed_at ?? performedAt),
-      day_type: p.day_type ?? dayType,
+      day_type: normalizeDayType(p.day_type ?? dayTypeCode),
       week_num: p.week_num ?? week,
       phase: p.phase ?? phase,
       mode: p.mode ?? mode,
@@ -163,7 +183,7 @@ export async function saveSession({
   }
 
   // Mirror to localStorage for the conditioning interference banner.
-  try { localStorage.setItem(LAST_DAY_KEY, dayType); } catch { /* ignore */ }
+  try { localStorage.setItem(LAST_DAY_KEY, dayTypeCode); } catch { /* ignore */ }
 
   return { ok: true, error: null, sessionId };
 }

@@ -105,6 +105,28 @@ export const CONDITIONING_METRICS = {
 export const isConditioningKey = (k) =>
   k in CONDITIONING_METRICS || k.startsWith('cond_');
 
+// Protocols whose prescription is a RANGE or a TEST (variable end time).
+// For these, pace alone doesn't capture the dose — the user should also log
+// duration. Fixed-duration protocols (Norwegian 4×4 ≈ 40 min, RSA 1:1 ×10,
+// rower 4×500m, etc.) don't need a duration input.
+export const VAR_DURATION_KEYS = new Set([
+  'treadmill_zone2',          // 20-30 min
+  'treadmill_zone2_easy',     // 15-20 min
+  'bangsbo_speed_endurance',  // 6 rounds ≈ 18 min total but timed work varies
+  'thirty_fifteen_ift',       // graded test, ends when you can't hold the stage
+  'bike_court_combo',         // 4 rounds, total elapsed varies
+]);
+
+// Suggested placeholder per protocol (sensible midpoint of the prescribed
+// range). Falls back to a generic hint.
+export const DURATION_HINT = {
+  treadmill_zone2: '25',
+  treadmill_zone2_easy: '18',
+  bangsbo_speed_endurance: '18',
+  thirty_fifteen_ift: '10',
+  bike_court_combo: '10',
+};
+
 // Returns the metric def for a conditioning exercise key, or null if it
 // has no registered metric (= the protocol is logged as picked but no
 // measurement is captured).
