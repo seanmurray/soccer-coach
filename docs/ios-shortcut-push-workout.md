@@ -77,6 +77,14 @@ exact labels.
 
 ## Setting up the Shortcut
 
+**Prerequisite: Toolbox Pro.** Apple's built-in Health actions in Shortcuts
+**cannot read workout objects** — `Find Health Samples` doesn't list a
+Workout data type, and there's no `Get Workouts` / `Get Details of Workout`
+action anymore. The workaround is [Toolbox Pro](https://toolboxpro.app/)
+(one-time IAP), which adds a `Get Activity Workouts` action that queries
+HealthKit for workouts. Once installed, that action shows up under the
+Toolbox Pro section in the Shortcuts action picker.
+
 1. **For Technogym treadmills: tap your watch to the console** at the start
    of each session. Apple GymKit pairs the watch and treadmill; on workout
    end, the calibrated treadmill data + watch HR land in Apple Health
@@ -86,27 +94,71 @@ exact labels.
 
 2. **Create the Shortcut.** In the Shortcuts app on iPhone:
 
-   - **Find Workouts where Date is today** (Health app action) → limit 1, sorted by Start Date descending.
-   - **Get Details of Workout** for each of: Type, Start Date, End Date, Duration, Distance, Active Energy, Average Heart Rate, Maximum Heart Rate, UUID.
-   - **Get Contents of URL** with:
-     - URL: `https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout`
-     - Method: `POST`
-     - Headers:
-       - `Content-Type: application/json`
-       - `x-api-key: <your SHORTCUTS_API_KEY>`
-     - Request Body type: JSON
-     - Fields (Magic Variable references the matching detail above):
-       ```
-       source        : apple_health
-       source_id     : <UUID>
-       workout_type  : <Type, lowercased — use "Change Case to Lowercase">
-       started_at    : <Start Date, ISO 8601>
-       ended_at      : <End Date, ISO 8601>
-       distance_mi   : <Distance in mi>
-       avg_hr        : <Average Heart Rate>
-       max_hr        : <Maximum Heart Rate>
-       calories      : <Active Energy in kcal>
-       ```
+   **a. Get Activity Workouts** (Toolbox Pro action). Configuration:
+   - **Use Date Range:** ON
+   - **Start Date:** today at 00:00. Use `Date` action set to *Start of Day*,
+     or *Current Date* with an *Adjust Date* (subtract 1 day) — **don't**
+     leave both Start and End as `Current Date`, that's a zero-width range
+     and returns nothing.
+   - **End Date:** Current Date
+   - **Distances:** imperial
+   - **Sort By:** Start Date, **Order:** Latest First, **Limit:** 1
+   - Distance/Temperature units don't affect the payload (we send the
+     numeric value either way).
+
+   **b. Extract fields** with `Set Variable` actions. Tap the
+   `Activity Workouts` magic variable → drill into properties to pick each:
+
+   | Variable     | From Activity Workouts → |
+   |--------------|--------------------------|
+   | `sourceId`   | UUID |
+   | `workoutType`| Type |
+   | `startedAt`  | Start Date |
+   | `endedAt`    | End Date |
+   | `durationSec`| Duration |
+   | `distanceMi` | Distance |
+   | `calories`   | Active Energy |
+
+   **c. Normalize.** Two cleanup steps that bit me on first run:
+   - **Lowercase the type.** `Change Case` action → `Lowercase`, input
+     `workoutType`, store back into `workoutType`. The edge function does
+     this defensively too, but cleaner to send it normalized.
+   - **ISO 8601 the dates.** `Format Date` action → `ISO 8601`, input
+     `startedAt`, store back into `startedAt`. Same for `endedAt`. The
+     default Shortcuts date is human-readable ("May 23, 2026 at 11:36 AM")
+     which the function rejects.
+
+   **d. (Optional) Heart rate.** `Get Activity Workouts` doesn't expose
+   avg/max HR — query it separately:
+   - `Find Health Samples` → **Heart Rate**, between `startedAt` and
+     `endedAt`.
+   - `Calculate Statistics` → **Average** → store as `avgHr`.
+   - `Calculate Statistics` → **Maximum** → store as `maxHr`.
+   - `Round` each to a whole number.
+
+   **e. POST it.** `Get Contents of URL`:
+   - URL: `https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout`
+   - Method: `POST`
+   - Headers:
+     - `Content-Type: application/json`
+     - `x-api-key: <your SHORTCUTS_API_KEY>`
+   - Request Body type: **JSON**
+   - Fields — **type the key as plain text on the left, insert the magic
+     variable on the right**. (Easy mistake: dropping the variable into
+     the key field instead of the value field. Then your data becomes the
+     JSON keys and every value is empty.)
+     ```
+     source        : apple_health         ← plain text literal
+     source_id     : <sourceId>
+     workout_type  : <workoutType>
+     started_at    : <startedAt>
+     ended_at      : <endedAt>
+     duration_sec  : <durationSec>
+     distance_mi   : <distanceMi>
+     avg_hr        : <avgHr>              ← omit if HR not wired up
+     max_hr        : <maxHr>              ← omit if HR not wired up
+     calories      : <calories>
+     ```
 
 3. **Automate it.** In Shortcuts → Automation → Create Personal Automation
    → **Workout** → "When ending a workout" → "Run Immediately". Run the
@@ -148,6 +200,32 @@ If you need to confirm or rotate it: Supabase dashboard → Project Settings
 
 ## Troubleshooting
 
+- **"Network connection was lost"** — Shortcut never reached the server.
+  Almost always a typo in the URL or a malformed JSON body (e.g. magic
+  variables in the key field instead of the value field). Compare against
+  Supabase logs (`mcp__supabase__get_logs` service: `edge-function`) —
+  if no POST shows up, it died client-side.
+- **500 "DB insert failed" with code 42P10** — `ON CONFLICT` target
+  missing. The function upserts on `(source, source_id)` and needs a
+  non-partial `UNIQUE` constraint on those columns:
+  ```sql
+  ALTER TABLE public.soccer_workouts
+    ADD CONSTRAINT soccer_workouts_source_dedupe UNIQUE (source, source_id);
+  ```
+  A *partial* unique index (`WHERE source_id IS NOT NULL`) won't satisfy
+  PostgREST — it has to be a plain unique constraint.
+- **Row inserted but every column is NULL** — magic variables landed in
+  the JSON **key** field instead of **value** field. Inspect
+  `soccer_workouts.raw` — if you see `"running": ""` or `"May 23, 2026 at
+  11:36 AM": ""`, that's what happened. Fix the Shortcut field mapping.
+- **`ended_at` (or any other field) NULL despite being sent** — typo in
+  the JSON key. Check `soccer_workouts.raw` for misspelled keys like
+  `emded_at`. The function only maps known keys; unknown ones land in
+  `raw` and get dropped.
+- **`Get Activity Workouts` returns nothing** — date range issue. Default
+  config with both Start Date and End Date set to `Current Date` is a
+  zero-width range. Set Start Date to start-of-day (or `Current Date - 1
+  day`).
 - **401 Unauthorized** — `x-api-key` header is missing or doesn't match
   `SHORTCUTS_API_KEY`.
 - **400 Missing performed_at / started_at** — Shortcut didn't include
