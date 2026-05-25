@@ -1,6 +1,7 @@
 import sheetStyles from './CNSBudgetCard.module.css';
 import { useRecentWorkouts } from '../hooks/useRecentWorkouts';
 import { formatDate } from '../lib/dateFormat';
+import { zoneOf } from '../lib/hrZones';
 
 // Surfaces the last few HealthKit / Mywellness workouts pushed in via the
 // iOS Shortcut. Renders nothing until the first workout arrives — keeps the
@@ -65,6 +66,12 @@ export function RecentWorkoutsCard() {
         if (w.avg_hr) parts.push(`HR ${w.avg_hr}` + (w.max_hr ? `/${w.max_hr}` : ''));
         if (w.calories) parts.push(`${w.calories} kcal`);
 
+        // Zone badge — small chip showing which HR zone the workout's avg HR
+        // landed in (Z1 Recovery → Z5 VO2max). Skipped when avg_hr is null;
+        // many workouts logged by hand or from sources without HR don't have
+        // this. Color-coded to match the load cards above.
+        const zone = zoneOf(w.avg_hr);
+
         return (
           <div
             key={w.id}
@@ -82,9 +89,26 @@ export function RecentWorkoutsCard() {
             <span style={{ color: 'var(--t3)', flexShrink: 0, minWidth: 96 }}>
               {formatDate(w.performed_at)}
             </span>
-            <span style={{ flex: 1, color: 'var(--t1)' }}>
+            <span style={{ flex: 1, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 6 }}>
               {typeLabel}
-              {!w.session_id && <span style={{ color: 'var(--t4)', marginLeft: 6 }}>· unmatched</span>}
+              {zone && (
+                <span
+                  title={`${zone.label} · ${zone.low}-${zone.high} bpm`}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
+                    color: zone.color,
+                    border: `0.5px solid ${zone.color}`,
+                    borderRadius: 4,
+                    padding: '1px 5px',
+                    lineHeight: 1.3,
+                  }}
+                >
+                  {zone.code}
+                </span>
+              )}
+              {!w.session_id && <span style={{ color: 'var(--t4)' }}>· unmatched</span>}
             </span>
             <span style={{ flexShrink: 0, color: 'var(--t2)' }}>{parts.join(' · ')}</span>
           </div>

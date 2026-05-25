@@ -69,6 +69,7 @@ export const SESSIONS = {
           name: 'Norwegian 4×4',
           desc: '4 rounds: 4 min @ 157-176 bpm / 3 min recovery. Gold-standard VO2max protocol — the engine upgrade that lets you sustain second-half output. Treadmill works fine. Same speed all 4 intervals — if rep 4 felt easier than rep 1, push harder next time.',
           rpe: 9, tags: ['cond'], kind: 'norwegian_4x4',
+          hr_low: 157, hr_high: 176, // 85-95% HRmax — Z4/Z5
           recommendedModes: ['full', 'mod1'],
           notRecommendedReason: 'Running-based conditioning increases strength interference at reduced readiness. Prefer bike, rower, or SkiErg today.',
         },
@@ -149,6 +150,7 @@ export const SESSIONS = {
           name: 'Treadmill Zone 2 steady',
           desc: '20-30 min @ 140-150 bpm. Aerobic base — improves recovery capacity between sprints and total session volume tolerance. Nasal-breathing pace if possible.',
           rpe: 5, tags: ['cond'], kind: 'single_metric',
+          hr_low: 140, hr_high: 150, // ~75-80% HRmax — top of Z3 / bottom of Z4
           recommendedModes: ['full', 'mod1', 'mod2', 'mod3', 'recovery'],
         },
       ],
@@ -162,7 +164,7 @@ export const SESSIONS = {
     lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps', 'v_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'nordic_curl', 'the_grappler'] },
     lin: { agility: ['pro_shuttle', 'figure_8_drill', 'lat_power_shuffle'], plyo: ['lateral_bounds'], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips', 'alternating_bounds', 'build_ups'], plyo: ['sl_broad_jump', 'box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'single_leg_hip_thrust'] },
-    cond: { protocols: [{ name: 'Easy bike or court jog', desc: '20 min at RPE 5-6 — aerobic flush. HR ~120-140 bpm.', rpe: 5, tags: ['cond'] }] },
+    cond: { protocols: [{ name: 'Easy bike or court jog', desc: '20 min at RPE 5-6 — aerobic flush. HR ~120-140 bpm.', rpe: 5, tags: ['cond'], hr_low: 120, hr_high: 140 }] },
   },
 
   // mod1: minor fatigue — same exercise selection as full, trim 1 set from
@@ -199,6 +201,7 @@ export const SESSIONS = {
           name: 'Norwegian 4×4 (capped intent)',
           desc: '4 rounds: 4 min @ 148-157 bpm / 3 min recovery. Same protocol as full, but cap intent at RPE 7.5. Still effective VO2max work, less CNS cost.',
           rpe: 7.5, tags: ['cond'], kind: 'norwegian_4x4',
+          hr_low: 148, hr_high: 157, // 80-85% HRmax — Z4 capped
         },
         {
           exercise_key: 'assault_bike_tabata',
@@ -230,7 +233,7 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'build_ups'], plyo: ['box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'walking_lunge_db'] },
     cond: {
       protocols: [
-        { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR ~120-140 bpm. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
+        { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR ~120-140 bpm. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric', hr_low: 120, hr_high: 140 },
         { exercise_key: 'skierg_1on2off', name: 'SkiErg — easy steady state', desc: '15 min easy. Breathing should be controlled throughout.', rpe: 5, tags: ['cond'], kind: 'single_metric' },
       ],
     },
@@ -247,7 +250,7 @@ export const SESSIONS = {
     vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_lunge_db', 'single_leg_hip_thrust'] },
     cond: {
       protocols: [
-        { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. Keep HR under ~115 bpm.', rpe: 3, tags: ['cond'], kind: 'single_metric' },
+        { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. Keep HR under ~115 bpm.', rpe: 3, tags: ['cond'], kind: 'single_metric', hr_low: null, hr_high: 115 },
       ],
     },
   },
@@ -257,7 +260,7 @@ export const SESSIONS = {
     lat: { agility: [], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['the_grappler'] },
     lin: { agility: [], plyo: [], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
     vel: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['single_leg_hip_thrust'] },
-    cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR under ~110 bpm. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric' }] },
+    cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR under ~110 bpm. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric', hr_low: null, hr_high: 110 }] },
   },
 };
 
