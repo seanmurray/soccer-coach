@@ -10,13 +10,25 @@
 // rising/steady/easing trend; the ratio is shown as secondary context
 // with deliberately descriptive (not risk-scored) language.
 //
-// LOAD MODEL: Foster session-RPE × duration in minutes (classic sRPE).
-//   load = session_rpe × duration_min
+// LOAD MODEL
+//   Soccer sessions: Foster session-RPE × duration in minutes (classic sRPE)
+//     load = session_rpe × duration_min
+//   Workouts (HealthKit / Mywellness): Banister TRIMP (see lib/trimp.js)
+//     load = duration × HRr × 0.64 × e^(1.92·HRr)
+//
+//   Both produce "training load units". Magnitudes aren't directly
+//   comparable (sRPE × min for a hard 60-min session ≈ 480; Banister TRIMP
+//   for the same intensity ≈ 150). We sum them in the COMBINED view and
+//   keep a separate SOCCER-ONLY view so the user can compare today vs.
+//   their historical soccer baseline cleanly.
+//
 // If duration is unknown or implausible (<5 min, >180 min), fall back to a
-// default 45 min — better than dropping the session entirely.
+// default 45 min for soccer — better than dropping the session entirely.
 //
 // CHRONIC LOAD: 28-day rolling sum ÷ 4 (weekly average).
 // ACUTE LOAD:   7-day rolling sum.
+
+import { workoutTRIMP } from './trimp';
 
 const DEFAULT_DURATION_MIN = 45;
 const MIN_REASONABLE_MIN = 5;
@@ -43,31 +55,20 @@ function loadFromRow(row) {
   return rpe * durationFromRow(row);
 }
 
-// Returns { acute, chronic, ratio, zone, daysOfData, samples } given an array
-// of soccer_sessions rows (any time range — we'll filter to 28 days here).
-//
-// zone: 'idle' (no data), 'low' (<0.5), 'ok' (0.5-1.3), 'caution' (1.3-1.5),
-// 'high' (>1.5).
-export function computeACWR(sessions, now = Date.now()) {
+// Compute the acute/chronic/ratio for a list of {ts, load} entries.
+// Pulled out so we can run it independently for soccer-only and combined
+// totals without duplicating window math.
+function _acwr(entries, now) {
   const acuteStart = now - 7 * MS_PER_DAY;
   const chronicStart = now - 28 * MS_PER_DAY;
 
   let acute = 0;
   let chronic = 0;
   let samples = 0;
-
-  for (const s of sessions) {
-    const dateStr = s.performed_at;
-    if (!dateStr) continue;
-    // performed_at is a 'YYYY-MM-DD' date column — anchor at noon UTC to
-    // avoid timezone-edge skew when comparing to "now".
-    const [y, m, d] = dateStr.split('-').map(Number);
-    const ts = Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12);
-    if (ts < chronicStart) continue;
-
-    const load = loadFromRow(s);
-    chronic += load;
-    if (ts >= acuteStart) acute += load;
+  for (const e of entries) {
+    if (e.ts < chronicStart) continue;
+    chronic += e.load;
+    if (e.ts >= acuteStart) acute += e.load;
     samples += 1;
   }
 
@@ -82,7 +83,6 @@ export function computeACWR(sessions, now = Date.now()) {
     else if (ratio <= 1.5) zone = 'caution';
     else zone = 'high';
 
-    // Absolute-load trend: this week vs the 4-week weekly average.
     if (acute > chronicWeekly * 1.1) trend = 'rising';
     else if (acute < chronicWeekly * 0.9) trend = 'easing';
     else trend = 'steady';
@@ -96,6 +96,58 @@ export function computeACWR(sessions, now = Date.now()) {
     zone,
     trend,
     samples,
+  };
+}
+
+// performed_at ('YYYY-MM-DD') → ms timestamp anchored at local noon. Local
+// noon avoids timezone-edge skew when comparing to "now."
+function tsFromPerformedAt(dateStr) {
+  if (!dateStr) return null;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  return Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12);
+}
+
+// Compute ACWR for soccer sessions only AND a combined view that adds
+// workout TRIMP load to the soccer load.
+//
+// Backwards compatible: if called with just an array of sessions (the v1
+// signature), returns the flat shape consumers like ACWRCard already use.
+// If called with `{ sessions, workouts }`, returns
+// `{ ...soccerShape, combined: {acute,chronic,...}, workoutCount }`.
+//
+// zone: 'idle' (no data), 'low' (<0.5), 'ok' (0.5-1.3), 'caution' (1.3-1.5),
+// 'high' (>1.5).
+export function computeACWR(input, now = Date.now()) {
+  // Normalize signature so we can accept the legacy array form OR the
+  // new {sessions, workouts} object form.
+  const sessions = Array.isArray(input) ? input : (input?.sessions ?? []);
+  const workouts = Array.isArray(input) ? [] : (input?.workouts ?? []);
+
+  const sessionEntries = [];
+  for (const s of sessions) {
+    const ts = tsFromPerformedAt(s.performed_at);
+    if (ts == null) continue;
+    sessionEntries.push({ ts, load: loadFromRow(s) });
+  }
+
+  const workoutEntries = [];
+  for (const w of workouts) {
+    const ts = tsFromPerformedAt(w.performed_at);
+    if (ts == null) continue;
+    const load = workoutTRIMP(w);
+    if (!Number.isFinite(load) || load <= 0) continue;
+    workoutEntries.push({ ts, load });
+  }
+
+  const soccer = _acwr(sessionEntries, now);
+  const combined = _acwr([...sessionEntries, ...workoutEntries], now);
+
+  // Keep the flat soccer-only fields at the top level for backwards compat
+  // with existing ACWRCard consumers. Combined sits alongside.
+  return {
+    ...soccer,
+    combined,
+    workoutCount: workoutEntries.length,
   };
 }
 

@@ -7,11 +7,14 @@
 // at 44, the CNS recovers slower than the muscles do.
 //
 // LOAD MODEL
-//   Heavy strength set (rpe ≥ 8 with non-trivial weight)  = 1.0 unit
-//   Max-effort strength (rpe ≥ 9)                          = 1.5 units (cap)
-//   Plyo / agility / sprint with measurement logged        = 0.5 unit each
+//   Heavy strength set (rpe ≥ 8 with non-trivial weight)   = 1.0 unit
+//   Max-effort strength (rpe ≥ 9)                           = 1.5 units (cap)
+//   Plyo / agility / sprint with measurement logged         = 0.5 unit each
 //     (these are the max-effort versions — measuring implies max intent)
 //   Norwegian 4x4 / high-RPE conditioning (rpe ≥ 8)         = 2.0 units
+//   HealthKit workouts (push-workout ingest)                = zone-scaled
+//     Z1/Z2 0, Z3 0.3, Z4 0.7, Z5 1.0 per 30 min (see lib/trimp.js)
+//     Folded into the 'cond' bucket — they're the same kind of draw.
 //
 // ZONES (over rolling 72 hours, today + previous 2 days)
 //   <  3   green   — fresh, push the planned session
@@ -19,14 +22,18 @@
 //   6-9    amber   — stacked, consider lighter intent
 //   ≥ 9    red     — overdraft, deload or rest
 
+import { workoutCNSUnits } from './trimp';
+import { zoneOf } from './hrZones';
+
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 // Inputs:
 //   sessions — soccer_sessions rows from the last 5 days (we use last 3)
 //   sets     — soccer_sets rows joined to those sessions
 //   perf     — soccer_exercise_perf rows joined to those sessions
+//   workouts — soccer_workouts rows in the same window (HealthKit ingest)
 //   now      — Date.now() for testing
-export function computeCNSBudget({ sessions = [], sets = [], perf = [], now = Date.now() }) {
+export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts = [], now = Date.now() }) {
   const cutoff = now - 3 * MS_PER_DAY;
   const sessionsInWindow = sessions.filter((s) => {
     if (!s.performed_at) return false;
@@ -78,17 +85,40 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], now = Da
     }
   }
 
+  // HealthKit workouts: zone-scaled CNS contribution. Folded into 'cond'
+  // because cardio shares the same neural-recovery pool as conditioning
+  // protocols. Z1/Z2 workouts contribute zero so easy aerobic days don't
+  // dent the budget.
+  for (const w of workouts) {
+    if (!w.performed_at) continue;
+    const [y, m, d] = w.performed_at.split('-').map(Number);
+    const ts = Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12);
+    if (ts < cutoff) continue;
+    const units = workoutCNSUnits(w, zoneOf);
+    if (units > 0) bump(w.performed_at, 'cond', units);
+  }
+
   const total = Object.values(perDay).reduce((sum, d) => sum + d.total, 0);
   let zone = 'green';
   if (total >= 9) zone = 'red';
   else if (total >= 6) zone = 'amber';
   else if (total >= 3) zone = 'okay';
 
+  // workoutsInWindow lets the card render when there are workouts but no
+  // soccer sessions yet — otherwise a Shortcut-only user wouldn't see CNS
+  // contribution from their cardio.
+  const workoutsInWindow = workouts.filter((w) => {
+    if (!w.performed_at) return false;
+    const [y, m, d] = w.performed_at.split('-').map(Number);
+    return Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12) >= cutoff;
+  });
+
   return {
     total: Math.round(total * 10) / 10,
     zone,
     perDay,
     sessionCount: sessionsInWindow.length,
+    workoutCount: workoutsInWindow.length,
   };
 }
 

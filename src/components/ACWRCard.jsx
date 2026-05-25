@@ -22,11 +22,18 @@ export function ACWRCard() {
   const { data, isLoading } = useACWR();
   if (isLoading || !data) return null;
 
-  const { acute, chronicWeekly, ratio, zone, trend, samples } = data;
+  const { acute, chronicWeekly, ratio, zone, trend, samples, combined, workoutCount } = data;
   // Don't surface until there's at least a week's worth of data.
   if (zone === 'idle' && samples < 2) return null;
 
   const { text } = acwrNarrative(zone, ratio);
+
+  // The headline number is soccer-only sRPE × duration — same scale users
+  // have been seeing all along. When push-workout has ingested cardio
+  // sessions in the window, we add a second line with the combined load
+  // (soccer + Banister TRIMP). Hidden when there are no workouts so the
+  // card stays clean on accounts that haven't wired up the Shortcut yet.
+  const showCombined = combined && workoutCount > 0;
 
   return (
     <div className={`${styles.card} ${ZONE_CLASS[zone] ?? ''}`}>
@@ -36,6 +43,15 @@ export function ACWRCard() {
       </div>
       <div className={styles.ratio}>{acute}</div>
       <div className={styles.text}>{text}</div>
+      {showCombined && (
+        <div className={styles.detail}>
+          + {combined.acute - acute} TRIMP from {workoutCount} workout{workoutCount === 1 ? '' : 's'} ·{' '}
+          combined load <strong style={{ color: 'var(--t2)' }}>{combined.acute}</strong>
+          {combined.ratio != null && (
+            <> · {combined.ratio.toFixed(2)}× ratio</>
+          )}
+        </div>
+      )}
       <div className={styles.detail}>
         {acwrTrendLabel(trend)} · 4-wk weekly avg {chronicWeekly} ·{' '}
         {ratio != null ? `${ratio.toFixed(2)}× ratio` : 'ratio —'} · {samples} session{samples === 1 ? '' : 's'}

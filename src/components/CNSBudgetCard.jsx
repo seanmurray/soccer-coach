@@ -20,9 +20,10 @@ export function CNSBudgetCard() {
   const { data, isLoading } = useCNSBudget();
   if (isLoading || !data) return null;
 
-  // Don't surface until there's at least one session in the window — avoids
-  // a "0 / fresh" card on a brand new account.
-  if (data.sessionCount === 0) return null;
+  // Don't surface until there's at least one session OR workout in the
+  // window — avoids a "0 / fresh" card on a brand new account, but lets
+  // cardio-only users see CNS feedback from their workouts.
+  if ((data.sessionCount ?? 0) === 0 && (data.workoutCount ?? 0) === 0) return null;
 
   const { total, zone, perDay } = data;
   const { text } = cnsBudgetNarrative(zone);

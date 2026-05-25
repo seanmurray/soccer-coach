@@ -17,14 +17,24 @@ export function useCNSBudget() {
       since.setDate(since.getDate() - 5);
       const sinceStr = since.toISOString().slice(0, 10);
 
-      const sessRes = await supabase
-        .from('soccer_sessions')
-        .select('id, performed_at')
-        .gte('performed_at', sinceStr);
+      // Sessions + workouts in parallel — both feed the CNS calculation.
+      // Workouts pull in even when there are zero sessions so cardio-only
+      // days still register CNS load.
+      const [sessRes, wkRes] = await Promise.all([
+        supabase.from('soccer_sessions').select('id, performed_at').gte('performed_at', sinceStr),
+        supabase.from('soccer_workouts').select('id, performed_at, duration_sec, avg_hr').gte('performed_at', sinceStr),
+      ]);
       if (sessRes.error) throw sessRes.error;
+      if (wkRes.error) throw wkRes.error;
+
       const ids = (sessRes.data ?? []).map((s) => s.id);
       if (ids.length === 0) {
-        return computeCNSBudget({ sessions: [], sets: [], perf: [] });
+        return computeCNSBudget({
+          sessions: [],
+          sets: [],
+          perf: [],
+          workouts: wkRes.data ?? [],
+        });
       }
 
       const [setsRes, perfRes] = await Promise.all([
@@ -38,6 +48,7 @@ export function useCNSBudget() {
         sessions: sessRes.data ?? [],
         sets: setsRes.data ?? [],
         perf: perfRes.data ?? [],
+        workouts: wkRes.data ?? [],
       });
     },
   });
