@@ -29,9 +29,13 @@ import { getPhase } from './periodization';
 
 const LAST_DAY_KEY = 'last_session_day_type';
 
+// LOCAL date, not UTC. toISOString() returns the UTC date, which silently
+// rolls a 10pm CST session over to the next day. Use the local getters so
+// "what day was this session?" matches the user's wall clock.
 const toDateString = (input) => {
   const d = input ? new Date(input) : new Date();
-  return d.toISOString().slice(0, 10); // YYYY-MM-DD
+  const p = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
 };
 
 // Defensive normalize: every persisted day_type must be one of these codes.
