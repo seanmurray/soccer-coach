@@ -63,6 +63,17 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
     bump(date, 'strength', units);
   }
 
+  // Sessions that have an HR-instrumented workout linked to them get their
+  // cond contribution REPLACED by the workout's TRIMP-based CNS estimate
+  // (more accurate than RPE-only). Pre-compute the set so the perf loop
+  // can skip cond rows from those sessions.
+  const sessionsWithLinkedWorkout = new Set();
+  for (const w of workouts) {
+    if (w.session_id && sessIds.has(w.session_id)) {
+      sessionsWithLinkedWorkout.add(w.session_id);
+    }
+  }
+
   for (const p of perf) {
     if (!sessIds.has(p.session_id)) continue;
     const date = sessionDate(p.session_id);
@@ -70,6 +81,10 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
     const effortRpe = Number(p.effort_rpe);
 
     if (p.exercise_type === 'cond') {
+      // Skip cond perf when an HR-instrumented workout is linked to this
+      // session — the workout-derived units are the better signal and get
+      // bumped below.
+      if (sessionsWithLinkedWorkout.has(p.session_id)) continue;
       // High-RPE conditioning is a real CNS draw — Tabata, Norwegian 4x4,
       // court sprints all live here.
       if (effortRpe >= 8) bump(date, 'cond', 2.0);
@@ -88,7 +103,9 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
   // HealthKit workouts: zone-scaled CNS contribution. Folded into 'cond'
   // because cardio shares the same neural-recovery pool as conditioning
   // protocols. Z1/Z2 workouts contribute zero so easy aerobic days don't
-  // dent the budget.
+  // dent the budget. Counted whether the workout is linked or not — it's
+  // the source of truth for cond load when linked, and a standalone
+  // signal when not.
   for (const w of workouts) {
     if (!w.performed_at) continue;
     const [y, m, d] = w.performed_at.split('-').map(Number);

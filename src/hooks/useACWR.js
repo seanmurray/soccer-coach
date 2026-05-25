@@ -25,7 +25,7 @@ export function useACWR() {
           .order('performed_at', { ascending: false }),
         supabase
           .from('soccer_workouts')
-          .select('id, performed_at, duration_sec, avg_hr')
+          .select('id, performed_at, duration_sec, avg_hr, session_id')
           .gte('performed_at', sinceStr),
       ]);
       if (sessRes.error) throw sessRes.error;

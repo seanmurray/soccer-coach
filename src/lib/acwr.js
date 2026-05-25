@@ -132,6 +132,12 @@ export function computeACWR(input, now = Date.now()) {
 
   const workoutEntries = [];
   for (const w of workouts) {
+    // Linked workouts are folded into a same-day soccer_session via
+    // session_id (auto-assigned at ingest by push-workout). Don't double-
+    // count: the session's sRPE × duration already captures the effort
+    // the user logged. Workout-as-source-of-truth-for-cond happens
+    // downstream in the CNS budget breakdown, not in ACWR.
+    if (w.session_id) continue;
     const ts = tsFromPerformedAt(w.performed_at);
     if (ts == null) continue;
     const load = workoutTRIMP(w);

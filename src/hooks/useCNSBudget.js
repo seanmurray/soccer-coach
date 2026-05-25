@@ -22,7 +22,7 @@ export function useCNSBudget() {
       // days still register CNS load.
       const [sessRes, wkRes] = await Promise.all([
         supabase.from('soccer_sessions').select('id, performed_at').gte('performed_at', sinceStr),
-        supabase.from('soccer_workouts').select('id, performed_at, duration_sec, avg_hr').gte('performed_at', sinceStr),
+        supabase.from('soccer_workouts').select('id, performed_at, duration_sec, avg_hr, session_id').gte('performed_at', sinceStr),
       ]);
       if (sessRes.error) throw sessRes.error;
       if (wkRes.error) throw wkRes.error;
