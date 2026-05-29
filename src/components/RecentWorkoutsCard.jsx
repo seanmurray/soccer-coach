@@ -27,6 +27,8 @@ const TYPE_LABEL = {
   rowing:      'Row',
   strength:    'Strength',
   hiit:        'HIIT',
+  yoga:        'Yoga',
+  swimming:    'Swim',
   other:       'Workout',
 };
 
