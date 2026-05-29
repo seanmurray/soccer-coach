@@ -1,5 +1,5 @@
 import { useRecentWorkouts } from '../hooks/useRecentWorkouts';
-import { zoneOf } from '../lib/hrZones';
+import { zoneOf, calibratedHRmax } from '../lib/hrZones';
 
 // Small compact indicator that shows up on Today when a recovery-zone
 // workout (Z1/Z2 — yoga, light walking, easy bike) was logged today or
@@ -47,13 +47,17 @@ export function RecoveryActivityBadge() {
   const today = todayISO();
   const yesterday = yesterdayISO();
 
+  // Calibrate HRmax from the observed maxes so zoning matches RecentWorkoutsCard
+  // (and the rest of the app) rather than the bare 185 default.
+  const hrMax = calibratedHRmax(data.map((w) => w.max_hr).filter((m) => m != null));
+
   // Recovery-zone work = Z1 or Z2 by avg HR. Yoga without HR still counts
   // (no HR samples but it's intrinsically recovery), so include it
   // unconditionally as a workout_type heuristic.
   const recovery = data.filter((w) => {
     const onRelevantDay = w.performed_at === today || w.performed_at === yesterday;
     if (!onRelevantDay) return false;
-    const z = zoneOf(w.avg_hr);
+    const z = zoneOf(w.avg_hr, hrMax);
     if (z && (z.code === 'Z1' || z.code === 'Z2')) return true;
     if (!w.avg_hr && (w.workout_type === 'yoga' || w.workout_type === 'walking')) return true;
     return false;

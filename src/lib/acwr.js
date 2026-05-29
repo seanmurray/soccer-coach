@@ -69,14 +69,22 @@ function _acwr(entries, now) {
   let acute = 0;
   let chronic = 0;
   let samples = 0;
+  let oldestTs = null;
   for (const e of entries) {
     if (e.ts < chronicStart) continue;
     chronic += e.load;
     if (e.ts >= acuteStart) acute += e.load;
+    if (oldestTs == null || e.ts < oldestTs) oldestTs = e.ts;
     samples += 1;
   }
 
-  const chronicWeekly = chronic / 4;
+  // Weekly chronic average. A fixed ÷4 assumes a full 28 days of history — for
+  // a newer or restarted log that understates the baseline and mechanically
+  // inflates the ratio into a false "sharp ramp." Divide instead by the number
+  // of weeks actually covered by the data, clamped to [1, 4].
+  const daysCovered = oldestTs == null ? 0 : (now - oldestTs) / MS_PER_DAY;
+  const weeksCovered = Math.min(4, Math.max(1, daysCovered / 7));
+  const chronicWeekly = chronic / weeksCovered;
   let ratio = null;
   let zone = 'idle';
   let trend = 'steady';
@@ -100,6 +108,7 @@ function _acwr(entries, now) {
     zone,
     trend,
     samples,
+    daysCovered: Math.round(daysCovered),
   };
 }
 
