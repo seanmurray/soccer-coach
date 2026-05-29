@@ -8,37 +8,71 @@
 
 import { WORKING_HRMAX } from '../data/sessions';
 
-// Percent-of-HRmax break points → bpm thresholds, snapped to int. Standard
-// 5-zone model used widely in endurance literature (Seiler polarized, ACSM).
-// Z5 ceiling is HRmax itself; treat anything above as Z5.
-const Z1_MAX = Math.round(WORKING_HRMAX * 0.60); // 111
-const Z2_MAX = Math.round(WORKING_HRMAX * 0.70); // 130
-const Z3_MAX = Math.round(WORKING_HRMAX * 0.80); // 148
-const Z4_MAX = Math.round(WORKING_HRMAX * 0.90); // 167
-
-// Visual + descriptive metadata per zone. Colors map to the existing CSS
-// vars used by CNSBudgetCard / ACWRCard so chips look at-home on Today.
+// Per-zone metadata (codes, labels, colors) is HRmax-independent; only the
+// bpm break points scale with HRmax. Colors map to the existing CSS vars used
+// by CNSBudgetCard / ACWRCard so chips look at-home on Today.
 //   green = aerobic territory (Z1, Z2) — recovery / base
 //   blue  = Z3 — tempo / sweet spot
 //   amber = Z4 — threshold (productive but costly)
 //   red   = Z5 — VO2max territory (high CNS / cardio cost)
-export const ZONES = {
-  Z1: { code: 'Z1', label: 'Recovery',    low: 0,          high: Z1_MAX,         color: 'var(--green)' },
-  Z2: { code: 'Z2', label: 'Aerobic',     low: Z1_MAX + 1, high: Z2_MAX,         color: 'var(--green)' },
-  Z3: { code: 'Z3', label: 'Tempo',       low: Z2_MAX + 1, high: Z3_MAX,         color: 'var(--blue)'  },
-  Z4: { code: 'Z4', label: 'Threshold',   low: Z3_MAX + 1, high: Z4_MAX,         color: 'var(--amber)' },
-  Z5: { code: 'Z5', label: 'VO2max',      low: Z4_MAX + 1, high: WORKING_HRMAX,  color: 'var(--red)'   },
+export const ZONE_META = {
+  Z1: { code: 'Z1', label: 'Recovery',  color: 'var(--green)' },
+  Z2: { code: 'Z2', label: 'Aerobic',   color: 'var(--green)' },
+  Z3: { code: 'Z3', label: 'Tempo',     color: 'var(--blue)'  },
+  Z4: { code: 'Z4', label: 'Threshold', color: 'var(--amber)' },
+  Z5: { code: 'Z5', label: 'VO2max',    color: 'var(--red)'   },
 };
 
+// Build the zone table (bpm break points) for a given HRmax. Standard 5-zone
+// %HRmax model used widely in endurance literature (Seiler polarized, ACSM).
+// Z5 ceiling is HRmax itself; treat anything above as Z5. Default arg keeps
+// every existing caller working against the configured working HRmax; pass a
+// calibrated value to scale the zones to the athlete's observed max.
+export function zonesFor(hrMax = WORKING_HRMAX) {
+  const z1 = Math.round(hrMax * 0.60);
+  const z2 = Math.round(hrMax * 0.70);
+  const z3 = Math.round(hrMax * 0.80);
+  const z4 = Math.round(hrMax * 0.90);
+  return {
+    Z1: { ...ZONE_META.Z1, low: 0,      high: z1 },
+    Z2: { ...ZONE_META.Z2, low: z1 + 1, high: z2 },
+    Z3: { ...ZONE_META.Z3, low: z2 + 1, high: z3 },
+    Z4: { ...ZONE_META.Z4, low: z3 + 1, high: z4 },
+    Z5: { ...ZONE_META.Z5, low: z4 + 1, high: hrMax },
+  };
+}
+
+// Default zone table at the configured working HRmax (185). Kept as a named
+// export for back-compat with callers that don't do dynamic calibration.
+export const ZONES = zonesFor(WORKING_HRMAX);
+
+// Calibrated HRmax from observed workout maxes. The configured WORKING_HRMAX
+// (185, a validated estimate) is the FLOOR — we only ever raise it when the
+// athlete demonstrably exceeds it, never lower it below the estimate. Caps at
+// 210 to reject sensor artifacts (chest-strap dropouts, watch glitches spike
+// HR readings into the 200s+). Matches the edge function's calibration so
+// stored zone-times and live zone chips agree.
+export const HRMAX_CEIL = 210;
+export function calibratedHRmax(observedMaxes = []) {
+  let best = WORKING_HRMAX;
+  for (const m of observedMaxes) {
+    const n = Number(m);
+    if (Number.isFinite(n) && n > best && n <= HRMAX_CEIL) best = n;
+  }
+  return best;
+}
+
 // Return the zone object for a given avg-HR reading. Null in → null out so
-// callers can decide whether to render the chip at all.
-export function zoneOf(bpm) {
+// callers can decide whether to render the chip at all. Pass hrMax to score
+// against a calibrated max instead of the default.
+export function zoneOf(bpm, hrMax = WORKING_HRMAX) {
   if (bpm == null || !Number.isFinite(bpm) || bpm <= 0) return null;
-  if (bpm <= Z1_MAX) return ZONES.Z1;
-  if (bpm <= Z2_MAX) return ZONES.Z2;
-  if (bpm <= Z3_MAX) return ZONES.Z3;
-  if (bpm <= Z4_MAX) return ZONES.Z4;
-  return ZONES.Z5;
+  const Z = zonesFor(hrMax);
+  if (bpm <= Z.Z1.high) return Z.Z1;
+  if (bpm <= Z.Z2.high) return Z.Z2;
+  if (bpm <= Z.Z3.high) return Z.Z3;
+  if (bpm <= Z.Z4.high) return Z.Z4;
+  return Z.Z5;
 }
 
 // Compare an actual avg HR to a prescribed range. Used by the today banner.
@@ -61,8 +95,8 @@ export function compareToPrescription(actual, low, high) {
 }
 
 // Convenience for chip text: "Z3 · 142"
-export function chipText(bpm) {
-  const z = zoneOf(bpm);
+export function chipText(bpm, hrMax = WORKING_HRMAX) {
+  const z = zoneOf(bpm, hrMax);
   if (!z) return null;
   return `${z.code} · ${Math.round(bpm)}`;
 }

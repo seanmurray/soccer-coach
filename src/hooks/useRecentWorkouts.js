@@ -15,7 +15,7 @@ export function useRecentWorkouts(limit = DEFAULT_LIMIT) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('soccer_workouts')
-        .select('id, source, workout_type, performed_at, started_at, duration_sec, distance_mi, avg_hr, max_hr, calories, session_id')
+        .select('id, source, workout_type, performed_at, started_at, duration_sec, distance_mi, avg_hr, max_hr, calories, hr_zone_sec, hrr_bpm, session_id')
         .order('started_at', { ascending: false, nullsFirst: false })
         .order('performed_at', { ascending: false })
         .limit(limit);

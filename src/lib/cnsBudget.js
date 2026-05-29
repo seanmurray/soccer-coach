@@ -32,8 +32,10 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 //   sets     — soccer_sets rows joined to those sessions
 //   perf     — soccer_exercise_perf rows joined to those sessions
 //   workouts — soccer_workouts rows in the same window (HealthKit ingest)
+//   hrMax    — calibrated HRmax for zoning the avg-HR fallback (workouts with
+//              hr_zone_sec use their stored per-zone time directly)
 //   now      — Date.now() for testing
-export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts = [], now = Date.now() }) {
+export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts = [], hrMax = undefined, now = Date.now() }) {
   const cutoff = now - 3 * MS_PER_DAY;
   const sessionsInWindow = sessions.filter((s) => {
     if (!s.performed_at) return false;
@@ -111,7 +113,7 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
     const [y, m, d] = w.performed_at.split('-').map(Number);
     const ts = Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12);
     if (ts < cutoff) continue;
-    const units = workoutCNSUnits(w, zoneOf);
+    const units = workoutCNSUnits(w, (bpm) => zoneOf(bpm, hrMax));
     if (units > 0) bump(w.performed_at, 'cond', units);
   }
 

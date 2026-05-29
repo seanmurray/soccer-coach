@@ -119,9 +119,11 @@ function tsFromPerformedAt(dateStr) {
 // 'high' (>1.5).
 export function computeACWR(input, now = Date.now()) {
   // Normalize signature so we can accept the legacy array form OR the
-  // new {sessions, workouts} object form.
+  // new {sessions, workouts, hrMax} object form.
   const sessions = Array.isArray(input) ? input : (input?.sessions ?? []);
   const workouts = Array.isArray(input) ? [] : (input?.workouts ?? []);
+  const hrMax = Array.isArray(input) ? undefined : input?.hrMax;
+  const restHr = Array.isArray(input) ? undefined : input?.restHr;
 
   const sessionEntries = [];
   for (const s of sessions) {
@@ -140,7 +142,12 @@ export function computeACWR(input, now = Date.now()) {
     if (w.session_id) continue;
     const ts = tsFromPerformedAt(w.performed_at);
     if (ts == null) continue;
-    const load = workoutTRIMP(w);
+    // Edwards TRIMP from stored time-in-zone (preferred), else Banister from
+    // avg HR using the athlete's real resting HR + calibrated max.
+    const opts = {};
+    if (hrMax) opts.hrMax = hrMax;
+    if (restHr) opts.restHr = restHr;
+    const load = workoutTRIMP(w, opts);
     if (!Number.isFinite(load) || load <= 0) continue;
     workoutEntries.push({ ts, load });
   }
