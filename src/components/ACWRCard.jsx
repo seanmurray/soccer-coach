@@ -29,10 +29,11 @@ export function ACWRCard() {
   const { text } = acwrNarrative(zone, ratio);
 
   // The headline number is soccer-only sRPE × duration — same scale users
-  // have been seeing all along. When push-workout has ingested cardio
-  // sessions in the window, we add a second line with the combined load
-  // (soccer + Banister TRIMP). Hidden when there are no workouts so the
-  // card stays clean on accounts that haven't wired up the Shortcut yet.
+  // have been seeing all along. When push-workout has ingested standalone
+  // cardio in the window, we add a second line with the combined load. Both
+  // sides are Foster RPE × minutes (same unit), so the combined total and
+  // ratio are directly meaningful. Hidden when there are no contributing
+  // workouts so the card stays clean before the Shortcut is wired up.
   const showCombined = combined && workoutCount > 0;
 
   return (
@@ -45,8 +46,8 @@ export function ACWRCard() {
       <div className={styles.text}>{text}</div>
       {showCombined && (
         <div className={styles.detail}>
-          + {combined.acute - acute} TRIMP from {workoutCount} workout{workoutCount === 1 ? '' : 's'} ·{' '}
-          combined load <strong style={{ color: 'var(--t2)' }}>{combined.acute}</strong>
+          + {combined.acute - acute} load from {workoutCount} workout{workoutCount === 1 ? '' : 's'} ·{' '}
+          combined <strong style={{ color: 'var(--t2)' }}>{combined.acute}</strong>
           {combined.ratio != null && (
             <> · {combined.ratio.toFixed(2)}× ratio</>
           )}

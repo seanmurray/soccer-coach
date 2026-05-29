@@ -13,12 +13,15 @@ export function useACWR() {
     enabled: !!supabase,
     staleTime: 1000 * 60 * 5,
     queryFn: async () => {
+      // LOCAL date (not UTC) for the 28-day lower bound, so the window edge
+      // doesn't shift a day near midnight in negative-offset timezones.
       const since = new Date();
       since.setDate(since.getDate() - 28);
-      const sinceStr = since.toISOString().slice(0, 10);
+      const p = (n) => String(n).padStart(2, '0');
+      const sinceStr = `${since.getFullYear()}-${p(since.getMonth() + 1)}-${p(since.getDate())}`;
 
-      // Sessions + workouts (28d window) and the latest resting HR + the
-      // all-time observed max HR (for HRmax calibration) in parallel.
+      // Sessions + workouts (28d window) and the latest resting HR + the top
+      // observed max HRs (for robust HRmax calibration) in parallel.
       const [sessRes, wkRes, rhrRes, maxRes] = await Promise.all([
         supabase
           .from('soccer_sessions')
@@ -27,7 +30,7 @@ export function useACWR() {
           .order('performed_at', { ascending: false }),
         supabase
           .from('soccer_workouts')
-          .select('id, performed_at, duration_sec, avg_hr, hr_zone_sec, session_id')
+          .select('id, performed_at, duration_sec, avg_hr, hr_hist, hr_zone_sec, session_id')
           .gte('performed_at', sinceStr),
         supabase
           .from('soccer_biometrics')
@@ -35,20 +38,22 @@ export function useACWR() {
           .not('rhr_bpm', 'is', null)
           .order('recorded_at', { ascending: false })
           .limit(1),
+        // Top maxes (not just the single highest) so calibratedHRmax can require
+        // corroboration and reject a lone artifact spike.
         supabase
           .from('soccer_workouts')
           .select('max_hr')
           .not('max_hr', 'is', null)
           .order('max_hr', { ascending: false })
-          .limit(1),
+          .limit(10),
       ]);
       if (sessRes.error) throw sessRes.error;
       if (wkRes.error) throw wkRes.error;
       // rhr/max are best-effort context — don't fail the whole query on them.
 
       const restHr = rhrRes.data?.[0]?.rhr_bpm ?? undefined;
-      const observedMax = maxRes.data?.[0]?.max_hr;
-      const hrMax = calibratedHRmax(observedMax != null ? [observedMax] : []);
+      const observedMaxes = (maxRes.data ?? []).map((r) => r.max_hr).filter((m) => m != null);
+      const hrMax = calibratedHRmax(observedMaxes);
 
       return computeACWR({
         sessions: sessRes.data ?? [],

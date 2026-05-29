@@ -28,6 +28,7 @@ export default function App() {
 
   const startSession = useSessionStore((s) => s.startSession);
   const resetSession = useSessionStore((s) => s.resetSession);
+  const markSessionEnd = useSessionStore((s) => s.markSessionEnd);
   const clearSwaps = useSwapsStore((s) => s.clear);
   const clearUpgrades = useUpgradesStore((s) => s.clear);
 
@@ -51,6 +52,7 @@ export default function App() {
       frcFullTotal: FRC_FULL.length,
       tabsVisited: s.tabsVisited,
       sessionStartedAt: s.sessionStartedAt,
+      sessionEndedAt: s.sessionEndedAt,
     };
   };
 
@@ -62,8 +64,11 @@ export default function App() {
   };
 
   // Finish Session button on the Workout screen — open the post-session sheet.
+  // Stamp the session-end time NOW (workout is done) so it isn't conflated with
+  // however long the debrief sheet stays open before save.
   const handleFinish = () => {
     if (saving) return;
+    markSessionEnd();
     setFinishSheetOpen(true);
   };
 

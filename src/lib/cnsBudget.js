@@ -12,9 +12,17 @@
 //   Plyo / agility / sprint with measurement logged         = 0.5 unit each
 //     (these are the max-effort versions — measuring implies max intent)
 //   Norwegian 4x4 / high-RPE conditioning (rpe ≥ 8)         = 2.0 units
-//   HealthKit workouts (push-workout ingest)                = zone-scaled
-//     Z1/Z2 0, Z3 0.3, Z4 0.7, Z5 1.0 per 30 min (see lib/trimp.js)
-//     Folded into the 'cond' bucket — they're the same kind of draw.
+//   HealthKit CARDIO workouts (push-workout ingest)         = zone-scaled
+//     Z1/Z2 0, Z3 1.0, Z4 2.5, Z5 5.0 per 30 min, capped 2.5/workout
+//     (see lib/trimp.js workoutCNSUnits). Folded into the 'cond' bucket.
+//
+//   COND RECONCILIATION: a conditioning effort can show up twice — once as a
+//   logged cond perf row (RPE-based) and once as an HR-instrumented workout
+//   linked to the same session. We take the MAX of the two, never the sum and
+//   never a blind replace: the sensor should refine — and never silently lower
+//   — a hard logged effort. Only CARDIO workout_types are folded (a HealthKit
+//   "strength" or "yoga" workout is NOT charged as cardio CNS — that would
+//   double-count the strength sets / mis-charge a recovery session).
 //
 // ZONES (over rolling 72 hours, today + previous 2 days)
 //   <  3   green   — fresh, push the planned session
@@ -23,25 +31,35 @@
 //   ≥ 9    red     — overdraft, deload or rest
 
 import { workoutCNSUnits } from './trimp';
-import { zoneOf } from './hrZones';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+// HealthKit workout types that count as cardio CNS draw. Strength (double-
+// counts logged sets), yoga (recovery), and unknown/other are excluded.
+const CARDIO_TYPES = new Set([
+  'running', 'cycling', 'walking', 'treadmill', 'elliptical', 'rowing', 'hiit', 'swimming',
+]);
 
 // Inputs:
 //   sessions — soccer_sessions rows from the last 5 days (we use last 3)
 //   sets     — soccer_sets rows joined to those sessions
 //   perf     — soccer_exercise_perf rows joined to those sessions
 //   workouts — soccer_workouts rows in the same window (HealthKit ingest)
-//   hrMax    — calibrated HRmax for zoning the avg-HR fallback (workouts with
-//              hr_zone_sec use their stored per-zone time directly)
+//   hrMax    — calibrated HRmax for zoning the workouts
+//   restHr   — validated resting HR for Karvonen zoning
 //   now      — Date.now() for testing
-export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts = [], hrMax = undefined, now = Date.now() }) {
+export function computeCNSBudget({
+  sessions = [], sets = [], perf = [], workouts = [],
+  hrMax = undefined, restHr = undefined, now = Date.now(),
+}) {
   const cutoff = now - 3 * MS_PER_DAY;
-  const sessionsInWindow = sessions.filter((s) => {
-    if (!s.performed_at) return false;
-    const [y, m, d] = s.performed_at.split('-').map(Number);
+  const inWindow = (performedAt) => {
+    if (!performedAt) return false;
+    const [y, m, d] = performedAt.split('-').map(Number);
     return Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12) >= cutoff;
-  });
+  };
+
+  const sessionsInWindow = sessions.filter((s) => inWindow(s.performed_at));
   const sessIds = new Set(sessionsInWindow.map((s) => s.id));
 
   // Per-day buckets for the breakdown.
@@ -55,27 +73,18 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
   const sessionDate = (sessionId) =>
     sessionsInWindow.find((s) => s.id === sessionId)?.performed_at ?? null;
 
+  // ── Strength (heavy sets) ──
   for (const s of sets) {
     if (!sessIds.has(s.session_id)) continue;
     const rpe = Number(s.rpe);
     if (!Number.isFinite(rpe) || rpe < 8) continue;
     const date = sessionDate(s.session_id);
     if (!date) continue;
-    const units = rpe >= 9 ? 1.5 : 1.0;
-    bump(date, 'strength', units);
+    bump(date, 'strength', rpe >= 9 ? 1.5 : 1.0);
   }
 
-  // Sessions that have an HR-instrumented workout linked to them get their
-  // cond contribution REPLACED by the workout's TRIMP-based CNS estimate
-  // (more accurate than RPE-only). Pre-compute the set so the perf loop
-  // can skip cond rows from those sessions.
-  const sessionsWithLinkedWorkout = new Set();
-  for (const w of workouts) {
-    if (w.session_id && sessIds.has(w.session_id)) {
-      sessionsWithLinkedWorkout.add(w.session_id);
-    }
-  }
-
+  // ── Perf rows: plyo bumps now; cond accumulates for later reconciliation ──
+  const condPerfBySession = {}; // session_id -> RPE-derived cond units
   for (const p of perf) {
     if (!sessIds.has(p.session_id)) continue;
     const date = sessionDate(p.session_id);
@@ -83,38 +92,41 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
     const effortRpe = Number(p.effort_rpe);
 
     if (p.exercise_type === 'cond') {
-      // Skip cond perf when an HR-instrumented workout is linked to this
-      // session — the workout-derived units are the better signal and get
-      // bumped below.
-      if (sessionsWithLinkedWorkout.has(p.session_id)) continue;
       // High-RPE conditioning is a real CNS draw — Tabata, Norwegian 4x4,
-      // court sprints all live here.
-      if (effortRpe >= 8) bump(date, 'cond', 2.0);
-      else if (effortRpe >= 6) bump(date, 'cond', 0.5);
+      // court sprints all live here. Reconciled against linked HR workouts.
+      const u = effortRpe >= 8 ? 2.0 : effortRpe >= 6 ? 0.5 : 0;
+      if (u > 0) condPerfBySession[p.session_id] = (condPerfBySession[p.session_id] ?? 0) + u;
       continue;
     }
 
-    // For plyo/agility, the existence of a logged measurement OR a high
-    // effort RPE signals a max-effort attempt.
+    // For plyo/agility, a logged measurement OR a high effort RPE signals a
+    // max-effort attempt.
     const hasMeasure = typeof p.notes === 'string' && /\d+\s*(in|cm|m|mph)/i.test(p.notes);
-    if (hasMeasure || effortRpe >= 8) {
-      bump(date, 'plyo', 0.5);
+    if (hasMeasure || effortRpe >= 8) bump(date, 'plyo', 0.5);
+  }
+
+  // ── HealthKit cardio workouts: zone-scaled CNS, grouped for reconciliation ──
+  const cardioBySession = {};      // linked session_id -> units
+  const cardioUnlinkedByDate = {}; // 'YYYY-MM-DD' -> units (standalone cardio)
+  for (const w of workouts) {
+    if (!inWindow(w.performed_at)) continue;
+    if (!CARDIO_TYPES.has(w.workout_type)) continue;
+    const u = workoutCNSUnits(w, { hrMax, restHr });
+    if (u <= 0) continue;
+    if (w.session_id && sessIds.has(w.session_id)) {
+      cardioBySession[w.session_id] = (cardioBySession[w.session_id] ?? 0) + u;
+    } else {
+      cardioUnlinkedByDate[w.performed_at] = (cardioUnlinkedByDate[w.performed_at] ?? 0) + u;
     }
   }
 
-  // HealthKit workouts: zone-scaled CNS contribution. Folded into 'cond'
-  // because cardio shares the same neural-recovery pool as conditioning
-  // protocols. Z1/Z2 workouts contribute zero so easy aerobic days don't
-  // dent the budget. Counted whether the workout is linked or not — it's
-  // the source of truth for cond load when linked, and a standalone
-  // signal when not.
-  for (const w of workouts) {
-    if (!w.performed_at) continue;
-    const [y, m, d] = w.performed_at.split('-').map(Number);
-    const ts = Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12);
-    if (ts < cutoff) continue;
-    const units = workoutCNSUnits(w, (bpm) => zoneOf(bpm, hrMax));
-    if (units > 0) bump(w.performed_at, 'cond', units);
+  // ── Cond reconciliation: max(RPE-logged, HR-instrumented) per session ──
+  for (const s of sessionsInWindow) {
+    const condUnits = Math.max(condPerfBySession[s.id] ?? 0, cardioBySession[s.id] ?? 0);
+    if (condUnits > 0) bump(s.performed_at, 'cond', condUnits);
+  }
+  for (const [date, u] of Object.entries(cardioUnlinkedByDate)) {
+    if (u > 0) bump(date, 'cond', u);
   }
 
   const total = Object.values(perDay).reduce((sum, d) => sum + d.total, 0);
@@ -126,11 +138,7 @@ export function computeCNSBudget({ sessions = [], sets = [], perf = [], workouts
   // workoutsInWindow lets the card render when there are workouts but no
   // soccer sessions yet — otherwise a Shortcut-only user wouldn't see CNS
   // contribution from their cardio.
-  const workoutsInWindow = workouts.filter((w) => {
-    if (!w.performed_at) return false;
-    const [y, m, d] = w.performed_at.split('-').map(Number);
-    return Date.UTC(y, (m ?? 1) - 1, d ?? 1, 12) >= cutoff;
-  });
+  const workoutsInWindow = workouts.filter((w) => inWindow(w.performed_at));
 
   return {
     total: Math.round(total * 10) / 10,

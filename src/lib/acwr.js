@@ -10,17 +10,15 @@
 // rising/steady/easing trend; the ratio is shown as secondary context
 // with deliberately descriptive (not risk-scored) language.
 //
-// LOAD MODEL
-//   Soccer sessions: Foster session-RPE × duration in minutes (classic sRPE)
-//     load = session_rpe × duration_min
-//   Workouts (HealthKit / Mywellness): Banister TRIMP (see lib/trimp.js)
-//     load = duration × HRr × 0.64 × e^(1.92·HRr)
+// LOAD MODEL — one unit for everything (Foster session-RPE × minutes)
+//   Soccer sessions: session_rpe × duration_min  (classic sRPE)
+//   Workouts (HealthKit): Σ(minutes_in_zone × Foster RPE-equivalent), see
+//     lib/trimp.js workoutLoad — deliberately the SAME unit as sRPE×min.
 //
-//   Both produce "training load units". Magnitudes aren't directly
-//   comparable (sRPE × min for a hard 60-min session ≈ 480; Banister TRIMP
-//   for the same intensity ≈ 150). We sum them in the COMBINED view and
-//   keep a separate SOCCER-ONLY view so the user can compare today vs.
-//   their historical soccer baseline cleanly.
+//   Because both sides are RPE×min, the COMBINED total and its ratio are
+//   directly meaningful (no mixed-scale artifact). We still keep a separate
+//   SOCCER-ONLY view so the user can compare today vs. their historical
+//   soccer baseline cleanly.
 //
 // If duration is unknown or implausible (<5 min, >180 min), fall back to a
 // default 45 min for soccer — better than dropping the session entirely.
@@ -28,7 +26,7 @@
 // CHRONIC LOAD: 28-day rolling sum ÷ 4 (weekly average).
 // ACUTE LOAD:   7-day rolling sum.
 
-import { workoutTRIMP } from './trimp';
+import { workoutLoad } from './trimp';
 
 const DEFAULT_DURATION_MIN = 45;
 const MIN_REASONABLE_MIN = 5;
@@ -37,13 +35,19 @@ const MAX_REASONABLE_MIN = 180;
 const MS_PER_MIN = 60_000;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
-// Pull a duration estimate from a soccer_sessions row. Uses created_at and
-// metadata.session_started_at if both are present; otherwise default.
+// Pull a duration estimate from a soccer_sessions row.
+//
+// Prefer metadata.session_ended_at (stamped when "Finish Session" is tapped)
+// over created_at. created_at is the row-INSERT time, which includes however
+// long the post-session debrief sheet sat open — using it silently inflated
+// session duration, and therefore acute load and the ACWR ratio. Fall back to
+// created_at for legacy rows saved before session_ended_at was captured.
 function durationFromRow(row) {
   const startedAt = row?.metadata?.session_started_at;
-  if (!startedAt || !row.created_at) return DEFAULT_DURATION_MIN;
+  const endedAt = row?.metadata?.session_ended_at ?? row?.created_at;
+  if (!startedAt || !endedAt) return DEFAULT_DURATION_MIN;
   const start = new Date(startedAt).getTime();
-  const end = new Date(row.created_at).getTime();
+  const end = new Date(endedAt).getTime();
   if (!Number.isFinite(start) || !Number.isFinite(end)) return DEFAULT_DURATION_MIN;
   const min = (end - start) / MS_PER_MIN;
   if (min < MIN_REASONABLE_MIN || min > MAX_REASONABLE_MIN) return DEFAULT_DURATION_MIN;
@@ -142,12 +146,12 @@ export function computeACWR(input, now = Date.now()) {
     if (w.session_id) continue;
     const ts = tsFromPerformedAt(w.performed_at);
     if (ts == null) continue;
-    // Edwards TRIMP from stored time-in-zone (preferred), else Banister from
-    // avg HR using the athlete's real resting HR + calibrated max.
+    // Foster load (same sRPE×min unit as soccer sessions) from time-in-zone,
+    // else from avg HR. One unit → combined total + ratio stay meaningful.
     const opts = {};
     if (hrMax) opts.hrMax = hrMax;
     if (restHr) opts.restHr = restHr;
-    const load = workoutTRIMP(w, opts);
+    const load = workoutLoad(w, opts);
     if (!Number.isFinite(load) || load <= 0) continue;
     workoutEntries.push({ ts, load });
   }

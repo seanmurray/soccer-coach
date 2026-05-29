@@ -1,12 +1,12 @@
 import sheetStyles from './CNSBudgetCard.module.css';
 import { useRecentWorkouts } from '../hooks/useRecentWorkouts';
 import { formatDate } from '../lib/dateFormat';
-import { zoneOf, calibratedHRmax, ZONE_META } from '../lib/hrZones';
+import { zoneOf, calibratedHRmax, ZONE_META, zoneSecForWorkout } from '../lib/hrZones';
 
-// Stacked Z1-Z5 time-in-zone bar. Renders nothing unless the workout carries
-// hr_zone_sec (computed server-side at ingest from the raw HR samples). Each
-// segment's width is proportional to seconds spent in that zone; colors match
-// the zone chips and load cards.
+// Stacked Z1-Z5 time-in-zone bar. Renders nothing unless the workout has HR
+// data. Seconds-per-zone are computed live (from hr_hist against the calibrated
+// HRmax/RHR; legacy rows fall back to stored hr_zone_sec). Each segment's width
+// is proportional to seconds in that zone; colors match chips and load cards.
 const ZONE_ORDER = ['Z1', 'Z2', 'Z3', 'Z4', 'Z5'];
 function ZoneBar({ zoneSec }) {
   if (!zoneSec || typeof zoneSec !== 'object') return null;
@@ -106,6 +106,8 @@ export function RecentWorkoutsCard() {
         // landed in (Z1 Recovery → Z5 VO2max), scored against the calibrated
         // HRmax. Skipped when avg_hr is null.
         const zone = zoneOf(w.avg_hr, hrMax);
+        // Time-in-zone bar data, recomputed live against the calibrated HRmax.
+        const zoneSec = zoneSecForWorkout(w, hrMax);
 
         return (
           <div key={w.id} style={{ padding: '6px 0', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
@@ -145,7 +147,7 @@ export function RecentWorkoutsCard() {
               </span>
               <span style={{ flexShrink: 0, color: 'var(--t2)' }}>{parts.join(' · ')}</span>
             </div>
-            <ZoneBar zoneSec={w.hr_zone_sec} />
+            <ZoneBar zoneSec={zoneSec} />
           </div>
         );
       })}

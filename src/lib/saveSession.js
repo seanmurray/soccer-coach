@@ -73,6 +73,7 @@ export async function saveSession({
   frcFullTotal = 0,
   tabsVisited = [],
   sessionStartedAt,
+  sessionEndedAt,
   // Post-session inputs
   sessionRpe = 7.5,
   energy = 3,
@@ -115,6 +116,10 @@ export async function saveSession({
       exercises_logged: exercisePerfBuffer.length,
       modules_used: moduleUsageBuffer.length,
       session_started_at: sessionStartedAt,
+      // Real end-of-session time (Finish tapped). Preferred over created_at for
+      // duration math — created_at also counts debrief-sheet time. Falls back
+      // to now() if a caller didn't supply it.
+      session_ended_at: sessionEndedAt ?? new Date().toISOString(),
     },
   };
 

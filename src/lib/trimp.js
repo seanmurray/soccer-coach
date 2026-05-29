@@ -1,137 +1,118 @@
-// Banister TRIMP — Training Impulse from heart-rate average + duration.
+// Workout training-load + CNS cost.
 //
-// REFERENCE: Banister 1991 — TRIMP = duration_min × HRr × b × e^(c·HRr)
-// where HRr = (avg_HR - rest_HR) / (max_HR - rest_HR) is the heart-rate
-// reserve fraction. Coefficients (b, c) are sex-specific from the original
-// derivation; men's values used here since the app is single-athlete (44yo
-// male per profile). Adjust if the audience widens.
+// ── LOAD: one unit shared with soccer sessions (Foster session-RPE × min) ──
+// Soccer sessions are scored as Foster sRPE × duration_min. To make the ACWR
+// "combined" view a single coherent number (not a sum of incompatible scales),
+// workouts are scored on the SAME unit: for each HR zone we assign the Borg
+// RPE you'd report for sustained work in that zone, and sum minutes × RPE:
 //
-// Why Banister vs. simpler models:
-//   • Captures intensity nonlinearly — a 60-min Z4 effort produces ~3× the
-//     load of a 60-min Z2 effort, matching real adaptive cost.
-//   • Uses what we have (avg_hr, duration_sec) without needing time-in-zone.
-//   • Most validated TRIMP variant; what most coaches mean by "TRIMP".
+//   load = Σ (minutes_in_zone × FOSTER_ZONE_RPE[zone])
 //
-// Output is unitless "TRIMP load." NOT directly comparable to sRPE × min
-// in absolute magnitude (scales differ by ~3×), but trend-comparable. We
-// sum them in ACWR for the "combined" view while keeping a soccer-only
-// number for clean comparison to historical baselines.
+// This deliberately replaces the old Edwards/Banister TRIMP path, which mixed
+// two scales (Edwards ≈2× Banister) in the same metric depending on whether a
+// workout carried time-in-zone — producing ratio artifacts from the scale
+// switch rather than real load changes. Foster-per-zone keeps workouts and
+// sessions commensurable so combined load and its ratio are meaningful.
+//
+// Validation anchors (HRmax 185 / RHR 60, Karvonen zones):
+//   60-min continuous Z4 (threshold)  = 60 × 8   = 480  ≈ a hard soccer session
+//   33-min easy run, avg 147 = Z2     = 33 × 4   ≈ 132  (~⅓ of a session)
+//
+// ── CNS: neural-fatigue contribution (units, see cnsBudget.js scale) ──
+// High-intensity cardio (Z4/Z5) draws on the same neural pool as plyo/sprint
+// work; Z1/Z2 are metabolic, not neural. Weights are tuned so a real VO2max
+// session (Norwegian 4×4 ≈ 8 min Z4 + 8 min Z5) ≈ 2.0 units — matching the
+// "hard cond protocol = 2.0" already in the CNS model — with a per-workout cap
+// so a single long high-intensity session can't dominate the budget.
 
-import { WORKING_HRMAX } from '../data/sessions';
+import { WORKING_HRMAX, WORKING_RESTHR } from '../data/sessions';
+import { zoneOf, zoneSecForWorkout } from './hrZones';
 
-// Resting HR fallback. The live value is pulled from soccer_biometrics
-// (push-biometrics → rhr_bpm) and threaded through workoutTRIMP; this
-// constant is only used when no biometric reading is available. The TRIMP
-// formula is fairly tolerant — ±5 bpm here only shifts results a few percent.
-export const RESTING_HR = 55;
+// Resting-HR fallback (kept for any caller that doesn't thread the live value).
+// The live value comes from soccer_biometrics.rhr_bpm (= 60, validated).
+export const RESTING_HR = WORKING_RESTHR;
 
-// Edwards TRIMP zone weights (Z1=1 … Z5=5). The Edwards summation —
-// Σ(minutes_in_zone × weight) — is the load model we prefer for workouts
-// because it captures interval structure that a single average HR hides: a
-// 30-min run alternating Z2 and Z5 carries far more load than 30 steady
-// minutes at the same MEAN heart rate.
-const EDWARDS_WEIGHTS = { Z1: 1, Z2: 2, Z3: 3, Z4: 4, Z5: 5 };
-
-// Banister men's coefficients.
-const B_MALE = 0.64;
-const C_MALE = 1.92;
-
-// Compute Banister TRIMP. Returns null when inputs are insufficient so
-// callers can decide whether to drop the workout entirely or fall back.
-export function bannisterTRIMP({ avgHr, durationMin, restHr = RESTING_HR, maxHr = WORKING_HRMAX }) {
-  if (!Number.isFinite(avgHr) || !Number.isFinite(durationMin)) return null;
-  if (avgHr <= 0 || durationMin <= 0) return null;
-  if (avgHr <= restHr) return 0; // sub-resting reading — treat as zero load
-  if (maxHr <= restHr) return null; // bad config
-  const hrr = Math.min(1, (avgHr - restHr) / (maxHr - restHr));
-  const trimp = durationMin * hrr * B_MALE * Math.exp(C_MALE * hrr);
-  return Math.round(trimp);
-}
+// Foster RPE-equivalent per HR zone (Borg CR10), settled with the athlete.
+const FOSTER_ZONE_RPE = { Z1: 2, Z2: 4, Z3: 6, Z4: 8, Z5: 9.5 };
 
 const DEFAULT_DURATION_MIN = 30;
 
-// Edwards TRIMP from a {Z1..Z5: seconds} map. Σ(minutes_in_zone × weight).
+// Foster load from a {Z1..Z5: seconds} map. Σ(minutes_in_zone × RPE_eq).
 // Returns null when the map is missing/empty so callers can fall back.
-export function edwardsTRIMP(zoneSec) {
+export function fosterFromZoneSec(zoneSec) {
   if (!zoneSec || typeof zoneSec !== 'object') return null;
   let total = 0;
   let any = false;
-  for (const code of Object.keys(EDWARDS_WEIGHTS)) {
+  for (const code of Object.keys(FOSTER_ZONE_RPE)) {
     const sec = Number(zoneSec[code]);
     if (Number.isFinite(sec) && sec > 0) {
-      total += (sec / 60) * EDWARDS_WEIGHTS[code];
+      total += (sec / 60) * FOSTER_ZONE_RPE[code];
       any = true;
     }
   }
   return any ? Math.round(total) : null;
 }
 
-// Workout → training load. Prefers true time-in-zone (Edwards, from
-// hr_zone_sec computed at ingest); falls back to Banister from the average HR
-// (this is where real resting HR matters), then to a flat light estimate when
-// there's no HR at all. Returns 0 (not null) for an empty workout so it just
-// doesn't contribute.
-//
-// SCALE NOTE: Edwards and Banister produce different magnitudes for the same
-// effort (Edwards runs ~2× higher). Going forward every workout carries
-// hr_zone_sec → Edwards, so the fallback only applies to pre-feature rows,
-// which age out of the 28-day ACWR window within a month. The transient
-// mixing affects only the supplementary "combined" view, never the headline
-// soccer-only number.
-export function workoutTRIMP(workout, { restHr = RESTING_HR, hrMax = WORKING_HRMAX } = {}) {
+// Workout → training load on the Foster sRPE×min scale.
+// 1) True time-in-zone (from hr_hist, recomputed live; or legacy hr_zone_sec)
+//    → Foster per-zone (preferred).
+// 2) Avg HR → single-zone estimate × duration (whole workout charged at the
+//    avg HR's zone). Less precise but same unit.
+// 3) No HR at all → assume easy aerobic (Z1 rate) for the duration.
+// Returns 0 (not null) for an empty workout so it simply doesn't contribute.
+export function workoutLoad(workout, { hrMax = WORKING_HRMAX, restHr = WORKING_RESTHR } = {}) {
   if (!workout) return 0;
   const durationMin = workout.duration_sec ? workout.duration_sec / 60 : DEFAULT_DURATION_MIN;
 
-  // 1) True time-in-zone → Edwards (preferred).
-  const fromZones = edwardsTRIMP(workout.hr_zone_sec);
+  const zoneSec = zoneSecForWorkout(workout, hrMax, restHr);
+  const fromZones = fosterFromZoneSec(zoneSec);
   if (fromZones != null && fromZones > 0) return fromZones;
 
-  // 2) Avg HR → Banister, using the athlete's real resting HR + calibrated max.
   const avgHr = Number(workout.avg_hr);
   if (Number.isFinite(avgHr) && avgHr > 0) {
-    return bannisterTRIMP({ avgHr, durationMin, restHr, maxHr: hrMax }) ?? 0;
+    const z = zoneOf(avgHr, hrMax, restHr);
+    const rpe = z ? FOSTER_ZONE_RPE[z.code] : FOSTER_ZONE_RPE.Z1;
+    return Math.round(durationMin * rpe);
   }
 
-  // 3) No HR at all — assume light aerobic effort for the duration.
-  return Math.round(durationMin * 0.4);
+  // No HR — assume light aerobic effort for the duration.
+  return Math.round(durationMin * FOSTER_ZONE_RPE.Z1);
 }
 
-// CNS contribution per workout, expressed in the same units cnsBudget.js
-// uses (heavy strength set = 1.0, plyo = 0.5, hard cond protocol = 2.0).
-//
-// Rationale: high-intensity cardio (Z4/Z5) draws on the same neural pool
-// as plyo/sprint work — VO2max intervals and threshold runs have real CNS
-// cost. Z1/Z2 (recovery/aerobic) are metabolic, not neural; no CNS toll.
-// Z3 (tempo) sits in between.
-//
-// Per-zone CNS units per 30 minutes of work (reference duration):
-//   Z1 0.0  Z2 0.0  Z3 0.3  Z4 0.7  Z5 1.0
-// Scaled linearly by duration so a 60-min Z4 workout = 1.4 units, same
-// ballpark as 1-2 heavy strength sets.
-const CNS_PER_30MIN = { Z1: 0, Z2: 0, Z3: 0.3, Z4: 0.7, Z5: 1.0 };
+// Per-zone CNS units per 30 minutes of work (reference duration). Z1/Z2 carry
+// no neural cost (aerobic = metabolic). Tuned so a Norwegian 4×4 (≈8 min Z4 +
+// 8 min Z5) ≈ 2.0 units = "hard cond protocol"; a 30-min steady-threshold run
+// hits the cap (2.5). Scaled linearly by time-in-zone, then capped per workout.
+const CNS_PER_30MIN = { Z1: 0, Z2: 0, Z3: 1.0, Z4: 2.5, Z5: 5.0 };
+export const CNS_WORKOUT_CAP = 2.5;
 
-export function workoutCNSUnits(workout, zoneOfFn) {
+// CNS contribution for a single workout, in cnsBudget.js units. Uses true
+// time-in-zone when available (so a run that only briefly touched Z5 is charged
+// for those minutes, not the whole duration); falls back to the avg-HR zone.
+// NOTE: workout-type gating (cardio only — never strength/yoga) is the caller's
+// job (cnsBudget.js); this function just scores the HR profile it's given.
+export function workoutCNSUnits(workout, { hrMax = WORKING_HRMAX, restHr = WORKING_RESTHR } = {}) {
   if (!workout) return 0;
   const durationMin = workout.duration_sec ? workout.duration_sec / 60 : DEFAULT_DURATION_MIN;
   if (durationMin <= 0) return 0;
 
-  // Prefer per-zone time when available — only the Z4/Z5 minutes carry CNS
-  // cost, so a run that touched Z5 briefly but mostly sat in Z2 is charged
-  // accurately rather than getting full Z-of-avg credit (or none).
-  const zs = workout.hr_zone_sec;
-  if (zs && typeof zs === 'object') {
-    let units = 0;
+  let units = 0;
+  const zoneSec = zoneSecForWorkout(workout, hrMax, restHr);
+  if (zoneSec) {
     for (const code of Object.keys(CNS_PER_30MIN)) {
-      const sec = Number(zs[code]);
+      const sec = Number(zoneSec[code]);
       if (Number.isFinite(sec) && sec > 0) units += CNS_PER_30MIN[code] * (sec / 60 / 30);
     }
-    return Math.round(units * 10) / 10;
+  } else {
+    // Fallback: charge the whole duration at the avg-HR zone's rate.
+    const avgHr = Number(workout.avg_hr);
+    if (!Number.isFinite(avgHr) || avgHr <= 0) return 0;
+    const z = zoneOf(avgHr, hrMax, restHr);
+    if (!z) return 0;
+    const per30 = CNS_PER_30MIN[z.code] ?? 0;
+    units = per30 * (durationMin / 30);
   }
 
-  // Fallback: charge the whole duration at the avg-HR zone's rate.
-  if (!workout.avg_hr) return 0;
-  const zone = zoneOfFn(workout.avg_hr);
-  if (!zone) return 0;
-  const per30 = CNS_PER_30MIN[zone.code] ?? 0;
-  return Math.round((per30 * (durationMin / 30)) * 10) / 10;
+  const capped = Math.min(units, CNS_WORKOUT_CAP);
+  return Math.round(capped * 10) / 10;
 }

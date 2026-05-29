@@ -98,6 +98,7 @@ export const useSessionStore = create((set, get) => ({
   frcFullChecked: [],    // indices of FRC post-conditioning items checked
   tabsVisited: [],
   sessionStartedAt: null,
+  sessionEndedAt: null,
 
   startSession: () => set({
     setsBuffer: [],
@@ -108,7 +109,13 @@ export const useSessionStore = create((set, get) => ({
     frcFullChecked: [],
     tabsVisited: [],
     sessionStartedAt: new Date().toISOString(),
+    sessionEndedAt: null,
   }),
+
+  // Stamp the real end-of-session time when "Finish Session" is tapped — used
+  // for accurate session duration (training load). Distinct from the row's
+  // created_at, which is the save/insert time and includes debrief-sheet lag.
+  markSessionEnd: () => set({ sessionEndedAt: new Date().toISOString() }),
 
   pushSet: (record) => set((s) => ({ setsBuffer: [...s.setsBuffer, record] })),
   pushExercisePerf: (record) => set((s) => ({ exercisePerfBuffer: [...s.exercisePerfBuffer, record] })),
@@ -140,6 +147,7 @@ export const useSessionStore = create((set, get) => ({
     frcFullChecked: [],
     tabsVisited: [],
     sessionStartedAt: null,
+    sessionEndedAt: null,
   }),
 }));
 

@@ -42,12 +42,16 @@ duplicate the row.
 | `performed_at` | `YYYY-MM-DD` | Local date. Auto-derived from `started_at` if absent.                            |
 | `duration_sec` | number   | Auto-derived from start/end if absent.                                               |
 | `distance_mi`  | number   | Miles. Distance-based workouts only.                                                 |
-| `avg_hr`       | number   | bpm                                                                                  |
-| `max_hr`       | number   | bpm                                                                                  |
+| `avg_hr`       | number   | bpm. If omitted, the server computes it from `hr_values`.                            |
+| `max_hr`       | number   | bpm. If omitted, the server computes it from `hr_values`.                            |
 | `calories`     | number   | kcal (active)                                                                        |
+| `hr_values`    | array or CSV | **Raw per-sample HR (bpm).** Required for time-in-zone, the zone bar, calibrated zones, and 1-min HRR. Parallel to `hr_dates`. Omitting it falls back to a single avg-HR estimate. |
+| `hr_dates`     | array or CSV | ISO-8601 timestamp for each `hr_values` entry (same order, same length).         |
 
 The whole posted JSON is also stored in `soccer_workouts.raw` so anything
-extra you send isn't lost.
+extra you send isn't lost — except the bulky `hr_values` / `hr_dates` arrays,
+which are distilled into `hr_hist` (a bpm→seconds histogram), `avg_hr`,
+`max_hr`, and `hrr_bpm` and then dropped from the stored blob.
 
 ### Example — Apple Watch run
 
@@ -128,13 +132,26 @@ Toolbox Pro section in the Shortcuts action picker.
      default Shortcuts date is human-readable ("May 23, 2026 at 11:36 AM")
      which the function rejects.
 
-   **d. (Optional) Heart rate.** `Get Activity Workouts` doesn't expose
-   avg/max HR — query it separately:
+   **d. Heart rate — send the raw samples, not just avg/max.** `Get Activity
+   Workouts` doesn't expose HR, so query the samples separately. The rich
+   analysis (time-in-zone bar, calibrated zones, 1-min HRR) is computed
+   server-side **from the raw sample arrays** — if you only send avg/max, you
+   get a single zone estimate and no zone bar / HRR.
    - `Find Health Samples` → **Heart Rate**, between `startedAt` and
-     `endedAt`.
-   - `Calculate Statistics` → **Average** → store as `avgHr`.
-   - `Calculate Statistics` → **Maximum** → store as `maxHr`.
-   - `Round` each to a whole number.
+     `endedAt`, sorted by **Start Date**. Store the result as `hrSamples`.
+   - Build the two parallel arrays from `hrSamples`:
+     - `hr_values`: map each sample → its **Value** (bpm).
+     - `hr_dates`: map each sample → its **Start Date**, **ISO 8601**
+       formatted. Both must be the same length and order.
+     - In Shortcuts: a `Repeat with Each` over `hrSamples` adding to two
+       text variables (one value, one ISO date per line) is the simplest
+       way; the server accepts newline- or comma-separated lists as well as
+       JSON arrays.
+   - (Optional, cheap) Also send `avg_hr` / `max_hr` via
+     `Calculate Statistics` → **Average** / **Maximum** → `Round`. The server
+     prefers these HealthKit summary values and only falls back to computing
+     them from `hr_values` when they're absent. The zone bar / HRR always
+     come from the raw samples.
 
    **e. POST it.** `Get Contents of URL`:
    - URL: `https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout`
@@ -155,8 +172,10 @@ Toolbox Pro section in the Shortcuts action picker.
      ended_at      : <endedAt>
      duration_sec  : <durationSec>
      distance_mi   : <distanceMi>
-     avg_hr        : <avgHr>              ← omit if HR not wired up
-     max_hr        : <maxHr>              ← omit if HR not wired up
+     avg_hr        : <avgHr>              ← optional; server can derive it
+     max_hr        : <maxHr>              ← optional; server can derive it
+     hr_values     : <hrValues>           ← raw bpm samples (enables zones/HRR)
+     hr_dates      : <hrDates>            ← ISO timestamps, parallel to hr_values
      calories      : <calories>
      ```
 
