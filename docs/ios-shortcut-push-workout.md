@@ -20,7 +20,7 @@ Mirrors the existing `push-biometrics` setup — same `x-api-key` auth, same
 ## Endpoint
 
 ```
-POST https://hsbtdqxwdcqvhnarujln.supabase.co/functions/v1/push-workout
+POST https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout
 Content-Type: application/json
 x-api-key: <SHORTCUTS_API_KEY>
 ```
@@ -154,7 +154,7 @@ Toolbox Pro section in the Shortcuts action picker.
      come from the raw samples.
 
    **e. POST it.** `Get Contents of URL`:
-   - URL: `https://hsbtdqxwdcqvhnarujln.supabase.co/functions/v1/push-workout`
+   - URL: `https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout`
    - Method: `POST`
    - Headers:
      - `Content-Type: application/json`
