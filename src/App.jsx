@@ -4,6 +4,7 @@ import { queryClient } from './lib/queryClient';
 import { BottomNav } from './components/BottomNav';
 import { TodayScreen } from './screens/TodayScreen';
 import { WorkoutScreen } from './screens/WorkoutScreen';
+import { LoadScreen } from './screens/LoadScreen';
 import { HistoryScreen } from './screens/HistoryScreen';
 import { ProgressScreen } from './screens/ProgressScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
@@ -121,10 +122,17 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReadinessBaselineSync />
       <div hidden={tab !== 'today'}>
-        <TodayScreen onStartSession={handleStart} onOpenModule={(i) => setModuleIndex(i)} />
+        <TodayScreen
+          onStartSession={handleStart}
+          onOpenModule={(i) => setModuleIndex(i)}
+          onNavigate={setTab}
+        />
       </div>
       <div hidden={tab !== 'workout'}>
         <WorkoutScreen onFinish={handleFinish} />
+      </div>
+      <div hidden={tab !== 'load'}>
+        <LoadScreen />
       </div>
       <div hidden={tab !== 'history'}>
         <HistoryScreen />

@@ -8,10 +8,7 @@ import { ModuleRow } from '../components/ModuleRow';
 import { AiInsightCard } from '../components/AiInsightCard';
 import { WeekBar } from '../components/WeekBar';
 import { MaxSuggestion } from '../components/MaxSuggestion';
-import { ACWRCard } from '../components/ACWRCard';
-import { CNSBudgetCard } from '../components/CNSBudgetCard';
-import { SprintExposureCard } from '../components/SprintExposureCard';
-import { RecentWorkoutsCard } from '../components/RecentWorkoutsCard';
+import { TodayLoadStrip } from '../components/TodayLoadStrip';
 import { HrPrescriptionBanner } from '../components/HrPrescriptionBanner';
 import { RecoveryActivityBadge } from '../components/RecoveryActivityBadge';
 import { MastersSpacingWarning } from '../components/MastersSpacingWarning';
@@ -22,7 +19,7 @@ import { MODE_INSIGHTS } from '../data/sessions';
 const formatToday = (d) =>
   d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
-export function TodayScreen({ onStartSession, onOpenModule }) {
+export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
   const rec = useSessionStore((s) => s.rec);
   const slp = useSessionStore((s) => s.slp);
   const mode = useSessionStore((s) => s.mode);
@@ -51,14 +48,11 @@ export function TodayScreen({ onStartSession, onOpenModule }) {
 
       <WeekComplete />
 
-      {/* Long-term context: training-load trend (ACWR), short-window CNS
-          fatigue, and any backfill suggestions for working maxes from
-          recent set history. */}
-      <ACWRCard />
-      <CNSBudgetCard />
-      <SprintExposureCard />
+      {/* Glanceable training-load summary; full analytics live on the Load tab.
+          Today's HR prescription stays here (it's about today's session) along
+          with any working-max backfill suggestions from recent set history. */}
+      <TodayLoadStrip onOpen={() => onNavigate?.('load')} />
       <HrPrescriptionBanner />
-      <RecentWorkoutsCard />
       <MaxSuggestion />
 
       <ReadinessSliders />

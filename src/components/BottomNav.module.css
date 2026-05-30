@@ -18,16 +18,18 @@
 
 .item {
   flex: 1;
+  min-width: 0; /* allow 6 tabs to share the row without overflow */
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 10px 4px 8px;
+  padding: 9px 2px 7px;
   gap: 3px;
   min-height: var(--tap-min);
   font-family: var(--font-body);
-  font-size: 15px;
+  /* Compact, iOS-tab-bar-sized labels so six tabs fit cleanly at 430px. */
+  font-size: 11px;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   color: var(--t3);
   transition: color 0.15s;
 }
@@ -37,7 +39,7 @@
 }
 
 .icon {
-  font-size: 22px;
+  font-size: 20px;
   line-height: 1;
   transition: transform 0.15s var(--ease-spring);
 }
