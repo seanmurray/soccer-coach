@@ -21,20 +21,29 @@ keys. The dashboard "API Keys" tabs (publishable / legacy anon) are unrelated.
 | `SUPABASE_URL`          | push-*                        | Auto-injected by the platform.                     |
 | `SUPABASE_SERVICE_ROLE_KEY` | push-*                    | Auto-injected by the platform.                     |
 
-## Deploy
+## Deploy — automatic via CI (preferred)
 
-⚠️ Always pass/keep `verify_jwt = false` (config.toml handles this for CLI
-deploys). A deploy that defaults it back **on** will 401 every Shortcut POST at
-the gateway before the function runs.
+`.github/workflows/deploy-functions.yml` deploys all three functions whenever
+`supabase/functions/**` or `supabase/config.toml` changes on `main`. **The repo
+is the source of truth — edit here and push; don't deploy by hand** (dashboard /
+MCP / local CLI) or the live functions drift from git.
+
+One-time setup: add repo secret **`SUPABASE_ACCESS_TOKEN`** (Supabase dashboard
+→ Account → Access Tokens → Generate; then GitHub → Settings → Secrets and
+variables → Actions → New repository secret). Until it's set, the workflow
+fails fast at its guard step.
+
+⚠️ `verify_jwt = false` lives in `config.toml` (single source of truth). A
+deploy that defaults it back **on** would 401 every Shortcut POST at the gateway
+before the function runs.
+
+## Deploy — manual fallback
 
 ```bash
 # one-time
 supabase link --project-ref sxnmxdezkrmtitjlaokq
 
-# deploy one (config.toml supplies verify_jwt=false)
-supabase functions deploy push-workout
-
-# or all three
+# deploy all three (config.toml supplies verify_jwt=false)
 supabase functions deploy push-workout push-biometrics claude-proxy
 ```
 

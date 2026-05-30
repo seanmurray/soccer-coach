@@ -16,6 +16,7 @@ on:
     branches: [main]
     paths:
       - 'supabase/functions/**'
+      - '!supabase/functions/**/*.md' # doc-only changes shouldn't redeploy
       - 'supabase/config.toml'
       - '.github/workflows/deploy-functions.yml'
   workflow_dispatch:
