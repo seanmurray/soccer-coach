@@ -20,10 +20,15 @@ Mirrors the existing `push-biometrics` setup — same `x-api-key` auth, same
 ## Endpoint
 
 ```
-POST https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout
+POST https://sxnmxdezkrmtitjlaokq.supabase.co/functions/v1/push-workout
 Content-Type: application/json
 x-api-key: <SHORTCUTS_API_KEY>
 ```
+
+> **Project moved 2026-05-30.** Soccer now lives in its own Supabase project
+> `sxnmxdezkrmtitjlaokq` (was the shared `oxvtmmiwgmheudgbvpjp`). Update the URL
+> in BOTH Shortcuts (push-workout and push-biometrics) and set the `x-api-key`
+> header — the new project enforces `SHORTCUTS_API_KEY` (the old one did not).
 
 The function upserts on `(source, source_id)` — a Shortcut retry won't
 duplicate the row.
@@ -154,7 +159,7 @@ Toolbox Pro section in the Shortcuts action picker.
      come from the raw samples.
 
    **e. POST it.** `Get Contents of URL`:
-   - URL: `https://oxvtmmiwgmheudgbvpjp.supabase.co/functions/v1/push-workout`
+   - URL: `https://sxnmxdezkrmtitjlaokq.supabase.co/functions/v1/push-workout`
    - Method: `POST`
    - Headers:
      - `Content-Type: application/json`
