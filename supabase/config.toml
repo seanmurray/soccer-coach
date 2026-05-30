@@ -1,0 +1,20 @@
+# Supabase project config — soccer-performance-coach (dedicated project).
+#
+# project_id is the project ref; `supabase link --project-ref sxnmxdezkrmtitjlaokq`
+# or `supabase functions deploy <name> --project-ref sxnmxdezkrmtitjlaokq`.
+project_id = "sxnmxdezkrmtitjlaokq"
+
+# IMPORTANT: all three Shortcut/AI functions authenticate themselves
+# (push-* via x-api-key, claude-proxy is a server-side proxy) and are called
+# WITHOUT a Supabase JWT. They MUST run with verify_jwt = false, otherwise the
+# API gateway rejects every request with 401 before the function body runs.
+# (We hit exactly this regression once when a deploy defaulted verify_jwt on.)
+
+[functions.push-workout]
+verify_jwt = false
+
+[functions.push-biometrics]
+verify_jwt = false
+
+[functions.claude-proxy]
+verify_jwt = false
