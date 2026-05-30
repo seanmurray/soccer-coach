@@ -42,7 +42,7 @@ Add two secrets (names must match exactly — the workflow reads them):
 
 | Name | Value |
 |---|---|
-| `VITE_SUPABASE_URL` | `https://oxvtmmiwgmheudgbvpjp.supabase.co` |
+| `VITE_SUPABASE_URL` | `https://hsbtdqxwdcqvhnarujln.supabase.co` |
 | `VITE_SUPABASE_ANON_KEY` | (copy from your local `.env.local`) |
 
 The workflow injects these at build time; they get baked into the JS bundle.
