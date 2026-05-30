@@ -3,6 +3,12 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # Edge-function-only changes don't affect the PWA bundle — skip the Pages
+    # rebuild for those (they're handled by deploy-functions.yml). A commit that
+    # also touches app code still triggers this (paths-ignore only skips when
+    # EVERY changed file matches).
+    paths-ignore:
+      - 'supabase/**'
   workflow_dispatch:
 
 # Required so the Pages deployment can publish from this workflow.
