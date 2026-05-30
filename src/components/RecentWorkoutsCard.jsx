@@ -38,13 +38,6 @@ function ZoneBar({ zoneSec }) {
 // Reuses the CNSBudgetCard module styles for visual parity with the other
 // load cards on Today.
 
-const SOURCE_LABEL = {
-  apple_health: 'Apple Health',
-  mywellness:   'Technogym',
-  shortcut:     'Shortcut',
-  manual:       'Manual',
-};
-
 const TYPE_LABEL = {
   running:     'Run',
   walking:     'Walk',
@@ -92,7 +85,6 @@ export function RecentWorkoutsCard() {
 
       {data.map((w) => {
         const typeLabel = TYPE_LABEL[w.workout_type] ?? (w.workout_type ?? 'Workout');
-        const sourceLabel = SOURCE_LABEL[w.source] ?? w.source;
         const parts = [fmtDuration(w.duration_sec)];
         const dist = fmtDistance(w.distance_mi);
         if (dist) parts.push(dist);
@@ -110,50 +102,65 @@ export function RecentWorkoutsCard() {
         const zoneSec = zoneSecForWorkout(w, hrMax);
 
         return (
-          <div key={w.id} style={{ padding: '6px 0', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                gap: 10,
-                fontFamily: 'var(--font-mono)',
-                fontSize: 13,
-                color: 'var(--t2)',
-              }}
-            >
-              <span style={{ color: 'var(--t3)', flexShrink: 0, minWidth: 96 }}>
+          <div key={w.id} style={{ padding: '8px 0', borderTop: '0.5px solid rgba(255,255,255,0.06)' }}>
+            {/* Line 1 — workout type + zone chip on the left, date pinned right. */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ color: 'var(--t1)', fontWeight: 600, fontSize: 14 }}>{typeLabel}</span>
+              {zone && (
+                <span
+                  title={`${zone.label} · ${zone.low}-${zone.high} bpm`}
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    letterSpacing: '0.04em',
+                    color: zone.color,
+                    border: `0.5px solid ${zone.color}`,
+                    borderRadius: 4,
+                    padding: '1px 5px',
+                    lineHeight: 1.3,
+                    flexShrink: 0,
+                  }}
+                >
+                  {zone.code}
+                </span>
+              )}
+              {!w.session_id && (
+                <span style={{ color: 'var(--t4)', fontSize: 11, fontFamily: 'var(--font-mono)' }}>unmatched</span>
+              )}
+              <span
+                style={{
+                  marginLeft: 'auto',
+                  flexShrink: 0,
+                  color: 'var(--t3)',
+                  fontSize: 12,
+                  fontFamily: 'var(--font-mono)',
+                }}
+              >
                 {formatDate(w.performed_at)}
               </span>
-              <span style={{ flex: 1, color: 'var(--t1)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                {typeLabel}
-                {zone && (
-                  <span
-                    title={`${zone.label} · ${zone.low}-${zone.high} bpm`}
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 600,
-                      letterSpacing: '0.04em',
-                      color: zone.color,
-                      border: `0.5px solid ${zone.color}`,
-                      borderRadius: 4,
-                      padding: '1px 5px',
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {zone.code}
-                  </span>
-                )}
-                {!w.session_id && <span style={{ color: 'var(--t4)' }}>· unmatched</span>}
-              </span>
-              <span style={{ flexShrink: 0, color: 'var(--t2)' }}>{parts.join(' · ')}</span>
             </div>
+
+            {/* Line 2 — metrics, mono, wrapping so nothing runs off the edge. */}
+            <div
+              style={{
+                marginTop: 4,
+                fontFamily: 'var(--font-mono)',
+                fontSize: 12.5,
+                lineHeight: 1.5,
+                color: 'var(--t2)',
+                overflowWrap: 'anywhere',
+              }}
+            >
+              {parts.join(' · ')}
+            </div>
+
             <ZoneBar zoneSec={zoneSec} />
           </div>
         );
       })}
 
       <div style={{ marginTop: 8, fontSize: 12, color: 'var(--t4)', fontFamily: 'var(--font-mono)' }}>
-        Source: Apple Health (Watch + Mywellness bridge)
+        Source: Apple Health (Apple Watch + GymKit)
       </div>
     </div>
   );
