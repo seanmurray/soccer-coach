@@ -15,7 +15,7 @@ const ROWS = [
   { key: 'body',    label: 'Body feel',  min: 1, max: 5,   step: 1, suffix: '/5' },
   { key: 'mot',     label: 'Motivation', min: 1, max: 5,   step: 1, suffix: '/5' },
   { key: 'battery', label: 'Battery',    sub: 'Athlytic · 0-100', min: 0, max: 100, step: 1, suffix: '%', alt: true },
-  { key: 'stress',  label: 'Stress',     sub: 'Athlytic · 0-60',  min: 0, max: 60,  step: 1, suffix: '',  alt: true },
+  { key: 'stress',  label: 'Stress',     sub: 'Athlytic · 0-100', min: 0, max: 100, step: 1, suffix: '',  alt: true },
 ];
 
 export function ReadinessSliders() {

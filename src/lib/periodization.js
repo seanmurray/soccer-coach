@@ -221,7 +221,7 @@ const WEIGHTS = { battery: 28, stress: 12, rec: 25, slp: 18, body: 10, mot: 7 };
 
 const ABS_NORMALIZE = {
   battery: (v) => v,                                  // 0-100 → 0-100
-  stress:  (v) => Math.max(0, ((60 - v) / 60) * 100), // 0-60 → inverted 0-100
+  stress:  (v) => Math.max(0, 100 - v),               // 0-100 → inverted 0-100
   rec:     (v) => v,                                  // 0-100
   slp:     (v) => v,                                  // 0-100
   body:    (v) => (v / 5) * 100,                      // 1-5 → 0-100
@@ -230,7 +230,7 @@ const ABS_NORMALIZE = {
 
 // SD floor below which the personal history is too flat to derive a
 // meaningful z-score — fall back to absolute scoring for that metric.
-const MIN_SD = { battery: 3, stress: 2 };
+const MIN_SD = { battery: 3, stress: 3 };
 const DEV_SLOPE = 20; // 1 SD from personal norm = ±20 pts around the 50 midpoint
 
 function normalizeReadiness(key, v, baseline) {

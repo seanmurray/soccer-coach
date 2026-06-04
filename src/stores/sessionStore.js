@@ -31,7 +31,7 @@ const initialReadiness = {
   body: 3,    // 1-5
   mot: 3,     // 1-5
   battery: 50, // 0-100, Athlytic
-  stress: 25,  // 0-60, Athlytic
+  stress: 42,  // 0-100, Athlytic (rescaled from old 0-60 default of 25)
 };
 
 export const useSessionStore = create(persist((set, get) => ({
@@ -157,7 +157,23 @@ export const useSessionStore = create(persist((set, get) => ({
   }),
 }), {
   name: 'soccer-coach-session',
+  // Bump when the meaning of any persisted field changes so we can rescale
+  // cached values in `migrate`. v1: Athlytic stress scale 0-60 → 0-100.
+  version: 1,
   storage: createJSONStorage(() => localStorage),
+  migrate: (persisted, fromVersion) => {
+    if (fromVersion < 1 && persisted) {
+      if (persisted.stress != null) {
+        persisted.stress = Math.round((persisted.stress * 100) / 60);
+      }
+      if (persisted._readinessLast?.stress != null) {
+        persisted._readinessLast.stress = Math.round(
+          (persisted._readinessLast.stress * 100) / 60
+        );
+      }
+    }
+    return persisted;
+  },
   // Only persist what's needed to resume mid-workout. `mode`/`score` are
   // derived (recomputed after rehydrate). `_readinessBaseline` is reloaded
   // from Supabase on boot by <ReadinessBaselineSync>. `week` keeps its own

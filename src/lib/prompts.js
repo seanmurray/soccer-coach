@@ -26,7 +26,7 @@ function readinessLines({ rec, slp, body, mot, battery, stress }) {
   if (body    != null) lines.push(`  Body feel ${body}/5`);
   if (mot     != null) lines.push(`  Motivation ${mot}/5`);
   if (battery != null) lines.push(`  Battery ${battery}% (Athlytic)`);
-  if (stress  != null) lines.push(`  Stress ${stress}/60 (Athlytic)`);
+  if (stress  != null) lines.push(`  Stress ${stress}/100 (Athlytic)`);
 
   const objectiveMissing = [rec, slp, battery, stress].every((v) => v == null);
   if (objectiveMissing) {
