@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './lib/queryClient';
 import { BottomNav } from './components/BottomNav';
@@ -19,8 +19,27 @@ import { saveSession } from './lib/saveSession';
 import { fireDebrief } from './lib/debrief';
 import { WARMUP, FRC_SHORT, FRC_FULL } from './data/frc';
 
+// Persist the active bottom-nav tab across reloads. Mobile Chrome aggressively
+// suspends backgrounded tabs and reloads them on return — without this, the
+// user always lands on Today even if they were mid-workout. Sub-tab and
+// in-flight buffers are persisted separately (sessionStore + WorkoutScreen).
+const TAB_KEY = 'soccer-coach-tab';
+const VALID_TABS = ['today', 'workout', 'load', 'history', 'progress', 'settings'];
+function readPersistedTab() {
+  try {
+    const v = localStorage.getItem(TAB_KEY);
+    return VALID_TABS.includes(v) ? v : 'today';
+  } catch {
+    return 'today';
+  }
+}
+
 export default function App() {
-  const [tab, setTab] = useState('today');
+  const [tab, setTab] = useState(readPersistedTab);
+  useEffect(() => {
+    try { localStorage.setItem(TAB_KEY, tab); } catch { /* ignore */ }
+  }, [tab]);
+
   const [moduleIndex, setModuleIndex] = useState(null);
   const [saving, setSaving] = useState(false);
   // Post-session sheet: shown after Finish Session is tapped, captures RPE

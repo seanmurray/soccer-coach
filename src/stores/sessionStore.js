@@ -1,11 +1,17 @@
 // Session store — readiness, derived mode, current-day selection, week, and
 // in-flight workout buffers (sets, exercise perf, module usage).
 //
-// Stays in memory; persistence to Supabase happens on `Finish Session`. The
-// only thing we mirror to localStorage is `last_session_day_type` for the
-// conditioning-interference banner (spec §14).
+// Persistence to Supabase happens on `Finish Session`. We ALSO mirror the
+// in-flight state to localStorage via zustand's `persist` middleware so the
+// session survives a PWA reload — mobile Chrome aggressively suspends
+// backgrounded tabs, and without this you lose mid-workout buffers (e.g. a
+// logged Norwegian 4×4 result) whenever you switch apps and come back.
+//
+// `week` keeps its standalone localStorage entry (legacy `soccer-coach-week`)
+// so existing installs don't lose their pointer.
 
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { computeMode } from '../lib/periodization';
 
 const WEEK_KEY = 'soccer-coach-week';
@@ -28,7 +34,7 @@ const initialReadiness = {
   stress: 25,  // 0-60, Athlytic
 };
 
-export const useSessionStore = create((set, get) => ({
+export const useSessionStore = create(persist((set, get) => ({
   // ── Readiness ──
   // Each value may be `null` to indicate "no data available" (e.g. didn't
   // wear the watch overnight). computeMode reweights based on present
@@ -149,6 +155,35 @@ export const useSessionStore = create((set, get) => ({
     sessionStartedAt: null,
     sessionEndedAt: null,
   }),
+}), {
+  name: 'soccer-coach-session',
+  storage: createJSONStorage(() => localStorage),
+  // Only persist what's needed to resume mid-workout. `mode`/`score` are
+  // derived (recomputed after rehydrate). `_readinessBaseline` is reloaded
+  // from Supabase on boot by <ReadinessBaselineSync>. `week` keeps its own
+  // legacy key — see readPersistedWeek above.
+  partialize: (state) => ({
+    rec: state.rec, slp: state.slp, body: state.body, mot: state.mot,
+    battery: state.battery, stress: state.stress,
+    _readinessLast: state._readinessLast,
+    dayType: state.dayType,
+    setsBuffer: state.setsBuffer,
+    exercisePerfBuffer: state.exercisePerfBuffer,
+    moduleUsageBuffer: state.moduleUsageBuffer,
+    warmupChecked: state.warmupChecked,
+    frcShortChecked: state.frcShortChecked,
+    frcFullChecked: state.frcFullChecked,
+    tabsVisited: state.tabsVisited,
+    sessionStartedAt: state.sessionStartedAt,
+    sessionEndedAt: state.sessionEndedAt,
+  }),
+  onRehydrateStorage: () => (state) => {
+    // After rehydration, recompute mode/score from the restored readiness.
+    if (state) {
+      const { mode, score } = computeMode(state, state._readinessBaseline);
+      useSessionStore.setState({ mode, score });
+    }
+  },
 }));
 
 // Initialize derived fields once at boot.

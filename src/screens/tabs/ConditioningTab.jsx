@@ -111,12 +111,32 @@ export function ConditioningTab() {
 // First tag is the primary measurement (avg mph) — measurementParse picks
 // that up so the value flows into the Progress charts under exercise_key
 // = 'norwegian_4x4'.
+
+// Pull int1..int4 back out of the encoded notes so a PWA reload mid-session
+// restores the typed values + the "Logged ✓" state from the persisted buffer.
+function parseIntervalsFromNotes(notes) {
+  if (!notes) return null;
+  const out = ['', '', '', ''];
+  for (let i = 1; i <= 4; i++) {
+    const m = notes.match(new RegExp(`int${i}:([0-9.]+)`));
+    if (m) out[i - 1] = m[1];
+  }
+  return out.some(Boolean) ? out : null;
+}
+
 function Norwegian4x4Card({ protocol, warning }) {
   const dayType = useSessionStore((s) => s.dayType);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
+  // Look for an already-logged 4×4 in the persisted buffer — on reload this
+  // is how we know to show "Logged ✓" and pre-fill the interval inputs.
+  const existing = useSessionStore((s) =>
+    s.exercisePerfBuffer.find((p) => p.exercise_key === 'norwegian_4x4')
+  );
 
-  const [intervals, setIntervals] = useState(['', '', '', '']);
-  const [saved, setSaved] = useState(false);
+  const [intervals, setIntervals] = useState(
+    () => parseIntervalsFromNotes(existing?.notes) ?? ['', '', '', '']
+  );
+  const [saved, setSaved] = useState(!!existing);
 
   const nums = intervals.map((v) => (v === '' ? null : Number(v)));
   const validCount = nums.filter((n) => Number.isFinite(n) && n > 0).length;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './WorkoutScreen.module.css';
 import common from '../components/Common.module.css';
 import { useShallow } from 'zustand/react/shallow';
@@ -37,6 +37,18 @@ const TAB_COMPONENTS = {
   conditioning: ConditioningTab,
 };
 
+// Persist the workout sub-tab so a PWA reload mid-workout returns the user to
+// the same block (e.g. Conditioning) rather than dropping them back to Warm-up.
+const SUBTAB_KEY = 'soccer-coach-workout-subtab';
+function readPersistedSubTab(tabs) {
+  try {
+    const v = localStorage.getItem(SUBTAB_KEY);
+    return tabs.find((t) => t.id === v) ? v : tabs[0].id;
+  } catch {
+    return tabs[0].id;
+  }
+}
+
 export function WorkoutScreen({ onFinish }) {
   // Keep the selector flat — useShallow only compares one level deep, so a
   // nested object literal would produce a new identity every render and
@@ -54,13 +66,17 @@ export function WorkoutScreen({ onFinish }) {
   );
 
   const tabs = dayType === 'cond' ? COND_TABS : NON_COND_TABS;
-  const [tab, setTab] = useState(tabs[0].id);
+  const [tab, setTab] = useState(() => readPersistedSubTab(tabs));
 
   // If the user changes day type while on the workout screen, reset to the
   // first valid tab for the new day.
   if (!tabs.find((t) => t.id === tab)) {
     setTab(tabs[0].id);
   }
+
+  useEffect(() => {
+    try { localStorage.setItem(SUBTAB_KEY, tab); } catch { /* ignore */ }
+  }, [tab]);
 
   const handleTab = (id) => {
     setTab(id);
