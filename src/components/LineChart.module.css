@@ -22,7 +22,7 @@
 
 .summary {
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 17px;
   color: var(--t3);
 }
 .summary strong { color: var(--green); font-weight: 600; }
@@ -35,7 +35,7 @@
 }
 
 .axis    { stroke: var(--t4); stroke-width: 0.5; }
-.tick    { fill: var(--t3); font-family: var(--font-mono); font-size: 10px; }
+.tick    { fill: var(--t3); font-family: var(--font-mono); font-size: 14px; }
 .gridline{ stroke: rgba(255, 255, 255, 0.05); stroke-width: 0.5; }
 
 .line {
@@ -52,5 +52,5 @@
   padding: 32px 12px;
   text-align: center;
   color: var(--t3);
-  font-size: 14px;
+  font-size: 17px;
 }

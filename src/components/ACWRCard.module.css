@@ -20,7 +20,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
 .zoneHigh .ratio    { color: var(--red); }
 
 .zoneLabel {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -52,14 +52,14 @@
 .zoneHigh .zoneLabel    { color: var(--red); }
 
 .text {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--t2);
   line-height: 1.5;
 }
 
 .detail {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 16px;
   color: var(--t3);
   margin-top: 6px;
 }

@@ -8,7 +8,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -27,7 +27,7 @@
 .row:last-child { border-bottom: none; }
 
 .text {
-  font-size: 15px;
+  font-size: 18px;
   color: var(--t2);
   line-height: 1.5;
 }
@@ -44,7 +44,7 @@
   height: 36px;
   padding: 0 14px;
   border-radius: 100px;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;

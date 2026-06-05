@@ -9,7 +9,7 @@
 }
 
 .colLabel {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -131,7 +131,7 @@
 }
 
 .adaptNote {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--amber);
   padding: 10px 12px;
   background: var(--amber-bg);

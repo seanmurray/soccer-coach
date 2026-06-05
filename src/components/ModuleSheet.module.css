@@ -58,7 +58,7 @@
 }
 
 .sub {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -91,7 +91,7 @@
 .section { margin-bottom: 22px; }
 
 .sectionTitle {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -129,7 +129,7 @@
 }
 .itemRx {
   font-family: var(--font-mono);
-  font-size: 15px;
+  font-size: 18px;
   color: var(--green);
   margin-bottom: 6px;
 }
@@ -184,7 +184,7 @@
 .video {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--green);
   border: 0.5px solid var(--green-line);

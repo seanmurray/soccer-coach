@@ -7,7 +7,7 @@
 }
 
 .title {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -22,7 +22,7 @@
 }
 
 .subtext {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--green);
   line-height: 1.5;
   margin-top: 8px;

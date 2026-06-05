@@ -20,7 +20,7 @@
   color: var(--t1);
 }
 .phase {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -38,7 +38,7 @@
   padding: 8px 4px;
   border-radius: var(--r2);
   background: var(--bg-input);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -74,7 +74,7 @@
   padding: 8px 12px;
   border-radius: var(--r2);
   background: var(--bg-input);
-  font-size: 15px;
+  font-size: 18px;
   color: var(--t2);
 }
 .checkDone   { color: var(--green); }
@@ -85,7 +85,7 @@
 }
 
 .blockNote {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--red);
   line-height: 1.5;
   margin: 8px 0 4px;
@@ -99,7 +99,7 @@
   background: var(--bg-input);
   margin: 4px 0;
   font-family: var(--font-mono);
-  font-size: 14px;
+  font-size: 17px;
   color: var(--t3);
 }
 .rpePreview strong { color: var(--t1); font-weight: 600; }
@@ -111,7 +111,7 @@
   border: none;
   border-radius: var(--r2);
   padding: 12px;
-  font-size: 15px;
+  font-size: 18px;
   color: var(--t1);
   font-family: inherit;
   resize: vertical;
@@ -119,7 +119,7 @@
 .note:focus { outline: 2px solid var(--green); }
 
 .sectionLabel {
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;

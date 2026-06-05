@@ -12,7 +12,7 @@
 }
 
 .maxCardLabel {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -68,7 +68,7 @@
   border-radius: var(--r2);
   background: var(--bg-card);
   color: var(--t3);
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -78,7 +78,7 @@
 .segment.active { background: var(--green); color: #0a0a0a; }
 
 .seasonHint {
-  font-size: 14px;
+  font-size: 17px;
   color: var(--t2);
   line-height: 1.5;
   margin-bottom: 16px;
@@ -101,7 +101,7 @@
 }
 .row:last-child { border-bottom: none; }
 .rowLabel { font-size: 17px; color: var(--t1); }
-.rowSub   { font-size: 14px; color: var(--t2); margin-top: 3px; }
+.rowSub   { font-size: 17px; color: var(--t2); margin-top: 3px; }
 
 /* iOS-style toggle */
 .toggle { position: relative; width: 52px; height: 32px; flex-shrink: 0; }

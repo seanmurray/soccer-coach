@@ -9,7 +9,7 @@
 }
 
 .label {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -51,7 +51,7 @@
 }
 
 .cue {
-  font-size: 15px;
+  font-size: 18px;
   color: var(--t2);
   font-style: italic;
   margin-top: 5px;
@@ -61,7 +61,7 @@
 .badge {
   display: inline-block;
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: 15px;
   padding: 2px 7px;
   border-radius: 4px;
   background: var(--purple-bg);
@@ -72,7 +72,7 @@
 .video {
   display: inline-flex;
   align-items: center;
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--green);
   border: 0.5px solid var(--green-line);

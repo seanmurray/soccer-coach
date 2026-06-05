@@ -1,5 +1,5 @@
 .groupHeader {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -23,7 +23,7 @@
   height: 38px;
   padding: 0 16px;
   border-radius: 100px;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--t3);
   background: var(--bg-card);
@@ -54,7 +54,7 @@
   justify-content: center;
   gap: 16px;
   margin-top: 8px;
-  font-size: 13px;
+  font-size: 16px;
   color: var(--t3);
 }
 

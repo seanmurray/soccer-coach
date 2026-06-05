@@ -14,20 +14,20 @@
   background: linear-gradient(135deg, var(--amber-bg), rgba(255, 214, 10, 0.2));
   border: 0.5px solid var(--amber-line);
   color: var(--amber);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .pill.compact {
-  font-size: 12px;
+  font-size: 15px;
   padding: 3px 8px;
 }
 
-.medal { font-size: 14px; line-height: 1; }
+.medal { font-size: 17px; line-height: 1; }
 .label { color: var(--t1); font-weight: 500; }
 .value { font-family: var(--font-mono); }
-.delta { color: var(--green); font-family: var(--font-mono); font-size: 12px; }
+.delta { color: var(--green); font-family: var(--font-mono); font-size: 15px; }
 
 .summary {
   display: inline-flex;
@@ -38,7 +38,7 @@
   background: var(--amber-bg);
   border: 0.5px solid var(--amber-line);
   color: var(--amber);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;

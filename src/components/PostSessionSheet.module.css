@@ -54,7 +54,7 @@
 }
 
 .sub {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -126,7 +126,7 @@
   background: var(--bg-pill);
   color: var(--t2);
   border-radius: var(--r3);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
   border: 0.5px solid rgba(255, 255, 255, 0.08);
 }
