@@ -1,0 +1,145 @@
+/* ─── DESIGN TOKENS ───────────────────────────────────────────
+   Young Athlete theme. Distinct from the soccer app: deep-navy base,
+   energetic accents, and a deliberately LARGE type scale for an 11-year-old
+   reading at arm's length on an iPad. Nothing below 16px. */
+
+:root {
+  /* Backgrounds — deep navy, friendlier than the soccer app's pure black */
+  --bg:        #0b1220;
+  --bg-card:   #131c2e;
+  --bg-raised: #1b2740;
+  --bg-input:  #22314f;
+  --bg-pill:   #2a3a5c;
+
+  /* Text */
+  --t1: #f6f9ff;
+  --t2: #b3c0d8;
+  --t3: #7888a8;
+  --t4: #45506a;
+
+  /* Accents */
+  --blue:      #3a8dff;
+  --blue-bg:   rgba(58, 141, 255, 0.14);
+  --blue-line: rgba(58, 141, 255, 0.35);
+  --green:     #32d977;
+  --green-bg:  rgba(50, 217, 119, 0.14);
+  --green-line:rgba(50, 217, 119, 0.35);
+  --amber:     #ffc83d;
+  --amber-bg:  rgba(255, 200, 61, 0.14);
+  --orange:    #ff8a3d;
+  --orange-bg: rgba(255, 138, 61, 0.14);
+  --purple:    #a87bff;
+  --purple-bg: rgba(168, 123, 255, 0.14);
+  --red:       #ff5a52;
+
+  /* Pattern tints — one color per movement family */
+  --pat-squat:  #3a8dff;
+  --pat-hinge:  #a87bff;
+  --pat-push:   #ff8a3d;
+  --pat-pull:   #32d977;
+  --pat-lunge:  #ffc83d;
+  --pat-core:   #ff5a52;
+  --pat-jump:   #34d6c8;
+  --pat-sprint: #ff6fb5;
+  --pat-throw:  #c8a24a;
+  --pat-move:   #6ea8ff;
+
+  /* Radii — rounder/chunkier than the soccer app */
+  --r1: 14px;
+  --r2: 20px;
+  --r3: 26px;
+  --r4: 34px;
+
+  /* Safe-area insets */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+
+  /* Big touch targets for kid fingers */
+  --tap: 60px;
+  --tap-min: 52px;
+
+  /* Layout — wider column for iPad */
+  --app-max-w: 560px;
+  --bottom-nav-h: 78px;
+
+  --font-display: 'Bebas Neue', -apple-system, sans-serif;
+  --font-body:    'DM Sans', -apple-system, sans-serif;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overscroll-behavior: none; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--t1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  font-size: 18px;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+input, textarea, select { font-family: inherit; color-scheme: dark; }
+a { color: var(--blue); text-decoration: none; }
+
+/* ─── APP SHELL ─────────────────────────────────────────────── */
+#root {
+  min-height: 100svh;
+  width: 100%;
+  max-width: var(--app-max-w);
+  margin: 0 auto;
+  position: relative;
+}
+
+.screen {
+  min-height: 100svh;
+  padding:
+    calc(var(--sat) + 20px)
+    18px
+    calc(var(--sab) + var(--bottom-nav-h) + 20px);
+  animation: fadeUp 0.24s ease;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ─── TYPOGRAPHY ────────────────────────────────────────────── */
+.title-xl { font-family: var(--font-display); font-size: 52px; letter-spacing: 0.02em; line-height: 0.95; color: var(--t1); }
+.title-lg { font-family: var(--font-display); font-size: 40px; letter-spacing: 0.02em; line-height: 1; color: var(--t1); }
+.title-md { font-family: var(--font-display); font-size: 30px; letter-spacing: 0.02em; color: var(--t1); }
+
+.overline {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+.body    { font-size: 18px; line-height: 1.6; color: var(--t2); }
+.caption { font-size: 16px; color: var(--t3); }
+
+/* Horizontal scroll rows without a visible scrollbar */
+.scroll-x {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.scroll-x::-webkit-scrollbar { display: none; }

@@ -1,0 +1,142 @@
+.header { margin-bottom: 20px; }
+.greeting { margin-top: 4px; }
+
+/* ─── Context picker ─────────────────────────────────────── */
+.sectionLabel {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin: 22px 0 12px;
+}
+
+.contextRow {
+  display: flex;
+  gap: 12px;
+}
+
+.contextBtn {
+  flex: 1;
+  background: var(--bg-card);
+  border: 2px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 20px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.contextBtn.active { border-color: var(--blue); background: var(--blue-bg); }
+.contextEmoji { font-size: 40px; }
+.contextName { font-size: 20px; font-weight: 700; color: var(--t1); }
+.contextNote { font-size: 15px; color: var(--t3); }
+
+/* ─── Template cards ─────────────────────────────────────── */
+.templateCard {
+  width: 100%;
+  text-align: left;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 18px;
+  margin-bottom: 12px;
+  transition: all 0.15s ease;
+}
+.templateCard:active { transform: scale(0.99); }
+.templateName { font-size: 23px; font-weight: 800; color: var(--t1); }
+.templateEmphasis { font-size: 15px; font-weight: 600; color: var(--blue); margin-top: 3px; }
+.templateBlurb { font-size: 16px; color: var(--t2); line-height: 1.5; margin-top: 8px; }
+.templateGo {
+  display: inline-block;
+  margin-top: 14px;
+  background: var(--blue);
+  color: #04101f;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 12px 20px;
+  border-radius: var(--r1);
+}
+
+/* ─── Active session ─────────────────────────────────────── */
+.sessTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.backBtn {
+  background: var(--bg-raised);
+  color: var(--t2);
+  font-size: 16px;
+  font-weight: 700;
+  padding: 9px 14px;
+  border-radius: var(--r1);
+}
+.sessName { font-size: 17px; font-weight: 700; color: var(--t2); }
+
+.progressWrap { margin: 14px 0 22px; }
+.progressBar {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bg-raised);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 999px;
+  transition: width 0.3s var(--ease-spring);
+}
+.progressText {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--t2);
+  margin-top: 8px;
+}
+
+.blockLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 22px 0 12px;
+}
+.blockTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--t1);
+}
+.blockNote { font-size: 15px; color: var(--t3); }
+
+.finishBtn {
+  width: 100%;
+  margin-top: 26px;
+  background: var(--green);
+  color: #04210f;
+  font-size: 22px;
+  font-weight: 800;
+  padding: 20px;
+  border-radius: var(--r2);
+  letter-spacing: 0.02em;
+}
+.finishBtn:disabled { opacity: 0.45; }
+
+/* ─── Success ────────────────────────────────────────────── */
+.success {
+  text-align: center;
+  padding: 40px 20px;
+}
+.successEmoji { font-size: 72px; }
+.successTitle { font-family: var(--font-display); font-size: 44px; color: var(--green); margin-top: 10px; }
+.successText { font-size: 18px; color: var(--t2); margin-top: 8px; line-height: 1.5; }
+.successBtn {
+  margin-top: 26px;
+  background: var(--bg-raised);
+  color: var(--t1);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px 28px;
+  border-radius: var(--r2);
+}

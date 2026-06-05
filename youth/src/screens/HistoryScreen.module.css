@@ -1,0 +1,56 @@
+.header { margin-bottom: 18px; }
+
+.statRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 18px 12px;
+  text-align: center;
+}
+.statBig {
+  font-family: var(--font-display);
+  font-size: 46px;
+  line-height: 1;
+  color: var(--t1);
+}
+.statBig.flame { color: var(--orange); }
+.statLabel {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-top: 6px;
+}
+
+.sessionCard {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.sessionEmoji { font-size: 34px; flex-shrink: 0; }
+.sessionMid { flex: 1; min-width: 0; }
+.sessionTitle { font-size: 19px; font-weight: 700; color: var(--t1); }
+.sessionMeta { font-size: 15px; color: var(--t3); margin-top: 2px; }
+.sessionFeel { font-size: 28px; flex-shrink: 0; }
+
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--t3);
+}
+.emptyEmoji { font-size: 60px; }
+.emptyText { font-size: 18px; margin-top: 14px; line-height: 1.5; }
+
+.loading { text-align: center; color: var(--t3); padding: 40px; font-size: 17px; }

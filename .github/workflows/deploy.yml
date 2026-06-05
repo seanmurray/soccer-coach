@@ -38,7 +38,7 @@ jobs:
       - name: Install
         run: npm ci
 
-      - name: Build
+      - name: Build (soccer app)
         env:
           # Project Pages live at /<repo-name>/, so Vite needs that as its
           # base path. Derived from the workflow context — no manual config.
@@ -46,6 +46,28 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
+
+      # ── Young Athlete sibling app ──────────────────────────────────────
+      # Lives in /youth, shares the same Supabase project, and is published as
+      # a sub-route at /<repo-name>/youth/. Built AFTER the soccer app (whose
+      # build empties dist/) and copied into dist/youth so both ship in one
+      # Pages artifact. The kid installs the /youth/ URL as its own PWA.
+      - name: Install (youth app)
+        run: npm ci
+        working-directory: youth
+
+      - name: Build (youth app)
+        env:
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/youth/
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: npm run build
+        working-directory: youth
+
+      - name: Nest youth build under dist/youth
+        run: |
+          mkdir -p dist/youth
+          cp -r youth/dist/. dist/youth/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

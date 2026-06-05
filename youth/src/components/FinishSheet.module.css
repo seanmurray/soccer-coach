@@ -1,0 +1,78 @@
+.scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 100;
+  animation: fade 0.2s ease;
+}
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.sheet {
+  width: 100%;
+  max-width: var(--app-max-w);
+  background: var(--bg-card);
+  border-radius: var(--r3) var(--r3) 0 0;
+  padding: 24px 18px calc(var(--sab) + 24px);
+  animation: rise 0.28s var(--ease-spring);
+}
+@keyframes rise { from { transform: translateY(100%); } to { transform: none; } }
+
+.title { font-family: var(--font-display); font-size: 34px; color: var(--t1); text-align: center; }
+.sub { font-size: 16px; color: var(--t3); text-align: center; margin-top: 4px; }
+
+.feelRow {
+  display: flex;
+  gap: 10px;
+  margin: 22px 0;
+}
+.feel {
+  flex: 1;
+  background: var(--bg-raised);
+  border: 2px solid transparent;
+  border-radius: var(--r2);
+  padding: 16px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.feel.on { border-color: var(--blue); background: var(--blue-bg); }
+.feelEmoji { font-size: 38px; }
+.feelLabel { font-size: 15px; font-weight: 600; color: var(--t2); }
+
+.note {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r1);
+  color: var(--t1);
+  font-size: 17px;
+  padding: 14px;
+  resize: none;
+  margin-bottom: 18px;
+}
+
+.actions { display: flex; gap: 10px; }
+.cancel {
+  flex: 1;
+  background: var(--bg-raised);
+  color: var(--t2);
+  font-size: 18px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: var(--r2);
+}
+.save {
+  flex: 2;
+  background: var(--green);
+  color: #04210f;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 16px;
+  border-radius: var(--r2);
+}
+.save:disabled { opacity: 0.5; }

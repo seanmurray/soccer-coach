@@ -39,6 +39,11 @@ export default defineConfig(({ mode }) => {
         // Supabase and Anthropic so they bypass the SW.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: 'index.html',
+        // The Young Athlete app is published as a sibling sub-route at
+        // /soccer-coach/youth/ with its own service worker. This SW's scope
+        // (/soccer-coach/) would otherwise catch those navigations and serve
+        // the soccer shell — deny /youth/ so the youth app's own SW handles it.
+        navigateFallbackDenylist: [/\/youth\//],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\/.*/i,
