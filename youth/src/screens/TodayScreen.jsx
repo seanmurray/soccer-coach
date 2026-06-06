@@ -6,6 +6,7 @@ import { EXERCISE_BY_KEY } from '../data/exercises';
 import { ExerciseCard } from '../components/ExerciseCard';
 import { FinishSheet } from '../components/FinishSheet';
 import { saveYouthSession } from '../lib/saveSession';
+import { sessionXp } from '../lib/xp';
 
 // In-progress session is persisted so an iPad PWA reload mid-workout keeps the
 // checkmarks (Safari suspends/reloads backgrounded tabs).
@@ -60,7 +61,7 @@ export function TodayScreen() {
     const count = session.done.length;
     setFinishing(false);
     setSession(null);
-    setJustFinished({ count });
+    setJustFinished({ count, xp: sessionXp(count) });
     queryClient.invalidateQueries({ queryKey: ['youth_sessions'] });
   };
 
@@ -75,6 +76,7 @@ export function TodayScreen() {
             You finished {justFinished.count} {justFinished.count === 1 ? 'move' : 'moves'} today.
             <br />Keep the streak going!
           </div>
+          <div className={styles.xpEarned}>+{justFinished.xp} XP</div>
           <button type="button" className={styles.successBtn} onClick={() => setJustFinished(null)}>
             Back to start
           </button>

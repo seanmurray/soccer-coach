@@ -131,6 +131,18 @@
 .successEmoji { font-size: 72px; }
 .successTitle { font-family: var(--font-display); font-size: 44px; color: var(--green); margin-top: 10px; }
 .successText { font-size: 18px; color: var(--t2); margin-top: 8px; line-height: 1.5; }
+.xpEarned {
+  display: inline-block;
+  margin-top: 18px;
+  font-family: var(--font-display);
+  font-size: 32px;
+  color: #04101f;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  padding: 8px 22px;
+  border-radius: 999px;
+  animation: pop 0.45s var(--ease-spring);
+}
+@keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: none; opacity: 1; } }
 .successBtn {
   margin-top: 26px;
   background: var(--bg-raised);

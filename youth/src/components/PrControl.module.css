@@ -1,0 +1,64 @@
+.wrap {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: var(--r1);
+  background: var(--amber-bg);
+  border: 1px solid rgba(255, 200, 61, 0.3);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.medal { font-size: 24px; }
+.label { font-size: 15px; font-weight: 700; color: var(--amber); flex: 1; }
+.best { font-size: 20px; font-weight: 800; color: var(--t1); }
+.none { font-size: 16px; color: var(--t3); }
+
+.logBtn {
+  margin-top: 12px;
+  width: 100%;
+  background: var(--amber);
+  color: #2a1c00;
+  font-size: 17px;
+  font-weight: 800;
+  padding: 13px;
+  border-radius: var(--r1);
+}
+
+.form { margin-top: 12px; }
+.inputRow { display: flex; gap: 10px; align-items: center; }
+.input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r1);
+  color: var(--t1);
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+  padding: 14px;
+}
+.unit { font-size: 17px; font-weight: 700; color: var(--t2); min-width: 44px; }
+
+.btns { display: flex; gap: 10px; margin-top: 10px; }
+.cancel {
+  flex: 1; background: var(--bg-raised); color: var(--t2);
+  font-size: 16px; font-weight: 700; padding: 12px; border-radius: var(--r1);
+}
+.save {
+  flex: 2; background: var(--green); color: #04210f;
+  font-size: 16px; font-weight: 800; padding: 12px; border-radius: var(--r1);
+}
+.save:disabled { opacity: 0.5; }
+
+.celebrate {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--green);
+  animation: pop 0.4s var(--ease-spring);
+}
+@keyframes pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }

@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { BottomNav } from './components/BottomNav';
 import { TodayScreen } from './screens/TodayScreen';
 import { LibraryScreen } from './screens/LibraryScreen';
-import { HistoryScreen } from './screens/HistoryScreen';
+import { ProgressScreen } from './screens/ProgressScreen';
 
 // Persist the active tab so an iPad PWA reload (Safari suspends backgrounded
 // tabs) returns the kid to where he was instead of always Today.
 const TAB_KEY = 'ya-tab';
-const VALID_TABS = ['today', 'library', 'history'];
+const VALID_TABS = ['today', 'library', 'progress'];
 function readTab() {
   try {
     const v = localStorage.getItem(TAB_KEY);
@@ -31,8 +31,8 @@ export default function App() {
       <div hidden={tab !== 'library'}>
         <LibraryScreen />
       </div>
-      <div hidden={tab !== 'history'}>
-        <HistoryScreen />
+      <div hidden={tab !== 'progress'}>
+        <ProgressScreen />
       </div>
       <BottomNav active={tab} onChange={setTab} />
     </>

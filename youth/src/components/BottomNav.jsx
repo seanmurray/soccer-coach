@@ -1,9 +1,9 @@
 import styles from './BottomNav.module.css';
 
 const TABS = [
-  { id: 'today',   label: 'Today',   icon: '🔥' },
-  { id: 'library', label: 'Moves',   icon: '📚' },
-  { id: 'history', label: 'Streak',  icon: '⭐' },
+  { id: 'today',    label: 'Today',    icon: '🔥' },
+  { id: 'library',  label: 'Moves',    icon: '📚' },
+  { id: 'progress', label: 'Progress', icon: '🏆' },
 ];
 
 export function BottomNav({ active, onChange }) {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import styles from './ExerciseCard.module.css';
 import { PATTERNS, EQUIPMENT } from '../data/exercises';
+import { PrControl } from './PrControl';
 
 // One exercise. Always shows name + prescription + a prominent "Watch" button
 // (video is the key teaching tool for a beginner). Tap the card to expand the
@@ -73,6 +74,7 @@ export function ExerciseCard({ exercise, done = false, onToggle, defaultOpen = f
               <span>{c}</span>
             </div>
           ))}
+          {exercise.pr && <PrControl exercise={exercise} />}
         </div>
       )}
     </div>

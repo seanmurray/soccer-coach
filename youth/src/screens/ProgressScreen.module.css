@@ -1,0 +1,123 @@
+.header { margin-bottom: 18px; }
+
+/* ── Level hero ─────────────────────────────────────────── */
+.levelCard {
+  background: linear-gradient(135deg, var(--bg-raised), var(--bg-card));
+  border: 1px solid var(--blue-line);
+  border-radius: var(--r3);
+  padding: 20px;
+  margin-bottom: 22px;
+}
+.levelTop { display: flex; align-items: center; gap: 12px; }
+.levelBadge {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #04101f;
+  font-family: var(--font-display);
+  font-size: 30px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.levelName { font-family: var(--font-display); font-size: 36px; color: var(--t1); line-height: 1; }
+.levelSub { font-size: 15px; color: var(--t3); margin-top: 2px; }
+
+.xpBar {
+  height: 16px;
+  border-radius: 999px;
+  background: var(--bg-input);
+  overflow: hidden;
+  margin: 16px 0 8px;
+}
+.xpFill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  transition: width 0.6s var(--ease-spring);
+}
+.xpMeta { display: flex; justify-content: space-between; font-size: 15px; color: var(--t2); font-weight: 600; }
+
+/* ── Ring + weekly goal ─────────────────────────────────── */
+.ringRow { display: flex; align-items: center; gap: 18px; margin-bottom: 22px; }
+.ringSide { flex: 1; }
+.streakBig {
+  font-family: var(--font-display);
+  font-size: 44px;
+  color: var(--orange);
+  line-height: 1;
+}
+.streakLabel { font-size: 14px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--t3); margin-top: 2px; }
+.totalLine { font-size: 16px; color: var(--t2); margin-top: 12px; }
+
+.goalStepper { display: flex; align-items: center; gap: 12px; margin-top: 14px; }
+.goalLabel { font-size: 14px; color: var(--t3); }
+.stepBtn {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--bg-raised); color: var(--t1);
+  font-size: 20px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+}
+.goalVal { font-size: 17px; font-weight: 700; color: var(--t1); min-width: 64px; text-align: center; }
+
+/* ── Section ────────────────────────────────────────────── */
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 26px;
+  letter-spacing: 0.02em;
+  color: var(--t1);
+  margin: 26px 0 12px;
+}
+
+/* ── Badges ─────────────────────────────────────────────── */
+.badgeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.badge {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 14px 8px;
+  text-align: center;
+}
+.badge.earned { background: var(--green-bg); border-color: var(--green-line); }
+.badgeEmoji { font-size: 32px; filter: grayscale(1) opacity(0.4); }
+.badge.earned .badgeEmoji { filter: none; }
+.badgeLabel { font-size: 13px; font-weight: 700; color: var(--t2); margin-top: 6px; line-height: 1.2; }
+.badge.earned .badgeLabel { color: var(--t1); }
+.badgeProg { font-size: 12px; color: var(--t3); margin-top: 3px; }
+
+/* ── Records ────────────────────────────────────────────── */
+.recordRow {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.recordMedal { font-size: 26px; }
+.recordName { flex: 1; font-size: 17px; font-weight: 600; color: var(--t1); }
+.recordVal { font-size: 20px; font-weight: 800; color: var(--amber); }
+.hint { font-size: 16px; color: var(--t3); line-height: 1.5; }
+
+/* ── Sessions ───────────────────────────────────────────── */
+.sessionCard {
+  display: flex; align-items: center; gap: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-raised);
+  border-radius: var(--r2);
+  padding: 14px 16px;
+  margin-bottom: 10px;
+}
+.sessionEmoji { font-size: 30px; flex-shrink: 0; }
+.sessionMid { flex: 1; min-width: 0; }
+.sessionTitle { font-size: 18px; font-weight: 700; color: var(--t1); }
+.sessionMeta { font-size: 14px; color: var(--t3); margin-top: 2px; }
+.sessionFeel { font-size: 26px; flex-shrink: 0; }
+
+.loading { text-align: center; color: var(--t3); padding: 40px; font-size: 17px; }
+.empty { text-align: center; padding: 30px 20px; color: var(--t3); }
+.emptyEmoji { font-size: 50px; }
+.emptyText { font-size: 17px; margin-top: 12px; line-height: 1.5; }
