@@ -18,3 +18,8 @@ verify_jwt = false
 
 [functions.claude-proxy]
 verify_jwt = false
+
+# Called from a Postgres trigger via pg_net (not from the browser) and
+# authenticates itself via the x-notify-secret header.
+[functions.youth-notify]
+verify_jwt = false
