@@ -59,7 +59,7 @@ export default function App() {
   const getSnapshot = () => {
     const s = useSessionStore.getState();
     return {
-      rec: s.rec, slp: s.slp, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
+      rec: s.rec, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
       mode: s.mode, dayType: s.dayType, week: s.week,
       setsBuffer: s.setsBuffer,
       exercisePerfBuffer: s.exercisePerfBuffer,

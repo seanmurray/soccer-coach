@@ -11,7 +11,7 @@ import { MODE_INSIGHTS } from '../data/sessions';
 
 export function useSessionCue({
   sessionStartedAt,
-  rec, slp, body, mot, battery, stress,
+  rec, body, mot, battery, stress,
   mode, dayType, week,
 }) {
   const fallback = MODE_INSIGHTS[mode]?.[dayType] ?? '';
@@ -24,7 +24,7 @@ export function useSessionCue({
     retry: 0,
     queryFn: async () => {
       const { system, messages, maxTokens } = buildSessionCuePrompt({
-        rec, slp, body, mot, battery, stress,
+        rec, body, mot, battery, stress,
         mode, dayType, week,
       });
       return askClaude({ system, messages, maxTokens });

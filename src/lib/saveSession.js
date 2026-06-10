@@ -59,7 +59,7 @@ const normalizeDayType = (d) => {
 
 export async function saveSession({
   // Readiness inputs at session time
-  rec, slp, body, mot, battery, stress,
+  rec, body, mot, battery, stress,
   mode, dayType, week,
   // Buffers
   setsBuffer = [],
@@ -93,7 +93,9 @@ export async function saveSession({
     week_num: week,
     mode,
     recovery_pct: rec,
-    sleep_pct: slp,
+    // sleep_pct retired from the readiness model (2026-06) but the column is
+    // kept so historical rows still display correctly. We just stop writing
+    // to it — it will be null on all new sessions.
     body_feel: body,
     motivation: mot,
     battery_pct: battery,

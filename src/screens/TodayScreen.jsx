@@ -21,7 +21,7 @@ const formatToday = (d) =>
 
 export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
   const rec = useSessionStore((s) => s.rec);
-  const slp = useSessionStore((s) => s.slp);
+  const battery = useSessionStore((s) => s.battery);
   const mode = useSessionStore((s) => s.mode);
   const dayType = useSessionStore((s) => s.dayType);
 
@@ -37,9 +37,12 @@ export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
         <WeekBar />
       </div>
 
+      {/* Two big Athlytic rings — Recovery is the lead readiness signal
+          (54% of the composite), Battery is the multi-day energy balance.
+          Together they mirror the two rings on Athlytic's own home screen. */}
       <div className={styles.rings}>
-        <ReadinessRing value={rec} label="Recovery" color="#30d158" />
-        <ReadinessRing value={slp} label="Sleep"    color="#bf5af2" />
+        <ReadinessRing value={rec}     label="Recovery" color="#30d158" />
+        <ReadinessRing value={battery} label="Battery"  color="#0a84ff" />
       </div>
 
       <ModeBanner mode={mode} />

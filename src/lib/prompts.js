@@ -19,16 +19,15 @@ import { getPhaseLabel } from './periodization';
 // Build the readiness lines, skipping any field the user marked as
 // "no data" (null). Surfaces an explicit note when objective inputs are
 // missing so the model doesn't lean confidently on subjective signal.
-function readinessLines({ rec, slp, body, mot, battery, stress }) {
+function readinessLines({ rec, body, mot, battery, stress }) {
   const lines = ['Readiness:'];
-  if (rec     != null) lines.push(`  Recovery ${rec}%`);
-  if (slp     != null) lines.push(`  Sleep ${slp}%`);
-  if (body    != null) lines.push(`  Body feel ${body}/5`);
-  if (mot     != null) lines.push(`  Motivation ${mot}/5`);
+  if (rec     != null) lines.push(`  Recovery ${rec}% (Athlytic — lead signal)`);
   if (battery != null) lines.push(`  Battery ${battery}% (Athlytic)`);
   if (stress  != null) lines.push(`  Stress ${stress}/100 (Athlytic)`);
+  if (body    != null) lines.push(`  Body feel ${body}/5`);
+  if (mot     != null) lines.push(`  Motivation ${mot}/5`);
 
-  const objectiveMissing = [rec, slp, battery, stress].every((v) => v == null);
+  const objectiveMissing = [rec, battery, stress].every((v) => v == null);
   if (objectiveMissing) {
     lines.push('  (No objective recovery data today — likely didn\'t wear watch overnight.)');
   }
@@ -37,7 +36,7 @@ function readinessLines({ rec, slp, body, mot, battery, stress }) {
 
 // ─── SESSION CUE ────────────────────────────────────────────
 export function buildSessionCuePrompt({
-  rec, slp, body, mot, battery, stress,
+  rec, body, mot, battery, stress,
   mode, dayType, week,
 }) {
   const dayLabel = DAY_TYPE_INFO[dayType]?.sub ?? dayType;
@@ -55,7 +54,7 @@ export function buildSessionCuePrompt({
     `Day: ${dayLabel} (${dayType})`,
     `Week: ${week} (${phase} phase)`,
     `Mode: ${modeLabel} (${mode})`,
-    ...readinessLines({ rec, slp, body, mot, battery, stress }),
+    ...readinessLines({ rec, body, mot, battery, stress }),
   ].join('\n');
 
   return {
@@ -87,7 +86,7 @@ const SEVERITY_DIRECTIVES = {
 
 export function buildDebriefPrompt({
   // Readiness
-  rec, slp, body, mot, battery, stress,
+  rec, body, mot, battery, stress,
   // Programming
   mode, dayType, week,
   // Buffers
@@ -153,7 +152,7 @@ export function buildDebriefPrompt({
     `Warmup: ${warmupChecked.length}/${warmupTotal} items checked`,
     '',
     'Readiness going in:',
-    ...readinessLines({ rec, slp, body, mot, battery, stress }).slice(1).map((l) => l.trim()),
+    ...readinessLines({ rec, body, mot, battery, stress }).slice(1).map((l) => l.trim()),
     '',
     'Post-session: ' + `RPE ${sessionRpe} · Energy ${energy}/5`,
     '',

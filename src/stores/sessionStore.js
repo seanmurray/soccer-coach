@@ -26,12 +26,11 @@ function readPersistedWeek() {
 }
 
 const initialReadiness = {
-  rec: 72,
-  slp: 72,
-  body: 3,    // 1-5
-  mot: 3,     // 1-5
-  battery: 50, // 0-100, Athlytic
-  stress: 42,  // 0-100, Athlytic (rescaled from old 0-60 default of 25)
+  rec: 72,     // 0-100, Athlytic Recovery — the lead readiness signal (54% weight)
+  body: 3,     // 1-5
+  mot: 3,      // 1-5
+  battery: 50, // 0-100, Athlytic Battery
+  stress: 42,  // 0-100, Athlytic Stress (rescaled from old 0-60 default of 25)
 };
 
 export const useSessionStore = create(persist((set, get) => ({
@@ -179,7 +178,7 @@ export const useSessionStore = create(persist((set, get) => ({
   // from Supabase on boot by <ReadinessBaselineSync>. `week` keeps its own
   // legacy key — see readPersistedWeek above.
   partialize: (state) => ({
-    rec: state.rec, slp: state.slp, body: state.body, mot: state.mot,
+    rec: state.rec, body: state.body, mot: state.mot,
     battery: state.battery, stress: state.stress,
     _readinessLast: state._readinessLast,
     dayType: state.dayType,

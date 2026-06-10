@@ -2,20 +2,24 @@ import styles from './ReadinessSlider.module.css';
 import { useShallow } from 'zustand/react/shallow';
 import { useSessionStore } from '../stores/sessionStore';
 
-// Six readiness inputs per spec §4 / §5.
-// Battery and Stress come from Athlytic and use a different value tint (blue)
-// to signal that they're external/measured rather than self-reported.
+// Five readiness inputs (spec §4 / §5). Recovery / Battery / Stress all come
+// from Athlytic and use a different value tint (blue) to signal they're
+// external/measured. Recovery is the lead at 54% of the score (it already
+// integrates HRV / RHR / sleep / baseline) — the others provide same-day
+// context and a subjective override.
+//
+// Sleep was retired from the score in 2026-06 because Athlytic Recovery
+// already incorporates it; the slider is gone with it.
 //
 // Each row has a "skip" toggle that excludes the input from the composite
 // score — useful when you didn't wear the watch overnight and don't have a
 // real number to enter. Excluded values save as null to soccer_sessions.
 const ROWS = [
-  { key: 'rec',     label: 'Recovery',   min: 0, max: 100, step: 1, suffix: '%' },
-  { key: 'slp',     label: 'Sleep',      min: 0, max: 100, step: 1, suffix: '%' },
-  { key: 'body',    label: 'Body feel',  min: 1, max: 5,   step: 1, suffix: '/5' },
-  { key: 'mot',     label: 'Motivation', min: 1, max: 5,   step: 1, suffix: '/5' },
+  { key: 'rec',     label: 'Recovery',   sub: 'Athlytic · 0-100', min: 0, max: 100, step: 1, suffix: '%', alt: true },
   { key: 'battery', label: 'Battery',    sub: 'Athlytic · 0-100', min: 0, max: 100, step: 1, suffix: '%', alt: true },
   { key: 'stress',  label: 'Stress',     sub: 'Athlytic · 0-100', min: 0, max: 100, step: 1, suffix: '',  alt: true },
+  { key: 'body',    label: 'Body feel',  min: 1, max: 5,           step: 1, suffix: '/5' },
+  { key: 'mot',     label: 'Motivation', min: 1, max: 5,           step: 1, suffix: '/5' },
 ];
 
 export function ReadinessSliders() {
@@ -25,7 +29,7 @@ export function ReadinessSliders() {
   // make Zustand think every render produced a new snapshot.
   const values = useSessionStore(
     useShallow((s) => ({
-      rec: s.rec, slp: s.slp, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
+      rec: s.rec, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
     }))
   );
 

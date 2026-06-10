@@ -94,7 +94,6 @@ export async function retryDebrief({ session, queryClient }) {
     const md = session.metadata ?? {};
     const { system, messages, maxTokens } = buildDebriefPrompt({
       rec: session.recovery_pct,
-      slp: session.sleep_pct,
       body: session.body_feel,
       mot: session.motivation,
       battery: session.battery_pct,

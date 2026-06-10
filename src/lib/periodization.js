@@ -196,34 +196,39 @@ export function tempoExplain(tempo) {
 //
 // Composite readiness → training mode. Spec §5.
 //
-// Each input has a weight; together they sum to 100 when all six are
-// present. When one or more inputs are null (e.g. no watch overnight =
-// no battery/stress/recovery/sleep), we drop those terms AND drop their
-// weight from the denominator so the remaining inputs still scale to 0-100.
+// Five inputs, summed weights = 100. Recovery (Athlytic's daily readiness
+// score, which already integrates HRV trend + RHR trend + sleep + your
+// rolling baseline) carries the lion's share at 54%. Battery (multi-day
+// energy balance) and Stress add same-day autonomic context. Body feel and
+// motivation are subjective sanity-checks that can also outvote the watch
+// when something's off it can't see (niggle, sick coming on).
 //
-// Edge case: if every objective input is missing and only self-reports remain,
-// the score will lean heavily on body+mot. That's the right behavior — the
-// user is telling us they have no objective signal today — but it makes the
-// thresholds sensitive. We add a small safety: when no objective inputs are
-// present at all, cap the mode at mod1 so we never recommend a "full" session
-// on pure subjective feel.
+// Sleep was dropped from the score in 2026-06 because it's already inside
+// Athlytic's Recovery number — having a separate Sleep slider double-counted
+// it. Sleep is unavailable on no-watch days anyway, so it never provides
+// information Recovery doesn't.
+//
+// MISSING INPUTS: when any input is null (e.g. forgot the watch → no
+// rec/battery/stress) the term drops AND its weight drops from the
+// denominator, so the remaining inputs still scale to 0-100. There is no
+// special cap when only self-reports are present — body + mot alone can
+// produce any mode, including full.
 //
 // HRV-TREND (2nd arg `baseline`): the autonomic markers — battery & stress
 // from Athlytic — mean more as a deviation from YOUR rolling norm than as
-// absolute numbers (the HRV-monitoring evidence: rolling baseline + CV beats
-// isolated readings). When a baseline { battery:{mean,sd}, stress:{mean,sd} }
-// is supplied and the SD is large enough to trust, battery/stress are scored
-// by how far today sits from your personal mean (±1 SD ≈ ±20 pts around the
-// 50 midpoint) instead of by their raw value. rec/slp/body/mot keep absolute
-// scoring. No baseline (or too-flat history) → original absolute behavior.
+// absolute numbers (rolling baseline + CV beats isolated readings). When a
+// baseline { battery:{mean,sd}, stress:{mean,sd} } is supplied and the SD
+// is large enough to trust, battery/stress are scored by how far today sits
+// from your personal mean (±1 SD ≈ ±20 pts around the 50 midpoint) instead
+// of by their raw value. rec/body/mot keep absolute scoring. No baseline
+// (or too-flat history) → original absolute behavior.
 
-const WEIGHTS = { battery: 28, stress: 12, rec: 25, slp: 18, body: 10, mot: 7 };
+const WEIGHTS = { rec: 54, battery: 14, stress: 8, body: 14, mot: 10 };
 
 const ABS_NORMALIZE = {
-  battery: (v) => v,                                  // 0-100 → 0-100
-  stress:  (v) => Math.max(0, 100 - v),               // 0-100 → inverted 0-100
   rec:     (v) => v,                                  // 0-100
-  slp:     (v) => v,                                  // 0-100
+  battery: (v) => v,                                  // 0-100
+  stress:  (v) => Math.max(0, 100 - v),               // 0-100 → inverted 0-100
   body:    (v) => (v / 5) * 100,                      // 1-5 → 0-100
   mot:     (v) => (v / 5) * 100,                      // 1-5 → 0-100
 };
@@ -246,23 +251,19 @@ function normalizeReadiness(key, v, baseline) {
   return ABS_NORMALIZE[key](v);
 }
 
-const OBJECTIVE_KEYS = ['battery', 'stress', 'rec', 'slp'];
-
 export function computeMode(inputs, baseline = null) {
   let weightedSum = 0;
   let weightTotal = 0;
-  let presentObjective = 0;
 
   for (const [key, weight] of Object.entries(WEIGHTS)) {
     const v = inputs[key];
     if (v == null) continue;
     weightedSum += normalizeReadiness(key, v, baseline) * weight;
     weightTotal += weight;
-    if (OBJECTIVE_KEYS.includes(key)) presentObjective += 1;
   }
 
   // Nothing at all → idle baseline (e.g. before user touches the sliders).
-  if (weightTotal === 0) return { mode: 'mod1', score: 0, presentObjective };
+  if (weightTotal === 0) return { mode: 'mod1', score: 0 };
 
   const score = weightedSum / weightTotal; // already on 0-100 because weights are percent points
 
@@ -273,11 +274,7 @@ export function computeMode(inputs, baseline = null) {
   else if (score >= 30) mode = 'mod3';
   else mode = 'recovery';
 
-  // Cap at mod1 when we have zero objective signal — never recommend a full
-  // session purely off self-reported feel.
-  if (presentObjective === 0 && (mode === 'full')) mode = 'mod1';
-
-  return { mode, score, presentObjective };
+  return { mode, score };
 }
 
 // ─── REST TIMER ────────────────────────────────────────────

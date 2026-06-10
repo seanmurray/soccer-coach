@@ -55,13 +55,13 @@ export function WorkoutScreen({ onFinish }) {
   // re-trigger React 19's getSnapshot caching check, infinite-looping.
   const {
     dayType, week, mode, logTabVisit, sessionStartedAt,
-    rec, slp, body, mot, battery, stress,
+    rec, body, mot, battery, stress,
   } = useSessionStore(
     useShallow((s) => ({
       dayType: s.dayType, week: s.week, mode: s.mode,
       logTabVisit: s.logTabVisit,
       sessionStartedAt: s.sessionStartedAt,
-      rec: s.rec, slp: s.slp, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
+      rec: s.rec, body: s.body, mot: s.mot, battery: s.battery, stress: s.stress,
     }))
   );
 
@@ -90,7 +90,7 @@ export function WorkoutScreen({ onFinish }) {
   // Session cue: try Claude first, fall back to the static MODE_INSIGHTS line
   // if the call fails or the session hasn't started.
   const { cue, fallback, isLoading: cueLoading, error: cueError } = useSessionCue({
-    sessionStartedAt, rec, slp, body, mot, battery, stress, mode, dayType, week,
+    sessionStartedAt, rec, body, mot, battery, stress, mode, dayType, week,
   });
   const cueText = cue ?? (cueError ? fallback : fallback);
 
