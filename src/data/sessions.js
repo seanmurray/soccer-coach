@@ -314,12 +314,17 @@ export const MODE_INSIGHTS = {
 };
 
 // Day-type metadata: subtitle copy + tag color key (matches CSS .tag-* classes).
+// `sub` is the long label used in tab bars and headers where the row has
+// breathing room; `short` is the 3-letter status-pill label (WeekComplete row),
+// uniform and guaranteed single-line. The done state is communicated by the
+// green-glow background, so the label can be terse — the long name lives on
+// the tab bar and the pill's hover title attribute.
 export const DAY_TYPE_INFO = {
-  acc:  { sub: 'Acceleration',    color: 'acc' },
-  lat:  { sub: 'Lateral COD',     color: 'lat' },
-  lin:  { sub: 'Linear Agility',  color: 'lin' },
-  vel:  { sub: 'Max Velocity',    color: 'vel' },
-  cond: { sub: 'Conditioning',    color: 'cond' },
+  acc:  { sub: 'Acceleration',    short: 'ACC',  color: 'acc' },
+  lat:  { sub: 'Lateral COD',     short: 'LAT',  color: 'lat' },
+  lin:  { sub: 'Linear Agility',  short: 'LIN',  color: 'lin' },
+  vel:  { sub: 'Max Velocity',    short: 'VEL',  color: 'vel' },
+  cond: { sub: 'Conditioning',    short: 'COND', color: 'cond' },
 };
 
 // Default day order — Settings screen lets the user reorder.

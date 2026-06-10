@@ -34,13 +34,21 @@
 }
 .day {
   flex: 1;
+  /* min-width:0 lets the pill shrink below its content size; without this
+     a long single word like ACCELERATION or COND·OPT forces the row wider
+     than the card and the last pill overflows the rounded right edge. */
+  min-width: 0;
+  /* overflow-wrap:anywhere allows a single word with no space to wrap if
+     needed (LATERAL COD already wraps on its space). */
+  overflow-wrap: anywhere;
   text-align: center;
   padding: 8px 4px;
   border-radius: var(--r2);
   background: var(--bg-input);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
   text-transform: uppercase;
   color: var(--t3);
 }

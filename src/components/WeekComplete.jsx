@@ -31,17 +31,24 @@ export function WeekComplete() {
         <div className={styles.phase}>{phase}</div>
       </div>
 
+      {/* Compact status pills — short labels (e.g. ACCEL, MAX VEL) keep each
+          pill on a single line; the done state is communicated by the green
+          glow, so the labels can be terse. The long names live on tabs. */}
       <div className={styles.days}>
         {REQUIRED_DAYS.map((d) => (
           <div
             key={d}
             className={`${styles.day} ${status?.requiredDone?.[d] ? styles.dayDone : ''}`}
+            title={DAY_TYPE_INFO[d]?.sub}
           >
-            {DAY_TYPE_INFO[d]?.sub ?? d}
+            {DAY_TYPE_INFO[d]?.short ?? d}
           </div>
         ))}
-        <div className={`${styles.day} ${styles.dayCond} ${status?.condDone ? styles.dayDone : ''}`}>
-          Cond·opt
+        <div
+          className={`${styles.day} ${styles.dayCond} ${status?.condDone ? styles.dayDone : ''}`}
+          title="Conditioning (optional)"
+        >
+          COND
         </div>
       </div>
 
