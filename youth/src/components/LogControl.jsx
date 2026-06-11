@@ -1,35 +1,47 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import styles from './PrControl.module.css';
+import styles from './LogControl.module.css';
 import { useYouthPRs } from '../hooks/useYouthPRs';
-import { saveYouthPR, bestForKey, formatPr } from '../lib/prs';
+import { saveYouthPR, bestForKey, lastForKey, formatLog } from '../lib/prs';
 
-// Self-contained personal-record control shown inside an ExerciseCard when the
-// exercise has `pr` metadata. Reads the current best from the cached PR query,
-// lets the athlete log a new attempt, and celebrates when it's a new record.
-export function PrControl({ exercise }) {
+// Inline log control shown inside the expanded ExerciseCard whenever the
+// exercise carries a `log` definition. Always visible:
+//   • LAST — most-recent value (so he sees what to beat)
+//   • PR   — best value ever
+// Tap "Log result" → number input → Save. If the new value beats his prior
+// best, the cell celebrates with a NEW RECORD animation; otherwise it's just
+// quietly added to history (still a useful data point — last value updates).
+export function LogControl({ exercise }) {
   const queryClient = useQueryClient();
   const { data: rows = [] } = useYouthPRs();
-  const pr = exercise.pr;
+  const log = exercise.log ?? exercise.pr; // legacy alias
 
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState('');
   const [saving, setSaving] = useState(false);
   const [celebrate, setCelebrate] = useState(null); // 'record' | 'logged'
 
-  const best = bestForKey(rows, exercise.key, pr.higherIsBetter);
+  const best = bestForKey(rows, exercise.key, log.higherIsBetter);
+  const last = lastForKey(rows, exercise.key);
+
+  const placeholder =
+    log.unit === 'sec'  ? 'seconds' :
+    log.unit === 'reps' ? 'reps' :
+    log.unit === 'lb'   ? 'pounds' :
+    log.unit === 'in'   ? 'inches' :
+    log.unit;
 
   const submit = async () => {
     const num = Number(value);
     if (!Number.isFinite(num) || num <= 0) return;
     setSaving(true);
-    const result = await saveYouthPR({ exerciseKey: exercise.key, value: num, unit: pr.unit });
+    const result = await saveYouthPR({ exerciseKey: exercise.key, value: num, unit: log.unit });
     setSaving(false);
     if (!result.ok) {
       alert('Could not save: ' + (result.error?.message ?? 'unknown error'));
       return;
     }
-    const isRecord = best == null || (pr.higherIsBetter ? num > best : num < best);
+    const isRecord = best == null || (log.higherIsBetter ? num > best : num < best);
     setCelebrate(isRecord ? 'record' : 'logged');
     setEditing(false);
     setValue('');
@@ -39,17 +51,26 @@ export function PrControl({ exercise }) {
 
   return (
     <div className={styles.wrap}>
-      <div className={styles.top}>
-        <span className={styles.medal}>🏅</span>
-        <span className={styles.label}>{pr.label}</span>
-        {best != null
-          ? <span className={styles.best}>{formatPr(best, pr)}</span>
-          : <span className={styles.none}>No record yet</span>}
+      <div className={styles.label}>🏅 {log.label}</div>
+
+      <div className={styles.stats}>
+        <div className={styles.stat}>
+          <div className={styles.statLabel}>Last</div>
+          {last != null
+            ? <div className={styles.statValue}>{formatLog(last, log)}</div>
+            : <div className={styles.statNone}>—</div>}
+        </div>
+        <div className={`${styles.stat} ${styles.statPr}`}>
+          <div className={styles.statLabel}>PR</div>
+          {best != null
+            ? <div className={styles.statValue}>{formatLog(best, log)}</div>
+            : <div className={styles.statNone}>—</div>}
+        </div>
       </div>
 
       {!editing && !celebrate && (
         <button type="button" className={styles.logBtn} onClick={() => setEditing(true)}>
-          {best != null ? 'Beat your record' : 'Set your first record'}
+          {last == null ? `Log your first ${log.label.toLowerCase()}` : 'Log today\'s result'}
         </button>
       )}
 
@@ -59,14 +80,15 @@ export function PrControl({ exercise }) {
             <input
               className={styles.input}
               type="number"
-              inputMode="numeric"
+              inputMode="decimal"
+              step="any"
               min="0"
               autoFocus
-              placeholder={pr.unit === 'sec' ? 'seconds' : pr.unit === 'reps' ? 'reps' : pr.unit}
+              placeholder={placeholder}
               value={value}
               onChange={(e) => setValue(e.target.value)}
             />
-            <span className={styles.unit}>{pr.unit}</span>
+            <span className={styles.unit}>{log.unit}</span>
           </div>
           <div className={styles.btns}>
             <button type="button" className={styles.cancel} onClick={() => { setEditing(false); setValue(''); }}>

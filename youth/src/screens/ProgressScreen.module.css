@@ -90,17 +90,42 @@
 
 /* ── Records ────────────────────────────────────────────── */
 .recordRow {
-  display: flex; align-items: center; gap: 12px;
+  display: grid;
+  grid-template-columns: 32px 1fr auto auto;
+  align-items: center;
+  gap: 10px;
   background: var(--bg-card);
   border: 1px solid var(--bg-raised);
   border-radius: var(--r2);
   padding: 14px 16px;
   margin-bottom: 10px;
 }
-.recordMedal { font-size: 26px; }
-.recordName { flex: 1; font-size: 17px; font-weight: 600; color: var(--t1); }
-.recordVal { font-size: 20px; font-weight: 800; color: var(--amber); }
-.hint { font-size: 16px; color: var(--t3); line-height: 1.5; }
+.recordMedal { font-size: 24px; }
+.recordName { font-size: 16px; font-weight: 600; color: var(--t1); line-height: 1.2; }
+.recordLast {
+  font-size: 16px; font-weight: 700; color: var(--t2);
+  text-align: right; min-width: 60px;
+}
+.recordLast::before {
+  content: 'last ';
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.recordVal {
+  font-size: 19px; font-weight: 800; color: var(--amber);
+  min-width: 80px; text-align: right;
+}
+.recordVal::before {
+  content: 'PR ';
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--t3);
+}
+.hint { font-size: 16px; color: var(--t3); line-height: 1.5; padding: 0 4px; }
 
 /* ── Sessions ───────────────────────────────────────────── */
 .sessionCard {

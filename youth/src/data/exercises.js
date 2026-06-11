@@ -17,6 +17,14 @@
 //   cues       2-3 short coaching cues (the teaching, in plain language)
 //   why        one short line on why it matters (motivation)
 //   video      YouTube search URL (rot-proof — see lib/youtube)
+//   log        optional — present for any exercise whose result is worth
+//              tracking. Shape: { kind, unit, label, higherIsBetter }.
+//                kind ∈ 'weight' | 'reps' | 'time' | 'distance' | 'height'
+//              The expanded card shows an inline input + the last value +
+//              the personal record; new attempts insert into youth_prs, and
+//              today's PR = max(value) across history for that key.
+//              Warm-ups and technique-only drills are intentionally omitted
+//              so the kid isn't prompted for meaningless numbers.
 
 import { ytSearch } from '../lib/youtube';
 
@@ -44,8 +52,17 @@ export const EQUIPMENT = {
 
 const E = (e) => ({ ...e, video: ytSearch(e._q) });
 
+// Reusable log presets so the inline JSX stays readable.
+const LOG_WEIGHT   = { kind: 'weight',   unit: 'lb',   label: 'Weight',   higherIsBetter: true };
+const LOG_REPS     = { kind: 'reps',     unit: 'reps', label: 'Best set', higherIsBetter: true };
+const LOG_TIME     = { kind: 'time',     unit: 'sec',  label: 'Best time', higherIsBetter: true };
+const LOG_DISTANCE = { kind: 'distance', unit: 'in',   label: 'Distance', higherIsBetter: true };
+const LOG_HEIGHT   = { kind: 'height',   unit: 'in',   label: 'Height',   higherIsBetter: true };
+
 export const EXERCISES = [
   // ─── WARM-UP & MOVEMENT ─────────────────────────────────────
+  // Warm-ups don't get a log field — entering a number for jumping jacks isn't
+  // useful and would teach the kid to obsess over the wrong things.
   E({ key: 'jumping_jacks', name: 'Jumping Jacks', pattern: 'move', equipment: 'none', level: 1,
     rx: '30 seconds', why: 'Wakes up the whole body and gets blood moving.',
     cues: ['Jump feet out and clap hands overhead', 'Land soft and quiet', 'Keep a steady bouncy rhythm'],
@@ -82,6 +99,7 @@ export const EXERCISES = [
   // ─── SQUAT ──────────────────────────────────────────────────
   E({ key: 'bodyweight_squat', name: 'Bodyweight Squat', pattern: 'squat', equipment: 'none', level: 1,
     rx: '3 sets of 10', why: 'The base for strong legs, jumping, and sprinting.',
+    log: LOG_REPS,
     cues: ['Feet shoulder-width, toes a little out', 'Push knees out and sit back like a chair', 'Chest tall, heels stay down, then stand'],
     _q: 'bodyweight squat proper form kids tutorial' }),
   E({ key: 'box_squat', name: 'Box Squat', pattern: 'squat', equipment: 'box', level: 1,
@@ -90,11 +108,12 @@ export const EXERCISES = [
     _q: 'box squat to bench teaching depth' }),
   E({ key: 'wall_sit', name: 'Wall Sit', pattern: 'squat', equipment: 'none', level: 1,
     rx: '3 x 20-30 sec', why: 'Builds leg endurance and toughness.',
-    pr: { metric: 'time', unit: 'sec', label: 'Longest wall sit', higherIsBetter: true },
+    log: LOG_TIME,
     cues: ['Slide down a wall until knees are at 90°', 'Back flat on the wall', 'Hold strong and breathe'],
     _q: 'wall sit exercise proper form' }),
   E({ key: 'goblet_squat', name: 'Goblet Squat', pattern: 'squat', equipment: 'dumbbell', level: 2,
     rx: '3 sets of 8', why: 'Adds a little weight while keeping great form.',
+    log: LOG_WEIGHT,
     cues: ['Hold one dumbbell at your chest with both hands', 'Squat down between your knees', 'Elbows stay inside your knees, chest tall'],
     _q: 'goblet squat dumbbell proper form' }),
   E({ key: 'tempo_squat', name: 'Tempo Squat', pattern: 'squat', equipment: 'none', level: 2,
@@ -109,6 +128,7 @@ export const EXERCISES = [
     _q: 'hip hinge dowel drill teach deadlift form' }),
   E({ key: 'glute_bridge', name: 'Glute Bridge', pattern: 'hinge', equipment: 'none', level: 1,
     rx: '3 sets of 12', why: 'Powers up your hips for sprinting and jumping.',
+    log: LOG_REPS,
     cues: ['Lie on your back, knees bent, feet flat', 'Squeeze your butt and lift hips up', 'Make a straight line from knees to shoulders'],
     _q: 'glute bridge exercise proper form' }),
   E({ key: 'sl_glute_bridge', name: 'Single-Leg Glute Bridge', pattern: 'hinge', equipment: 'none', level: 2,
@@ -117,6 +137,7 @@ export const EXERCISES = [
     _q: 'single leg glute bridge form' }),
   E({ key: 'db_rdl', name: 'Dumbbell RDL', pattern: 'hinge', equipment: 'dumbbell', level: 2,
     rx: '3 sets of 8', why: 'Strengthens the back of your legs (the speed muscles).',
+    log: LOG_WEIGHT,
     cues: ['Hold dumbbells in front of your thighs', 'Push hips back, lower the weights down your legs', 'Soft knees, flat back, stand by squeezing your butt'],
     _q: 'romanian deadlift dumbbell RDL form beginner' }),
   E({ key: 'band_good_morning', name: 'Band Good Morning', pattern: 'hinge', equipment: 'bands', level: 2,
@@ -127,15 +148,17 @@ export const EXERCISES = [
   // ─── PUSH ───────────────────────────────────────────────────
   E({ key: 'incline_pushup', name: 'Incline Push-up', pattern: 'push', equipment: 'box', level: 1,
     rx: '3 sets of 8', why: 'The easiest way to start building push-up strength.',
+    log: LOG_REPS,
     cues: ['Hands on a bench or couch, body in a straight line', 'Lower your chest to the edge', 'Push back up, body stays stiff like a plank'],
     _q: 'incline push up beginner form' }),
   E({ key: 'pushup', name: 'Push-up', pattern: 'push', equipment: 'none', level: 2,
     rx: '3 sets of 6-10', why: 'The classic upper-body strength builder.',
-    pr: { metric: 'reps', unit: 'reps', label: 'Most push-ups', higherIsBetter: true },
+    log: LOG_REPS,
     cues: ['Hands a bit wider than shoulders', 'Body straight from head to heels — squeeze everything', 'Lower until elbows bend ~90°, then push up'],
     _q: 'push up proper form kids tutorial' }),
   E({ key: 'pike_pushup', name: 'Pike Push-up', pattern: 'push', equipment: 'none', level: 2,
     rx: '3 sets of 6', why: 'Builds strong shoulders for throwing and handstands.',
+    log: LOG_REPS,
     cues: ['Make an upside-down V with your body', 'Bend elbows and lower the top of your head toward the floor', 'Push back up tall'],
     _q: 'pike push up shoulders form' }),
   E({ key: 'band_press', name: 'Band Overhead Press', pattern: 'push', equipment: 'bands', level: 1,
@@ -144,6 +167,7 @@ export const EXERCISES = [
     _q: 'band overhead press shoulder form' }),
   E({ key: 'db_press', name: 'Dumbbell Overhead Press', pattern: 'push', equipment: 'dumbbell', level: 2,
     rx: '3 sets of 8', why: 'Overhead strength for all sports.',
+    log: LOG_WEIGHT,
     cues: ['Dumbbells at your shoulders', 'Press up until arms are straight', 'Squeeze your belly so you don\'t arch your back'],
     _q: 'dumbbell overhead press form beginner' }),
 
@@ -154,10 +178,12 @@ export const EXERCISES = [
     _q: 'resistance band row exercise form' }),
   E({ key: 'inverted_row', name: 'Inverted Row', pattern: 'pull', equipment: 'bar', level: 2,
     rx: '3 sets of 8', why: 'A push-up in reverse — great for the back.',
+    log: LOG_REPS,
     cues: ['Hang under a low bar or sturdy table', 'Body straight, pull your chest to the bar', 'Squeeze your back, lower slow'],
     _q: 'inverted row beginner form table' }),
   E({ key: 'db_row', name: 'Dumbbell Row', pattern: 'pull', equipment: 'dumbbell', level: 2,
     rx: '3 x 10 each', why: 'One-arm back strength and balance.',
+    log: LOG_WEIGHT,
     cues: ['One hand and knee on a bench, flat back', 'Pull the dumbbell to your hip', 'Lower it slow and controlled'],
     _q: 'one arm dumbbell row form beginner' }),
   E({ key: 'band_pull_apart', name: 'Band Pull-Apart', pattern: 'pull', equipment: 'bands', level: 1,
@@ -166,12 +192,12 @@ export const EXERCISES = [
     _q: 'band pull apart exercise form' }),
   E({ key: 'dead_hang', name: 'Dead Hang', pattern: 'pull', equipment: 'bar', level: 1,
     rx: '3 x 15-20 sec', why: 'Builds grip strength and a healthy spine.',
-    pr: { metric: 'time', unit: 'sec', label: 'Longest hang', higherIsBetter: true },
+    log: LOG_TIME,
     cues: ['Hang from a bar with both hands', 'Relax your shoulders down a little', 'Hold strong and breathe'],
     _q: 'dead hang from bar grip strength' }),
   E({ key: 'chin_up', name: 'Chin-up (or Assisted)', pattern: 'pull', equipment: 'bar', level: 3,
     rx: '3 sets of 3-5', why: 'A true sign of athletic strength.',
-    pr: { metric: 'reps', unit: 'reps', label: 'Most chin-ups', higherIsBetter: true },
+    log: LOG_REPS,
     cues: ['Palms facing you, hang from the bar', 'Pull until your chin clears the bar', 'Use a band or a chair to help if needed'],
     _q: 'chin up proper form beginner assisted' }),
 
@@ -204,19 +230,22 @@ export const EXERCISES = [
   // ─── CORE & CARRY ───────────────────────────────────────────
   E({ key: 'plank', name: 'Plank', pattern: 'core', equipment: 'none', level: 1,
     rx: '3 x 20-30 sec', why: 'A strong core makes every move more powerful.',
-    pr: { metric: 'time', unit: 'sec', label: 'Longest plank', higherIsBetter: true },
+    log: LOG_TIME,
     cues: ['Elbows under shoulders, body straight', 'Squeeze your belly and butt', 'Don\'t let hips sag or pop up'],
     _q: 'plank proper form kids' }),
   E({ key: 'side_plank', name: 'Side Plank', pattern: 'core', equipment: 'none', level: 2,
     rx: '3 x 15-20 sec each', why: 'Strengthens the sides of your core for twisting.',
+    log: LOG_TIME,
     cues: ['On one elbow, body in a straight line', 'Lift hips up high', 'Squeeze everything and hold'],
     _q: 'side plank proper form' }),
   E({ key: 'dead_bug', name: 'Dead Bug', pattern: 'core', equipment: 'none', level: 1,
     rx: '3 x 8 each', why: 'Teaches your core to stay stiff while arms and legs move.',
+    log: LOG_REPS,
     cues: ['On your back, arms up, knees up over hips', 'Lower opposite arm and leg slowly', 'Press your low back flat into the floor'],
     _q: 'dead bug core exercise form' }),
   E({ key: 'hollow_hold', name: 'Hollow Hold', pattern: 'core', equipment: 'none', level: 2,
     rx: '3 x 15-20 sec', why: 'The gymnast\'s secret to a powerful core.',
+    log: LOG_TIME,
     cues: ['On your back, press low back into the floor', 'Lift shoulders and legs a little off the ground', 'Make a banana shape, arms by your ears'],
     _q: 'hollow hold gymnastics core form' }),
   E({ key: 'bird_dog', name: 'Bird Dog', pattern: 'core', equipment: 'none', level: 1,
@@ -225,10 +254,12 @@ export const EXERCISES = [
     _q: 'bird dog exercise proper form' }),
   E({ key: 'farmer_carry', name: 'Farmer Carry', pattern: 'core', equipment: 'dumbbell', level: 1,
     rx: '3 x 20 yards', why: 'Total-body strength and a vise grip.',
+    log: { ...LOG_WEIGHT, label: 'Weight (each hand)' },
     cues: ['Hold a dumbbell in each hand', 'Stand tall, shoulders back', 'Walk slow with small steps, don\'t lean'],
     _q: 'farmer carry exercise form' }),
   E({ key: 'suitcase_carry', name: 'Suitcase Carry', pattern: 'core', equipment: 'dumbbell', level: 2,
     rx: '3 x 20 yds each', why: 'Anti-lean core strength, one side at a time.',
+    log: LOG_WEIGHT,
     cues: ['One dumbbell in one hand only', 'Stand perfectly straight — don\'t lean toward it', 'Walk tall, then switch hands'],
     _q: 'suitcase carry core exercise form' }),
 
@@ -239,20 +270,22 @@ export const EXERCISES = [
     _q: 'how to land safely jump landing mechanics youth' }),
   E({ key: 'pogo_hops', name: 'Pogo Hops', pattern: 'jump', equipment: 'none', level: 1,
     rx: '3 x 15', why: 'Builds springy, fast ankles for speed.',
+    log: LOG_REPS,
     cues: ['Bounce straight up off the balls of your feet', 'Stay stiff like a pogo stick — legs straight', 'Quick, light, off the ground fast'],
     _q: 'pogo hops plyometric drill form' }),
   E({ key: 'broad_jump', name: 'Broad Jump', pattern: 'jump', equipment: 'none', level: 2,
     rx: '3 sets of 5', why: 'Pure horizontal power, like a long jump.',
-    pr: { metric: 'distance', unit: 'in', label: 'Longest jump', higherIsBetter: true },
+    log: LOG_DISTANCE,
     cues: ['Swing your arms back, then jump forward as far as you can', 'Reach with your arms', 'Land soft and stick it — knees out'],
     _q: 'standing broad jump technique' }),
   E({ key: 'box_jump', name: 'Box Jump (low)', pattern: 'jump', equipment: 'box', level: 2,
     rx: '3 sets of 5', why: 'Explosive jumping with a soft landing.',
-    pr: { metric: 'height', unit: 'in', label: 'Highest box', higherIsBetter: true },
+    log: LOG_HEIGHT,
     cues: ['Use a low, sturdy box', 'Swing arms and jump up, land softly on top', 'Stand tall, then step back down — never jump down'],
     _q: 'box jump proper form landing youth' }),
   E({ key: 'skater_bound', name: 'Skater Bounds', pattern: 'jump', equipment: 'none', level: 2,
     rx: '3 x 6 each', why: 'Side-to-side power for cutting and skating.',
+    log: LOG_DISTANCE,
     cues: ['Jump sideways off one foot onto the other', 'Land soft and balance for a second', 'Push off and bound back the other way'],
     _q: 'skater bound lateral plyometric drill' }),
   E({ key: 'tuck_jump', name: 'Tuck Jump', pattern: 'jump', equipment: 'none', level: 3,
@@ -261,6 +294,8 @@ export const EXERCISES = [
     _q: 'tuck jump plyometric form' }),
 
   // ─── SPEED & AGILITY ────────────────────────────────────────
+  // Sprint drills are timed in the world but messy to self-log on an iPad —
+  // skipping logs for now to avoid friction. Easy to add later.
   E({ key: 'high_knees', name: 'High Knees', pattern: 'sprint', equipment: 'none', level: 1,
     rx: '3 x 15 yards', why: 'Teaches fast feet and good knee drive.',
     cues: ['Run in place or forward, knees up to hip height', 'Stay on the balls of your feet', 'Pump your arms fast'],
@@ -283,20 +318,25 @@ export const EXERCISES = [
     _q: '5-10-5 pro agility drill technique' }),
 
   // ─── THROW & POWER ──────────────────────────────────────────
+  // Med-ball moves log the ball's weight (the kid's main progression knob).
   E({ key: 'mb_chest_pass', name: 'Med Ball Chest Pass', pattern: 'throw', equipment: 'medball', level: 1,
     rx: '3 sets of 8', why: 'Explosive pushing power for the upper body.',
+    log: { ...LOG_WEIGHT, label: 'Ball weight' },
     cues: ['Hold the ball at your chest', 'Push it hard into a wall (or to a partner)', 'Step into it and follow through'],
     _q: 'medicine ball chest pass power throw' }),
   E({ key: 'mb_slam', name: 'Med Ball Slam', pattern: 'throw', equipment: 'medball', level: 1,
     rx: '3 sets of 8', why: 'Full-body power and a great way to blow off steam.',
+    log: { ...LOG_WEIGHT, label: 'Ball weight' },
     cues: ['Reach the ball high overhead', 'Slam it straight down as hard as you can', 'Use your whole body, catch the bounce'],
     _q: 'medicine ball slam exercise form' }),
   E({ key: 'mb_rotational', name: 'Med Ball Rotational Throw', pattern: 'throw', equipment: 'medball', level: 2,
     rx: '3 x 6 each', why: 'Twisting power for throwing, hitting, and kicking.',
+    log: { ...LOG_WEIGHT, label: 'Ball weight' },
     cues: ['Stand side-on to a wall', 'Wind up and throw the ball into the wall by twisting your hips', 'Hips lead, then shoulders — explode'],
     _q: 'medicine ball rotational throw power' }),
   E({ key: 'mb_overhead_throw', name: 'Med Ball Overhead Throw', pattern: 'throw', equipment: 'medball', level: 2,
     rx: '3 sets of 6', why: 'Total-body extension power, like a soccer throw-in.',
+    log: { ...LOG_WEIGHT, label: 'Ball weight' },
     cues: ['Ball overhead, small step back', 'Whip it forward and up, throwing far', 'Use legs, hips, and arms together'],
     _q: 'medicine ball overhead throw for distance' }),
 ];

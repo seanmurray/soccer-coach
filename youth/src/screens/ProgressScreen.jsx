@@ -7,11 +7,14 @@ import { EXERCISES } from '../data/exercises';
 import { summarize, readWeeklyGoal, writeWeeklyGoal } from '../lib/streak';
 import { computeXp, levelForXp } from '../lib/xp';
 import { computeBadges } from '../lib/badges';
-import { bestMap, formatPr } from '../lib/prs';
+import { bestMap, lastMap, formatLog } from '../lib/prs';
 import { WeeklyRing } from '../components/WeeklyRing';
 
 const FEEL_EMOJI = { 1: '😅', 2: '💪', 3: '🔥' };
-const PR_EXERCISES = EXERCISES.filter((e) => e.pr);
+// Every exercise that can be logged at all — we show Last + PR for each one
+// that has at least one logged attempt. Falls back to `.pr` to stay
+// compatible with any older entry that still uses the prior field name.
+const LOGGABLE = EXERCISES.filter((e) => e.log || e.pr);
 
 function formatDay(d) {
   return new Date(d).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
@@ -40,8 +43,18 @@ export function ProgressScreen() {
   const lvl = levelForXp(xp);
   const badges = computeBadges(rows, prs, streak);
   const earnedCount = badges.filter((b) => b.earned).length;
-  const best = bestMap(prs, Object.fromEntries(EXERCISES.map((e) => [e.key, e])));
-  const records = PR_EXERCISES.filter((e) => best[e.key] != null);
+  const exerciseLookup = Object.fromEntries(EXERCISES.map((e) => [e.key, e]));
+  const best = bestMap(prs, exerciseLookup);
+  const last = lastMap(prs);
+  // Show every loggable exercise that has at least one attempt, sorted by
+  // most-recent-first so the kid's recent work is at the top.
+  const records = LOGGABLE
+    .filter((e) => best[e.key] != null)
+    .map((e) => {
+      const newest = prs.find((r) => r.exercise_key === e.key);
+      return { ex: e, newestAt: newest?.achieved_at ?? '' };
+    })
+    .sort((a, b) => b.newestAt.localeCompare(a.newestAt));
 
   const changeGoal = (delta) => setGoal((g) => writeWeeklyGoal(g + delta));
 
@@ -102,20 +115,24 @@ export function ProgressScreen() {
         ))}
       </div>
 
-      {/* Records */}
+      {/* Records — every logged exercise with Last + PR side by side. */}
       <div className={styles.sectionTitle}>Records 🏅</div>
       {records.length === 0 ? (
         <div className={styles.hint}>
-          No records yet. In a workout or in Moves, open a move like Plank or Broad Jump and tap “Set your first record”.
+          No records yet. Inside any workout, expand an exercise card and tap “Log today's result” — your last value and PR will show up here.
         </div>
       ) : (
-        records.map((e) => (
-          <div key={e.key} className={styles.recordRow}>
-            <span className={styles.recordMedal}>🏅</span>
-            <span className={styles.recordName}>{e.pr.label}</span>
-            <span className={styles.recordVal}>{formatPr(best[e.key], e.pr)}</span>
-          </div>
-        ))
+        records.map(({ ex }) => {
+          const spec = ex.log ?? ex.pr;
+          return (
+            <div key={ex.key} className={styles.recordRow}>
+              <span className={styles.recordMedal}>🏅</span>
+              <span className={styles.recordName}>{ex.name}</span>
+              <span className={styles.recordLast}>{formatLog(last[ex.key], spec)}</span>
+              <span className={styles.recordVal}>{formatLog(best[ex.key], spec)}</span>
+            </div>
+          );
+        })
       )}
 
       {/* History */}
