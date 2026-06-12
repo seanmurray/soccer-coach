@@ -7,6 +7,7 @@ import { ExerciseCard } from '../components/ExerciseCard';
 import { FinishSheet } from '../components/FinishSheet';
 import { saveYouthSession } from '../lib/saveSession';
 import { sessionXp } from '../lib/xp';
+import { ATHLETE } from '../config/athlete';
 
 // In-progress session is persisted so an iPad PWA reload mid-workout keeps the
 // checkmarks (Safari suspends/reloads backgrounded tabs).
@@ -158,7 +159,7 @@ export function TodayScreen() {
   return (
     <main className="screen">
       <div className={styles.header}>
-        <div className="overline">Let's train</div>
+        <div className="overline">Let's train{ATHLETE.id !== 'seamus' ? `, ${ATHLETE.short}` : ''}</div>
         <div className="title-xl">TODAY</div>
       </div>
 

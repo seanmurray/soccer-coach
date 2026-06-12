@@ -5,6 +5,7 @@
 import { supabase } from './supabase';
 import { TEMPLATE_BY_ID } from '../data/templates';
 import { EXERCISE_BY_KEY } from '../data/exercises';
+import { ATHLETE } from '../config/athlete';
 
 export async function saveYouthSession({ templateId, context, doneKeys, feel, note }) {
   if (!supabase) return { ok: false, error: new Error('No database connection') };
@@ -24,6 +25,7 @@ export async function saveYouthSession({ templateId, context, doneKeys, feel, no
   });
 
   const row = {
+    athlete_id: ATHLETE.id,
     template_id: templateId,
     context,
     title: template?.name ?? 'Workout',

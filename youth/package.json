@@ -5,7 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:millie": "cross-env VITE_ATHLETE=millie vite",
+    "dev:evie": "cross-env VITE_ATHLETE=evie vite",
     "build": "vite build",
+    "build:millie": "cross-env VITE_ATHLETE=millie vite build",
+    "build:evie": "cross-env VITE_ATHLETE=evie vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -17,6 +21,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^6.0.1",
+    "cross-env": "^7.0.3",
     "vite": "^8.0.10",
     "vite-plugin-pwa": "^1.3.0"
   }

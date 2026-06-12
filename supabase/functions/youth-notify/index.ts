@@ -1,27 +1,58 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-// youth-notify (v1) — emails the dad when his son hits a milestone in the
-// Young Athlete app: a new personal record, a freshly-unlocked badge, or a
-// level-up. Triggered by Supabase Database Webhooks on INSERT to youth_sessions
-// and youth_prs (see migration: create_youth_webhooks). Per-workout emails are
-// intentionally suppressed — only celebratory events fire.
+// youth-notify (v2) — emails the dad when one of the three sibling athletes
+// (Seamus / Millie / Evie) hits a milestone in the Young Athlete app: a new
+// personal record, a freshly-unlocked badge, or a level-up.
+//
+// Triggered by Supabase Database Webhooks on INSERT to youth_sessions and
+// youth_prs (see migration: create_youth_webhooks). The webhook body carries
+// the inserted row, including athlete_id — the function recomputes stats
+// scoped to that athlete only, so each kid's badges and level-ups are
+// independent. Per-workout emails are intentionally suppressed; only
+// celebratory events fire.
 //
 // Auth: invoked from the database via pg_net with a shared secret in the
 // `x-notify-secret` header; rejected otherwise. verify_jwt is off in
 // supabase/config.toml so the API gateway doesn't bounce the call.
 //
-// Secrets (set via Supabase dashboard → Edge Functions → Secrets):
-//   RESEND_API_KEY   — required. Resend sender key.
+// Secrets (dashboard → Edge Functions → Secrets):
+//   RESEND_API_KEY   — required.
 //   NOTIFY_SECRET    — required. Shared with the DB trigger.
 //   NOTIFY_TO_EMAIL  — optional. Defaults to tungsten.sean@gmail.com.
-//   NOTIFY_FROM_EMAIL— optional. Defaults to onboarding@resend.dev (Resend
-//                      sandbox; switch to your domain once verified).
-//
-// Auto-injected by the runtime:
-//   SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY — used to recompute totals.
+//   NOTIFY_FROM_EMAIL— optional. Defaults to onboarding@resend.dev.
 
 const DEFAULT_TO   = 'tungsten.sean@gmail.com';
 const DEFAULT_FROM = 'onboarding@resend.dev';
+
+// ─── Athletes — name + visual identity for emails ───────────────────────────
+type Athlete = {
+  id: string; name: string; pronoun: string; url: string;
+  bg: string; card: string; border: string; accent: string;
+  textHeading: string; textBody: string; textMuted: string;
+};
+const ATHLETES: Record<string, Athlete> = {
+  seamus: {
+    id: 'seamus', name: 'Seamus', pronoun: 'He',
+    url:  'https://seanmurray.github.io/soccer-coach/youth/',
+    bg: '#0b1220', card: '#131c2e', border: '#1b2740',
+    accent: '#3a8dff', textHeading: '#f6f9ff', textBody: '#b3c0d8', textMuted: '#7888a8',
+  },
+  millie: {
+    id: 'millie', name: 'Millie', pronoun: 'She',
+    url:  'https://seanmurray.github.io/soccer-coach/millie/',
+    bg: '#170a13', card: '#241420', border: '#321b2c',
+    accent: '#ff4d9d', textHeading: '#fef5f8', textBody: '#d8b3c2', textMuted: '#a07888',
+  },
+  evie: {
+    id: 'evie', name: 'Evie', pronoun: 'She',
+    url:  'https://seanmurray.github.io/soccer-coach/evie/',
+    bg: '#110b20', card: '#1f1430', border: '#2a1d40',
+    accent: '#b974ff', textHeading: '#f6f0ff', textBody: '#c8b3d8', textMuted: '#8878a8',
+  },
+};
+function athleteOf(id: string | undefined): Athlete {
+  return ATHLETES[(id ?? 'seamus').toLowerCase()] ?? ATHLETES.seamus;
+}
 
 // ─── XP / Levels — kept in lockstep with youth/src/lib/xp.js ────────────────
 const XP_PER_MOVE = 10;
@@ -56,7 +87,7 @@ type Stats = {
   prCount: number; streak: number;
 };
 const BADGES: BadgeDef[] = [
-  { id: 'first',       emoji: '🎯', label: 'First Workout', desc: 'Finished his first session',    target: 1,             getCurrent: (s) => s.total },
+  { id: 'first',       emoji: '🎯', label: 'First Workout', desc: 'Finished their first session',  target: 1,             getCurrent: (s) => s.total },
   { id: 'w10',         emoji: '🔟', label: '10 Workouts',   desc: 'Finished 10 sessions',          target: 10,            getCurrent: (s) => s.total },
   { id: 'w25',         emoji: '🏅', label: '25 Workouts',   desc: 'Finished 25 sessions',          target: 25,            getCurrent: (s) => s.total },
   { id: 'w50',         emoji: '🎖️', label: '50 Workouts',   desc: 'Finished 50 sessions',          target: 50,            getCurrent: (s) => s.total },
@@ -69,7 +100,7 @@ const BADGES: BadgeDef[] = [
   { id: 'jump',        emoji: '⬆️', label: 'Jump Master',   desc: '25 jump moves',                 target: 25,            getCurrent: (s) => s.byPattern.jump ?? 0 },
   { id: 'speed',       emoji: '⚡', label: 'Speed Demon',   desc: '25 speed moves',                target: 25,            getCurrent: (s) => s.byPattern.sprint ?? 0 },
   { id: 'grip',        emoji: '🧗', label: 'Iron Grip',     desc: '25 pull moves',                 target: 25,            getCurrent: (s) => s.byPattern.pull ?? 0 },
-  { id: 'pr1',         emoji: '📈', label: 'Record Breaker', desc: 'Logged his first record',      target: 1,             getCurrent: (s) => s.prCount },
+  { id: 'pr1',         emoji: '📈', label: 'Record Breaker', desc: 'Logged their first record',    target: 1,             getCurrent: (s) => s.prCount },
   { id: 'pr5',         emoji: '👑', label: 'Record Hunter',  desc: 'Logged 5 records',             target: 5,             getCurrent: (s) => s.prCount },
 ];
 
@@ -112,7 +143,7 @@ function computeXp(sessions: any[], prs: any[]) {
   return x + prs.length * XP_PER_PR;
 }
 
-// ─── Supabase helpers (service role) ────────────────────────────────────────
+// ─── Supabase helpers (service role) — scoped per athlete ───────────────────
 async function sb(path: string, init: RequestInit = {}) {
   const url = Deno.env.get('SUPABASE_URL');
   const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -125,20 +156,27 @@ async function sb(path: string, init: RequestInit = {}) {
     },
   });
 }
-const fetchSessions = async () => (await sb('youth_sessions?select=*&order=performed_at.desc')).json();
-const fetchPrs      = async () => (await sb('youth_prs?select=*&order=achieved_at.desc')).json();
-const fetchEarned   = async () => (await sb('youth_earned_badges?select=badge_id')).json();
-const insertEarned  = async (ids: string[]) => sb('youth_earned_badges', { method: 'POST', body: JSON.stringify(ids.map(id => ({ badge_id: id }))) });
+const fetchSessions = async (athleteId: string) =>
+  (await sb(`youth_sessions?select=*&athlete_id=eq.${athleteId}&order=performed_at.desc`)).json();
+const fetchPrs = async (athleteId: string) =>
+  (await sb(`youth_prs?select=*&athlete_id=eq.${athleteId}&order=achieved_at.desc`)).json();
+const fetchEarned = async (athleteId: string) =>
+  (await sb(`youth_earned_badges?select=badge_id&athlete_id=eq.${athleteId}`)).json();
+const insertEarned = async (athleteId: string, ids: string[]) =>
+  sb('youth_earned_badges', {
+    method: 'POST',
+    body: JSON.stringify(ids.map(id => ({ athlete_id: athleteId, badge_id: id }))),
+  });
 
 // ─── Email helpers ──────────────────────────────────────────────────────────
-function emailShell(title: string, body: string) {
-  return `<!doctype html><html><body style="margin:0;padding:24px;background:#0b1220;color:#f5f5f5;font-family:-apple-system,sans-serif;">
-<div style="max-width:520px;margin:0 auto;background:#131c2e;border-radius:18px;padding:28px;border:1px solid #1b2740;">
-<div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:#7888a8;font-weight:700;">Young Athlete</div>
-<h1 style="font-size:28px;margin:8px 0 18px;color:#f6f9ff;">${title}</h1>
+function emailShell(a: Athlete, title: string, body: string) {
+  return `<!doctype html><html><body style="margin:0;padding:24px;background:${a.bg};color:${a.textHeading};font-family:-apple-system,sans-serif;">
+<div style="max-width:520px;margin:0 auto;background:${a.card};border-radius:18px;padding:28px;border:1px solid ${a.border};">
+<div style="font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:${a.textMuted};font-weight:700;">${a.name}'s Athlete</div>
+<h1 style="font-size:28px;margin:8px 0 18px;color:${a.textHeading};">${title}</h1>
 ${body}
-<div style="margin-top:26px;padding-top:18px;border-top:1px solid #1b2740;font-size:13px;color:#7888a8;">
-<a href="https://seanmurray.github.io/soccer-coach/youth/" style="color:#3a8dff;text-decoration:none;font-weight:600;">Open Young Athlete →</a>
+<div style="margin-top:26px;padding-top:18px;border-top:1px solid ${a.border};font-size:13px;color:${a.textMuted};">
+<a href="${a.url}" style="color:${a.accent};text-decoration:none;font-weight:600;">Open ${a.name}'s app →</a>
 </div></div></body></html>`;
 }
 async function sendEmail(subject: string, html: string) {
@@ -159,7 +197,10 @@ async function sendEmail(subject: string, html: string) {
 
 // ─── Event handlers ─────────────────────────────────────────────────────────
 async function handleSessionInsert(row: any) {
-  const [sessions, prs, earned] = await Promise.all([fetchSessions(), fetchPrs(), fetchEarned()]);
+  const a = athleteOf(row.athlete_id);
+  const [sessions, prs, earned] = await Promise.all([
+    fetchSessions(a.id), fetchPrs(a.id), fetchEarned(a.id),
+  ]);
   const stats = buildStats(sessions, prs);
 
   // Detect badges newly earned vs already-notified.
@@ -167,13 +208,13 @@ async function handleSessionInsert(row: any) {
   const justEarned = BADGES.filter(b => b.getCurrent(stats) >= b.target && !alreadyEmailed.has(b.id));
   if (justEarned.length) {
     await Promise.all(justEarned.map(async (b) => {
-      await sendEmail(`🏅 ${b.label} unlocked!`,
-        emailShell(`${b.emoji} ${b.label}`,
-          `<p style="font-size:17px;line-height:1.55;color:#b3c0d8;">Your son just unlocked the <strong style="color:#32d977;">${b.label}</strong> badge.</p>
-<p style="font-size:16px;color:#b3c0d8;">${b.desc}.</p>
-<p style="font-size:15px;color:#7888a8;margin-top:16px;">${stats.total} total workouts · ${stats.streak}-day streak</p>`));
+      await sendEmail(`${a.name}: 🏅 ${b.label} unlocked!`,
+        emailShell(a, `${b.emoji} ${b.label}`,
+          `<p style="font-size:17px;line-height:1.55;color:${a.textBody};">${a.name} just unlocked the <strong style="color:${a.accent};">${b.label}</strong> badge.</p>
+<p style="font-size:16px;color:${a.textBody};">${b.desc}.</p>
+<p style="font-size:15px;color:${a.textMuted};margin-top:16px;">${stats.total} total workouts · ${stats.streak}-day streak</p>`));
     }));
-    await insertEarned(justEarned.map(b => b.id));
+    await insertEarned(a.id, justEarned.map(b => b.id));
   }
 
   // Level-up: compare XP before vs after this session.
@@ -182,43 +223,45 @@ async function handleSessionInsert(row: any) {
   const before   = levelForXp(xpBefore);
   const after    = levelForXp(xpAfter);
   if (after.level > before.level) {
-    await sendEmail(`🚀 Leveled up — ${after.name}!`,
-      emailShell(`🚀 Level ${after.level}: ${after.name}`,
-        `<p style="font-size:17px;line-height:1.55;color:#b3c0d8;">He just leveled up from <strong>${before.name}</strong> to <strong style="color:#3a8dff;">${after.name}</strong>.</p>
-<p style="font-size:15px;color:#7888a8;margin-top:14px;">${xpAfter.toLocaleString()} XP total.</p>`));
+    await sendEmail(`${a.name}: 🚀 Leveled up — ${after.name}!`,
+      emailShell(a, `🚀 Level ${after.level}: ${after.name}`,
+        `<p style="font-size:17px;line-height:1.55;color:${a.textBody};">${a.name} just leveled up from <strong>${before.name}</strong> to <strong style="color:${a.accent};">${after.name}</strong>.</p>
+<p style="font-size:15px;color:${a.textMuted};margin-top:14px;">${xpAfter.toLocaleString()} XP total.</p>`));
   }
 }
 
 async function handlePrInsert(row: any) {
-  const all = await fetchPrs();
+  const a = athleteOf(row.athlete_id);
+  const all = await fetchPrs(a.id);
   const sameKey = (all ?? []).filter((r: any) => r.exercise_key === row.exercise_key && r.id !== row.id);
   const prevBest = sameKey.length ? Math.max(...sameKey.map((r: any) => Number(r.value))) : null;
   const value = Number(row.value);
   const isFirst = prevBest === null;
   const isRecord = !isFirst && value > prevBest;
-  if (!isFirst && !isRecord) {
-    // Logged but didn't beat his best — skip the PR email. Badges still recompute below.
-  } else {
+  if (isFirst || isRecord) {
     const unit = row.unit ?? '';
+    const moveName = row.exercise_key.replace(/_/g, ' ');
     const newLine = isFirst
-      ? `<p style="font-size:17px;color:#b3c0d8;line-height:1.55;">First record for <strong>${row.exercise_key.replace(/_/g, ' ')}</strong>: <strong style="color:#ffc83d;font-size:22px;">${value}${unit}</strong>.</p>`
-      : `<p style="font-size:17px;color:#b3c0d8;line-height:1.55;">New best on <strong>${row.exercise_key.replace(/_/g, ' ')}</strong>: <strong style="color:#ffc83d;font-size:22px;">${value}${unit}</strong> (was ${prevBest}${unit}, +${(value - prevBest!).toFixed(1)}${unit}).</p>`;
-    await sendEmail(isFirst ? '🏅 First record set!' : '🎉 New personal record!',
-      emailShell(isFirst ? '🏅 First record!' : '🎉 NEW RECORD!', newLine));
+      ? `<p style="font-size:17px;color:${a.textBody};line-height:1.55;">First record for <strong>${moveName}</strong>: <strong style="color:#ffc83d;font-size:22px;">${value}${unit}</strong>.</p>`
+      : `<p style="font-size:17px;color:${a.textBody};line-height:1.55;">New best on <strong>${moveName}</strong>: <strong style="color:#ffc83d;font-size:22px;">${value}${unit}</strong> (was ${prevBest}${unit}, +${(value - (prevBest as number)).toFixed(1)}${unit}).</p>`;
+    await sendEmail(
+      `${a.name}: ${isFirst ? '🏅 First record set!' : '🎉 New personal record!'}`,
+      emailShell(a, isFirst ? '🏅 First record!' : '🎉 NEW RECORD!', newLine)
+    );
   }
 
   // PR may also unlock PR-related badges (Record Breaker / Record Hunter).
-  const [sessions, earned] = await Promise.all([fetchSessions(), fetchEarned()]);
+  const [sessions, earned] = await Promise.all([fetchSessions(a.id), fetchEarned(a.id)]);
   const stats = buildStats(sessions, all);
   const alreadyEmailed = new Set((earned ?? []).map((b: any) => b.badge_id));
   const justEarned = BADGES.filter(b => b.getCurrent(stats) >= b.target && !alreadyEmailed.has(b.id));
   if (justEarned.length) {
     await Promise.all(justEarned.map(async (b) => {
-      await sendEmail(`🏅 ${b.label} unlocked!`,
-        emailShell(`${b.emoji} ${b.label}`,
-          `<p style="font-size:17px;color:#b3c0d8;line-height:1.55;">Your son just unlocked <strong style="color:#32d977;">${b.label}</strong>: ${b.desc}.</p>`));
+      await sendEmail(`${a.name}: 🏅 ${b.label} unlocked!`,
+        emailShell(a, `${b.emoji} ${b.label}`,
+          `<p style="font-size:17px;color:${a.textBody};line-height:1.55;">${a.name} just unlocked <strong style="color:${a.accent};">${b.label}</strong>: ${b.desc}.</p>`));
     }));
-    await insertEarned(justEarned.map(b => b.id));
+    await insertEarned(a.id, justEarned.map(b => b.id));
   }
 }
 
@@ -233,7 +276,6 @@ Deno.serve(async (req) => {
 
   try {
     const body = await req.json();
-    // Supabase database webhook shape: { type, table, record, schema, old_record }
     if (body.type !== 'INSERT') return new Response('ok (ignored)', { status: 200 });
     if (body.table === 'youth_sessions') await handleSessionInsert(body.record);
     else if (body.table === 'youth_prs') await handlePrInsert(body.record);

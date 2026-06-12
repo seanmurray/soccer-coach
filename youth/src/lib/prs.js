@@ -6,12 +6,18 @@
 // "Last" is just the most recent row.
 
 import { supabase } from './supabase';
+import { ATHLETE } from '../config/athlete';
 
 export async function saveYouthPR({ exerciseKey, value, unit }) {
   if (!supabase) return { ok: false, error: new Error('No database connection') };
   const { error } = await supabase
     .from('youth_prs')
-    .insert({ exercise_key: exerciseKey, value, unit: unit ?? null });
+    .insert({
+      athlete_id: ATHLETE.id,
+      exercise_key: exerciseKey,
+      value,
+      unit: unit ?? null,
+    });
   if (error) return { ok: false, error };
   return { ok: true };
 }

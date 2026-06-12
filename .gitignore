@@ -18,10 +18,11 @@ dev-dist
 .env.local
 .env.*.local
 
-# Editor directories and files
+# Editor / tool directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
+.claude/
 .DS_Store
 *.suo
 *.ntvs*

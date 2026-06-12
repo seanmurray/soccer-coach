@@ -47,27 +47,74 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      # ── Young Athlete sibling app ──────────────────────────────────────
-      # Lives in /youth, shares the same Supabase project, and is published as
-      # a sub-route at /<repo-name>/youth/. Built AFTER the soccer app (whose
-      # build empties dist/) and copied into dist/youth so both ship in one
-      # Pages artifact. The kid installs the /youth/ URL as its own PWA.
+      # ── Young Athlete sibling apps (Seamus / Millie / Evie) ────────────
+      # One source under youth/, built three times with different
+      # VITE_ATHLETE + VITE_BASE_PATH + per-athlete icons. Each kid installs
+      # their own URL as a PWA and only sees their own data (rows are
+      # filtered by athlete_id). The /youth/ path stays Seamus's so the
+      # already-installed PWA keeps working without re-install.
       - name: Install (youth app)
         run: npm ci
         working-directory: youth
 
-      - name: Build (youth app)
+      - name: Build (Seamus's app)
         env:
+          VITE_ATHLETE: seamus
           VITE_BASE_PATH: /${{ github.event.repository.name }}/youth/
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        run: npm run build
+        run: |
+          cp -f public/icons/seamus/icon-192.png         public/icon-192.png
+          cp -f public/icons/seamus/icon-512.png         public/icon-512.png
+          cp -f public/icons/seamus/apple-touch-icon.png public/apple-touch-icon.png
+          cp -f public/favicon-seamus.svg                public/favicon.svg
+          npm run build
         working-directory: youth
 
-      - name: Nest youth build under dist/youth
+      - name: Nest into dist/youth
         run: |
           mkdir -p dist/youth
           cp -r youth/dist/. dist/youth/
+          rm -rf youth/dist
+
+      - name: Build (Millie's app)
+        env:
+          VITE_ATHLETE: millie
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/millie/
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          cp -f public/icons/millie/icon-192.png         public/icon-192.png
+          cp -f public/icons/millie/icon-512.png         public/icon-512.png
+          cp -f public/icons/millie/apple-touch-icon.png public/apple-touch-icon.png
+          cp -f public/favicon-millie.svg                public/favicon.svg
+          npm run build
+        working-directory: youth
+
+      - name: Nest into dist/millie
+        run: |
+          mkdir -p dist/millie
+          cp -r youth/dist/. dist/millie/
+          rm -rf youth/dist
+
+      - name: Build (Evie's app)
+        env:
+          VITE_ATHLETE: evie
+          VITE_BASE_PATH: /${{ github.event.repository.name }}/evie/
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          cp -f public/icons/evie/icon-192.png         public/icon-192.png
+          cp -f public/icons/evie/icon-512.png         public/icon-512.png
+          cp -f public/icons/evie/apple-touch-icon.png public/apple-touch-icon.png
+          cp -f public/favicon-evie.svg                public/favicon.svg
+          npm run build
+        working-directory: youth
+
+      - name: Nest into dist/evie
+        run: |
+          mkdir -p dist/evie
+          cp -r youth/dist/. dist/evie/
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

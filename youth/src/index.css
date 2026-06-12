@@ -1,49 +1,12 @@
 /* ─── DESIGN TOKENS ───────────────────────────────────────────
-   Young Athlete theme. Distinct from the soccer app: deep-navy base,
-   energetic accents, and a deliberately LARGE type scale for an 11-year-old
-   reading at arm's length on an iPad. Nothing below 16px. */
+   Three sibling themes share one component library. The non-color tokens
+   (radii, fonts, safe-area, touch targets, layout, motion) live in :root.
+   Each athlete's palette is a [data-theme="..."] block selected by
+   main.jsx based on VITE_ATHLETE. CSS variable NAMES are intentionally
+   stable (--blue is "primary accent" everywhere, even when its value is
+   pink or purple) so components don't fork by theme. */
 
 :root {
-  /* Backgrounds — deep navy, friendlier than the soccer app's pure black */
-  --bg:        #0b1220;
-  --bg-card:   #131c2e;
-  --bg-raised: #1b2740;
-  --bg-input:  #22314f;
-  --bg-pill:   #2a3a5c;
-
-  /* Text */
-  --t1: #f6f9ff;
-  --t2: #b3c0d8;
-  --t3: #7888a8;
-  --t4: #45506a;
-
-  /* Accents */
-  --blue:      #3a8dff;
-  --blue-bg:   rgba(58, 141, 255, 0.14);
-  --blue-line: rgba(58, 141, 255, 0.35);
-  --green:     #32d977;
-  --green-bg:  rgba(50, 217, 119, 0.14);
-  --green-line:rgba(50, 217, 119, 0.35);
-  --amber:     #ffc83d;
-  --amber-bg:  rgba(255, 200, 61, 0.14);
-  --orange:    #ff8a3d;
-  --orange-bg: rgba(255, 138, 61, 0.14);
-  --purple:    #a87bff;
-  --purple-bg: rgba(168, 123, 255, 0.14);
-  --red:       #ff5a52;
-
-  /* Pattern tints — one color per movement family */
-  --pat-squat:  #3a8dff;
-  --pat-hinge:  #a87bff;
-  --pat-push:   #ff8a3d;
-  --pat-pull:   #32d977;
-  --pat-lunge:  #ffc83d;
-  --pat-core:   #ff5a52;
-  --pat-jump:   #34d6c8;
-  --pat-sprint: #ff6fb5;
-  --pat-throw:  #c8a24a;
-  --pat-move:   #6ea8ff;
-
   /* Radii — rounder/chunkier than the soccer app */
   --r1: 14px;
   --r2: 20px;
@@ -66,6 +29,132 @@
   --font-body:    'DM Sans', -apple-system, sans-serif;
 
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── SEAMUS theme (navy + blue) — default ─────────────────────
+   Also applied when no data-theme attribute is set, so dev/preview is
+   safe even before main.jsx has run. */
+:root,
+[data-theme="seamus"] {
+  --bg:        #0b1220;
+  --bg-card:   #131c2e;
+  --bg-raised: #1b2740;
+  --bg-input:  #22314f;
+  --bg-pill:   #2a3a5c;
+
+  --t1: #f6f9ff;
+  --t2: #b3c0d8;
+  --t3: #7888a8;
+  --t4: #45506a;
+
+  --blue:      #3a8dff;
+  --blue-bg:   rgba(58, 141, 255, 0.14);
+  --blue-line: rgba(58, 141, 255, 0.35);
+  --green:     #32d977;
+  --green-bg:  rgba(50, 217, 119, 0.14);
+  --green-line:rgba(50, 217, 119, 0.35);
+  --amber:     #ffc83d;
+  --amber-bg:  rgba(255, 200, 61, 0.14);
+  --orange:    #ff8a3d;
+  --orange-bg: rgba(255, 138, 61, 0.14);
+  --purple:    #a87bff;
+  --purple-bg: rgba(168, 123, 255, 0.14);
+  --red:       #ff5a52;
+
+  --pat-squat:  #3a8dff;
+  --pat-hinge:  #a87bff;
+  --pat-push:   #ff8a3d;
+  --pat-pull:   #32d977;
+  --pat-lunge:  #ffc83d;
+  --pat-core:   #ff5a52;
+  --pat-jump:   #34d6c8;
+  --pat-sprint: #ff6fb5;
+  --pat-throw:  #c8a24a;
+  --pat-move:   #6ea8ff;
+}
+
+/* ─── MILLIE theme (pink + warm berry base) ────────────────────
+   For a 9-year-old who likes pink. Backgrounds shift to deep warm-berry;
+   primary accent ("--blue" by name) becomes hot pink. Other semantic
+   accents (green for done, amber for PRs, red for errors) stay universal
+   so the visual grammar is consistent across the three sibling apps. */
+[data-theme="millie"] {
+  --bg:        #170a13;
+  --bg-card:   #241420;
+  --bg-raised: #321b2c;
+  --bg-input:  #3f2235;
+  --bg-pill:   #4a283e;
+
+  --t1: #fef5f8;
+  --t2: #d8b3c2;
+  --t3: #a07888;
+  --t4: #5a4050;
+
+  --blue:      #ff4d9d;   /* "primary" — actually hot pink */
+  --blue-bg:   rgba(255, 77, 157, 0.14);
+  --blue-line: rgba(255, 77, 157, 0.35);
+  --green:     #32d977;
+  --green-bg:  rgba(50, 217, 119, 0.14);
+  --green-line:rgba(50, 217, 119, 0.35);
+  --amber:     #ffc83d;
+  --amber-bg:  rgba(255, 200, 61, 0.14);
+  --orange:    #ff8a3d;
+  --orange-bg: rgba(255, 138, 61, 0.14);
+  --purple:    #b974ff;
+  --purple-bg: rgba(185, 116, 255, 0.14);
+  --red:       #ff5a52;
+
+  --pat-squat:  #ff4d9d;
+  --pat-hinge:  #b974ff;
+  --pat-push:   #ff8a3d;
+  --pat-pull:   #32d977;
+  --pat-lunge:  #ffc83d;
+  --pat-core:   #ff5a52;
+  --pat-jump:   #ff6fb5;
+  --pat-sprint: #ff4d9d;
+  --pat-throw:  #ffafd0;
+  --pat-move:   #ffafd0;
+}
+
+/* ─── EVIE theme (purple + violet base) ────────────────────────
+   For an almost-8-year-old who likes purple. Deep cool-violet background
+   and a vibrant purple primary accent. */
+[data-theme="evie"] {
+  --bg:        #110b20;
+  --bg-card:   #1f1430;
+  --bg-raised: #2a1d40;
+  --bg-input:  #362654;
+  --bg-pill:   #432d65;
+
+  --t1: #f6f0ff;
+  --t2: #c8b3d8;
+  --t3: #8878a8;
+  --t4: #4a3a6a;
+
+  --blue:      #b974ff;   /* "primary" — actually vibrant purple */
+  --blue-bg:   rgba(185, 116, 255, 0.16);
+  --blue-line: rgba(185, 116, 255, 0.40);
+  --green:     #32d977;
+  --green-bg:  rgba(50, 217, 119, 0.14);
+  --green-line:rgba(50, 217, 119, 0.35);
+  --amber:     #ffc83d;
+  --amber-bg:  rgba(255, 200, 61, 0.14);
+  --orange:    #ff8a3d;
+  --orange-bg: rgba(255, 138, 61, 0.14);
+  --purple:    #b974ff;
+  --purple-bg: rgba(185, 116, 255, 0.14);
+  --red:       #ff5a52;
+
+  --pat-squat:  #b974ff;
+  --pat-hinge:  #a87bff;
+  --pat-push:   #ff8a3d;
+  --pat-pull:   #32d977;
+  --pat-lunge:  #ffc83d;
+  --pat-core:   #ff5a52;
+  --pat-jump:   #34d6c8;
+  --pat-sprint: #d68aff;
+  --pat-throw:  #c8a24a;
+  --pat-move:   #b974ff;
 }
 
 /* ─── RESET ─────────────────────────────────────────────────── */
