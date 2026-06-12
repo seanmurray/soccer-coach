@@ -47,27 +47,27 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: npm run build
 
-      # ── Young Athlete sibling apps (Seamus / Millie / Evie) ────────────
+      # ── Young Athlete sibling apps (August / Millie / Evie) ────────────
       # One source under youth/, built three times with different
       # VITE_ATHLETE + VITE_BASE_PATH + per-athlete icons. Each kid installs
       # their own URL as a PWA and only sees their own data (rows are
-      # filtered by athlete_id). The /youth/ path stays Seamus's so the
+      # filtered by athlete_id). The /youth/ path stays August's so the
       # already-installed PWA keeps working without re-install.
       - name: Install (youth app)
         run: npm ci
         working-directory: youth
 
-      - name: Build (Seamus's app)
+      - name: Build (August's app)
         env:
-          VITE_ATHLETE: seamus
+          VITE_ATHLETE: august
           VITE_BASE_PATH: /${{ github.event.repository.name }}/youth/
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         run: |
-          cp -f public/icons/seamus/icon-192.png         public/icon-192.png
-          cp -f public/icons/seamus/icon-512.png         public/icon-512.png
-          cp -f public/icons/seamus/apple-touch-icon.png public/apple-touch-icon.png
-          cp -f public/favicon-seamus.svg                public/favicon.svg
+          cp -f public/icons/august/icon-192.png         public/icon-192.png
+          cp -f public/icons/august/icon-512.png         public/icon-512.png
+          cp -f public/icons/august/apple-touch-icon.png public/apple-touch-icon.png
+          cp -f public/favicon-august.svg                public/favicon.svg
           npm run build
         working-directory: youth
 

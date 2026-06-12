@@ -159,7 +159,7 @@ export function TodayScreen() {
   return (
     <main className="screen">
       <div className={styles.header}>
-        <div className="overline">Let's train{ATHLETE.id !== 'seamus' ? `, ${ATHLETE.short}` : ''}</div>
+        <div className="overline">Let's train, {ATHLETE.short}</div>
         <div className="title-xl">TODAY</div>
       </div>
 

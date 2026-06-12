@@ -2,7 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Young Athlete app — three sibling builds (Seamus / Millie / Evie) share
+// Young Athlete app — three sibling builds (August / Millie / Evie) share
 // this source. Each ships under its own GitHub Pages sub-route with its own
 // theme + PWA identity. The athlete is picked by VITE_ATHLETE at build time.
 //
@@ -11,10 +11,10 @@ import { VitePWA } from 'vite-plugin-pwa'
 // /soccer-coach/evie/). Local dev defaults to "/".
 
 const ATHLETE_MANIFEST = {
-  seamus: {
-    name: 'Young Athlete',
-    short_name: 'Athlete',
-    description: 'Build real athleticism — strength, speed, jumps, and movement skill, with video for every exercise.',
+  august: {
+    name: "August's Athlete",
+    short_name: 'August',
+    description: "August's training: get strong, move well, log every record.",
     background_color: '#0b1220',
     theme_color: '#0b1220',
   },
@@ -37,8 +37,8 @@ const ATHLETE_MANIFEST = {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const base = env.VITE_BASE_PATH || '/';
-  const athlete = (env.VITE_ATHLETE || 'seamus').toLowerCase();
-  const m = ATHLETE_MANIFEST[athlete] ?? ATHLETE_MANIFEST.seamus;
+  const athlete = (env.VITE_ATHLETE || 'august').toLowerCase();
+  const m = ATHLETE_MANIFEST[athlete] ?? ATHLETE_MANIFEST.august;
 
   return {
     base,

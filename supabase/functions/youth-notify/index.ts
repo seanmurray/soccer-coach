@@ -1,7 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 // youth-notify (v2) — emails the dad when one of the three sibling athletes
-// (Seamus / Millie / Evie) hits a milestone in the Young Athlete app: a new
+// (August / Millie / Evie) hits a milestone in the Young Athlete app: a new
 // personal record, a freshly-unlocked badge, or a level-up.
 //
 // Triggered by Supabase Database Webhooks on INSERT to youth_sessions and
@@ -31,8 +31,8 @@ type Athlete = {
   textHeading: string; textBody: string; textMuted: string;
 };
 const ATHLETES: Record<string, Athlete> = {
-  seamus: {
-    id: 'seamus', name: 'Seamus', pronoun: 'He',
+  august: {
+    id: 'august', name: 'August', pronoun: 'He',
     url:  'https://seanmurray.github.io/soccer-coach/youth/',
     bg: '#0b1220', card: '#131c2e', border: '#1b2740',
     accent: '#3a8dff', textHeading: '#f6f9ff', textBody: '#b3c0d8', textMuted: '#7888a8',
@@ -51,7 +51,7 @@ const ATHLETES: Record<string, Athlete> = {
   },
 };
 function athleteOf(id: string | undefined): Athlete {
-  return ATHLETES[(id ?? 'seamus').toLowerCase()] ?? ATHLETES.seamus;
+  return ATHLETES[(id ?? 'august').toLowerCase()] ?? ATHLETES.august;
 }
 
 // ─── XP / Levels — kept in lockstep with youth/src/lib/xp.js ────────────────

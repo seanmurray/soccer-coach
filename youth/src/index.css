@@ -31,11 +31,11 @@
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* ─── SEAMUS theme (navy + blue) — default ─────────────────────
+/* ─── AUGUST theme (navy + blue) — default ─────────────────────
    Also applied when no data-theme attribute is set, so dev/preview is
    safe even before main.jsx has run. */
 :root,
-[data-theme="seamus"] {
+[data-theme="august"] {
   --bg:        #0b1220;
   --bg-card:   #131c2e;
   --bg-raised: #1b2740;

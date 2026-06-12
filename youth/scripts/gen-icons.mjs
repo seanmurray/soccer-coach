@@ -21,7 +21,7 @@ const PUBLIC = path.resolve(__dirname, '..', 'public');
 // Each athlete: bg gradient (dark → darker), bolt gradient (primary → accent),
 // and a stroke color that contrasts the bolt.
 const PALETTES = {
-  seamus: {
+  august: {
     bgFrom:  '#13203a', bgTo:  '#0b1220',
     boltFrom:'#3a8dff', boltTo:'#32d977',
     stroke:  '#06210f',
@@ -78,12 +78,12 @@ for (const [athlete, palette] of Object.entries(PALETTES)) {
   console.log(`wrote ${athlete}: favicon-${athlete}.svg + 3 PNGs in icons/${athlete}/`);
 }
 
-// Keep public/favicon.svg + icon-*.png as the Seamus defaults so `npm run dev`
+// Keep public/favicon.svg + icon-*.png as August's defaults so `npm run dev`
 // works without the per-athlete pre-build copy step.
-const seamusSvg = svgFor(PALETTES.seamus);
-await writeFile(path.join(PUBLIC, 'favicon.svg'), seamusSvg);
+const augustSvg = svgFor(PALETTES.august);
+await writeFile(path.join(PUBLIC, 'favicon.svg'), augustSvg);
 for (const { name, size } of TARGETS) {
-  const buf = await sharp(Buffer.from(seamusSvg)).resize(size, size).png().toBuffer();
+  const buf = await sharp(Buffer.from(augustSvg)).resize(size, size).png().toBuffer();
   await writeFile(path.join(PUBLIC, name), buf);
 }
-console.log('wrote default seamus assets at public/');
+console.log('wrote default august assets at public/');

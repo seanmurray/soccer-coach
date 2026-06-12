@@ -39,7 +39,7 @@ export default defineConfig(({ mode }) => {
         // Supabase and Anthropic so they bypass the SW.
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: 'index.html',
-        // The Young Athlete sibling apps (Seamus / Millie / Evie) are
+        // The Young Athlete sibling apps (August / Millie / Evie) are
         // published as sub-routes at /soccer-coach/{youth,millie,evie}/, each
         // with its own service worker. This SW's scope (/soccer-coach/) would
         // otherwise catch those navigations and serve the soccer shell — deny
