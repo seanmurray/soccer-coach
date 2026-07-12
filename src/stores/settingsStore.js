@@ -7,7 +7,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { DEFAULT_DAY_ORDER } from '../data/sessions';
 
-const initialMaxes = { trapbar: 0, bsq: 0, bench: 0, blgsq: 0 };
+const initialMaxes = { trapbar: 0, bsq: 0, bench: 0, blgsq: 0, ohp: 0, pendlay: 0 };
 
 const initialTimerPrefs = {
   autoStart: true,

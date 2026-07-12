@@ -538,13 +538,17 @@ export const MAXES_CONFIG = [
   { key: 'bsq',     label: 'Back / front squat', placeholder: 'e.g. 225' },
   { key: 'bench',   label: 'Bench press', placeholder: 'e.g. 185' },
   { key: 'blgsq',   label: 'Bulgarian split squat', placeholder: 'e.g. 80 each' },
+  { key: 'ohp',     label: 'Standing overhead press', placeholder: 'e.g. 115' },
+  { key: 'pendlay', label: 'Pendlay row', placeholder: 'e.g. 155' },
 ];
 
 // Maps an exercise key to the working-max key used for load calc.
 // Anything missing here = no recommended load.
 export const EX_TO_MAX_KEY = {
-  bench_press:   'bench',
-  floor_press:   'bench',
-  trapbar_dl:    'trapbar',
-  blg_split_sq:  'blgsq',
+  bench_press:    'bench',
+  floor_press:    'bench',
+  trapbar_dl:     'trapbar',
+  blg_split_sq:   'blgsq',
+  overhead_press: 'ohp',
+  pendlay_row:    'pendlay',
 };
