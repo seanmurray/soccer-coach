@@ -127,7 +127,17 @@ export function getStrengthPrescription(exKey, week, mode, season = 'pre') {
   const info = getPhaseInfo(week);
   const recipe = PHASE_RECIPE[info.phase];
 
-  const exMap = { bench_press: 'bench', floor_press: 'bench', trapbar_dl: 'trapbar', blg_split_sq: 'blgsq' };
+  // overhead_press and pendlay_row are the new lin-day superset. Both share
+  // the `bench` recipe because basePct is expressed as % of that lift's OWN
+  // 1RM — the same relative intensity works for any upper-body barbell
+  // compound. Tempos are close enough for a first pass; dial in per-lift
+  // later if the athlete's data suggests a different profile.
+  const exMap = {
+    bench_press: 'bench', floor_press: 'bench',
+    overhead_press: 'bench', pendlay_row: 'bench',
+    trapbar_dl: 'trapbar',
+    blg_split_sq: 'blgsq',
+  };
   const key = exMap[exKey] || 'bench';
 
   // Within-phase step loading; deload weeks bypass the multiplier.

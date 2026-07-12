@@ -413,6 +413,26 @@ export const EX = {
     cue: 'Upper arm hits floor between reps. Dead stop — pure concentric. More tricep than bench.',
     swaps: ['Bench press (standard)', 'DB floor press (no barbell)'],
   },
+  overhead_press: {
+    name: 'Standing overhead press', muscle: 'push', tags: ['str'], type: 'strength',
+    url: YT('standing barbell overhead press military press form'),
+    cue: 'Braced trunk, glutes squeezed, bar path straight over mid-foot. Head through the window at lockout. No leg drive — this is strict.',
+    swaps: [
+      'Seated DB press (shoulder mobility issue)',
+      'Push press (need leg drive for load)',
+      'Landmine press (unilateral / anterior shoulder friendly)',
+    ],
+  },
+  pendlay_row: {
+    name: 'Pendlay row (dead-stop)', muscle: 'pull', tags: ['str'], type: 'strength',
+    url: YT('pendlay row form dead stop barbell'),
+    cue: 'Bar starts on floor every rep. Torso ~parallel. Pull to lower chest, hips do not rise. Dead-stop between reps — no bounce.',
+    swaps: [
+      'Chest-supported T-bar row (lower-back sensitive)',
+      'Barbell row (bent-over, not dead-stop)',
+      'Meadows row (unilateral variation)',
+    ],
+  },
   nordic_curl: {
     name: 'Nordic hamstring curl', muscle: 'hamstring eccentric', tags: ['str', 'acc'], type: 'strength',
     url: 'https://movements.overtimeathletes.com/strength/lower-body/nordic-hamstring-curl/',

@@ -36,29 +36,48 @@ export const WORKING_RESTHR = 60;
 
 export const SESSIONS = {
   full: {
+    // 2026-06 rework: build blocks now COMPLEMENT the day's strength focus
+    // rather than repeat leg work. New rule: no exercise appears on more than
+    // one day of the microcycle (variations of a pattern are fine, same exact
+    // exercise is not). walking_lunge_db went from 17/20 workouts to 1/20.
+    // lin strength swapped from bench_press to a standing OHP + pendlay_row
+    // superset — gets a heavy pull anchor into the week that was missing.
     acc: {
       agility: ['falling_starts', 'wall_starts', 'two_pt_starts', 'half_kneel_starts', 'decel_series'],
       plyo: ['snap_downs', 'broad_jump', 'half_kneel_box_jump', 'sprinter_step_up'],
       strength: ['bench_press'],
-      build: ['walking_lunge_db', 'the_grappler', 'pullup', 'ab_wheel'],
+      // Bench = upper push. Build fills: knee-dominant lower (accel-day complement),
+      // vertical pull, rotational power, anti-extension core (sprint posture).
+      build: ['walking_lunge_db', 'pullup', 'mb_rotational_slam', 'ab_wheel'],
     },
     lat: {
       agility: ['lat_power_shuffle', 'carioca_qstep', 'half_arc_run', 'lat_shuffle_react', 'y_cut', 'jump_cut'],
       plyo: ['v_jumps', 'skater_jumps', 'ascending_skaters', 'russian_lunge', 'russian_speed_lunge'],
       strength: ['blg_split_sq'],
-      build: ['walking_lunge_db', 'nordic_curl', 'the_grappler', 'half_kneel_rot_chop'],
+      // BSS = single-leg quad. No more single-leg work in build. Fills:
+      // unilateral pull, hamstring resilience (BSS blasted the quad), heavy
+      // rotational carry, anti-rotation (cutting stability).
+      build: ['single_arm_row', 'nordic_curl', 'the_grappler', 'pallof_press'],
     },
     lin: {
       agility: ['two_pt_stop_go', 'pro_shuttle', 'l_drill', 'lat_power_shuffle', 'figure_8_drill'],
       plyo: ['lateral_bounds', 'sl_snap_down', 'blg_squat_jump', 'russian_lunge'],
-      strength: ['bench_press'],
-      build: ['walking_lunge_db', 'cable_row_rotation', 'pullup', 'pallof_press'],
+      // Superset: OHP + Pendlay row. Gets a heavy pull into the week that
+      // bench + bench previously did not. Cue the athlete: alternate sets.
+      strength: ['overhead_press', 'pendlay_row'],
+      // OHP+row = vertical push/pull. Build fills: frontal-plane single-leg
+      // (mirrors COD demands), rotational chop, rotational push (different
+      // plane from OHP), anti-extension power (MB slam).
+      build: ['goblet_lat_lunge', 'half_kneel_rot_chop', 'cable_press_rotation', 'mb_slam'],
     },
     vel: {
       agility: ['high_knee_run', 'butt_kick_run', 'a_skips', 'b_skips', 'sl_high_knee', 'sl_cycling', 'str_leg_bounds', 'alternating_bounds', 'step_over_runs', 'build_ups'],
       plyo: ['sl_broad_jump', 'sl_triple_jump', 'box_jump'],
       strength: ['trapbar_dl'],
-      build: ['blg_split_sq', 'walking_lunge_db', 'the_grappler', 'cable_press_rotation'],
+      // Trap bar = heavy bilateral hinge. Build is UPPER-dominant — no more
+      // legs after big lower + max-V mechanics. Rotational pull, horizontal
+      // push variant, single-leg posterior (accessory), anti-lateral core.
+      build: ['cable_row_rotation', 'floor_press', 'single_leg_hip_thrust', 'walking_kb_high_pull_coil'],
     },
     cond: {
       // Soccer-specific conditioning — protocols adapted to user's equipment
@@ -169,40 +188,47 @@ export const SESSIONS = {
 
   // Legacy v9 'modified' block — still referenced by getStrengthPrescription
   // for prescription mapping. Selection lists below match v9 exactly.
+  // Legacy v9 'modified' block — mirrors mod1 (3-item build blocks, same
+  // uniqueness rule). Kept for prescription mapping.
   modified: {
-    acc: { agility: ['two_pt_starts', 'half_kneel_starts', 'decel_series'], plyo: ['snap_downs', 'seated_box_jump'], strength: ['bench_press'], build: ['walking_lunge_db', 'the_grappler', 'ab_wheel'] },
-    lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps', 'v_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'nordic_curl', 'the_grappler'] },
-    lin: { agility: ['pro_shuttle', 'figure_8_drill', 'lat_power_shuffle'], plyo: ['lateral_bounds'], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
-    vel: { agility: ['a_skips', 'b_skips', 'alternating_bounds', 'build_ups'], plyo: ['sl_broad_jump', 'box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'single_leg_hip_thrust'] },
+    acc: { agility: ['two_pt_starts', 'half_kneel_starts', 'decel_series'], plyo: ['snap_downs', 'seated_box_jump'], strength: ['bench_press'], build: ['walking_lunge_db', 'pullup', 'mb_rotational_slam'] },
+    lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps', 'v_jumps'], strength: ['blg_split_sq'], build: ['single_arm_row', 'nordic_curl', 'pallof_press'] },
+    lin: { agility: ['pro_shuttle', 'figure_8_drill', 'lat_power_shuffle'], plyo: ['lateral_bounds'], strength: ['overhead_press', 'pendlay_row'], build: ['goblet_lat_lunge', 'half_kneel_rot_chop', 'cable_press_rotation'] },
+    vel: { agility: ['a_skips', 'b_skips', 'alternating_bounds', 'build_ups'], plyo: ['sl_broad_jump', 'box_jump'], strength: ['trapbar_dl'], build: ['cable_row_rotation', 'floor_press', 'walking_kb_high_pull_coil'] },
     cond: { protocols: [{ name: 'Easy bike or court jog', desc: '20 min at RPE 5-6 — aerobic flush. HR ~125-145 bpm.', rpe: 5, tags: ['cond'], hr_low: 125, hr_high: 145 }] },
   },
 
-  // mod1: minor fatigue — same exercise selection as full, trim 1 set from
-  // strength, skip last plyo. Strength prescription handled at -15%.
+  // mod1: minor fatigue — 3-item build (drop the lowest-priority slot from
+  // the full 4-item block). Strength prescription handled at -15%. Uniqueness
+  // rule preserved: no exercise appears on more than one day.
   mod1: {
     acc: {
       agility: ['falling_starts', 'two_pt_starts', 'half_kneel_starts', 'decel_series'],
       plyo: ['snap_downs', 'broad_jump', 'sprinter_step_up'],
       strength: ['bench_press'],
-      build: ['walking_lunge_db', 'the_grappler', 'pullup'],
+      // drop ab_wheel — priority = lower + pull + rotational power.
+      build: ['walking_lunge_db', 'pullup', 'mb_rotational_slam'],
     },
     lat: {
       agility: ['lat_power_shuffle', 'carioca_qstep', 'half_arc_run', 'y_cut', 'jump_cut'],
       plyo: ['v_jumps', 'skater_jumps', 'russian_lunge'],
       strength: ['blg_split_sq'],
-      build: ['walking_lunge_db', 'nordic_curl', 'the_grappler'],
+      // drop the_grappler (heaviest CNS carry) — priority = pull + hamstring + anti-rot.
+      build: ['single_arm_row', 'nordic_curl', 'pallof_press'],
     },
     lin: {
       agility: ['two_pt_stop_go', 'pro_shuttle', 'l_drill', 'figure_8_drill'],
       plyo: ['lateral_bounds', 'sl_snap_down', 'russian_lunge'],
-      strength: ['bench_press'],
-      build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'],
+      strength: ['overhead_press', 'pendlay_row'],
+      // drop mb_slam (high-CNS power piece) — priority = lower + chop + rot press.
+      build: ['goblet_lat_lunge', 'half_kneel_rot_chop', 'cable_press_rotation'],
     },
     vel: {
       agility: ['a_skips', 'b_skips', 'sl_high_knee', 'str_leg_bounds', 'alternating_bounds', 'build_ups'],
       plyo: ['sl_broad_jump', 'box_jump'],
       strength: ['trapbar_dl'],
-      build: ['blg_split_sq', 'walking_lunge_db', 'the_grappler'],
+      // drop single_leg_hip_thrust (leg accessory after big lower day) — priority = pulls + core.
+      build: ['cable_row_rotation', 'floor_press', 'walking_kb_high_pull_coil'],
     },
     cond: {
       protocols: [
@@ -235,12 +261,13 @@ export const SESSIONS = {
     },
   },
 
-  // mod2: moderate fatigue — core exercises only, cap RPE 7.5, skip high-CNS plyos.
+  // mod2: moderate fatigue — 2-item build (essentials only), cap RPE 7.5, skip
+  // high-CNS plyos. Uniqueness rule preserved across days.
   mod2: {
-    acc: { agility: ['two_pt_starts', 'wall_starts', 'decel_series'], plyo: ['snap_downs', 'seated_box_jump'], strength: ['bench_press'], build: ['walking_lunge_db', 'the_grappler'] },
-    lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'nordic_curl'] },
-    lin: { agility: ['pro_shuttle', 'figure_8_drill'], plyo: ['lateral_bounds'], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation'] },
-    vel: { agility: ['a_skips', 'b_skips', 'build_ups'], plyo: ['box_jump'], strength: ['trapbar_dl'], build: ['blg_split_sq', 'walking_lunge_db'] },
+    acc: { agility: ['two_pt_starts', 'wall_starts', 'decel_series'], plyo: ['snap_downs', 'seated_box_jump'], strength: ['bench_press'], build: ['walking_lunge_db', 'pullup'] },
+    lat: { agility: ['lat_power_shuffle', 'half_arc_run', 'y_cut'], plyo: ['skater_jumps'], strength: ['blg_split_sq'], build: ['nordic_curl', 'pallof_press'] },
+    lin: { agility: ['pro_shuttle', 'figure_8_drill'], plyo: ['lateral_bounds'], strength: ['overhead_press', 'pendlay_row'], build: ['goblet_lat_lunge', 'half_kneel_rot_chop'] },
+    vel: { agility: ['a_skips', 'b_skips', 'build_ups'], plyo: ['box_jump'], strength: ['trapbar_dl'], build: ['cable_row_rotation', 'walking_kb_high_pull_coil'] },
     cond: {
       protocols: [
         { exercise_key: 'assault_bike_tabata', name: 'Assault bike — Zone 2', desc: '20 min at RPE 5-6. Conversational pace. HR ~125-145 bpm. Aerobic flush — supports recovery, not a training stimulus.', rpe: 5, tags: ['cond'], kind: 'single_metric', hr_low: 125, hr_high: 145 },
@@ -249,15 +276,14 @@ export const SESSIONS = {
     },
   },
 
-  // mod3: high fatigue — technique maintenance only, 55% load, bodyweight plyos.
+  // mod3: high fatigue — technique maintenance only, 55% load, bodyweight
+  // plyos. 2-item build, low-CNS pieces. Uniqueness rule still enforced —
+  // no exercise appears on more than one day even at the lowest volume tier.
   mod3: {
-    acc: { agility: ['a_skips', 'b_skips', 'wall_starts'], plyo: ['pogo_jumps', 'snap_downs'], strength: ['bench_press'], build: ['walking_lunge_db', 'half_kneel_rot_chop'] },
-    // v9 referenced `cable_woodchop` here, which never existed in EX.
-    // Substituting `half_kneel_rot_chop` — same movement family (cable rotation
-    // chop) and an appropriate fit for mod3's "technique only" prescription.
-    lat: { agility: ['lat_power_shuffle'], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['walking_lunge_db', 'half_kneel_rot_chop'] },
-    lin: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['bench_press'], build: ['walking_lunge_db', 'pallof_press'] },
-    vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_lunge_db', 'single_leg_hip_thrust'] },
+    acc: { agility: ['a_skips', 'b_skips', 'wall_starts'], plyo: ['pogo_jumps', 'snap_downs'], strength: ['bench_press'], build: ['walking_lunge_db', 'ab_wheel'] },
+    lat: { agility: ['lat_power_shuffle'], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['nordic_curl', 'pallof_press'] },
+    lin: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['overhead_press', 'pendlay_row'], build: ['goblet_lat_lunge', 'half_kneel_rot_chop'] },
+    vel: { agility: ['a_skips', 'b_skips', 'high_knee_run'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['cable_row_rotation', 'walking_kb_high_pull_coil'] },
     cond: {
       protocols: [
         { exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — active recovery', desc: '15-20 min very easy jog or walk. RPE 3-4. Movement, not conditioning. Keep HR under ~125 bpm.', rpe: 3, tags: ['cond'], kind: 'single_metric', hr_low: null, hr_high: 125 },
@@ -265,11 +291,14 @@ export const SESSIONS = {
     },
   },
 
+  // recovery: 1 low-CNS build item per day — circulation-oriented, not
+  // training stimulus. Strength drops to bare motor pattern maintenance;
+  // agility/plyo mostly skipped. Uniqueness rule preserved.
   recovery: {
-    acc: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['bench_press'], build: ['half_kneel_rot_chop'] },
-    lat: { agility: [], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['the_grappler'] },
-    lin: { agility: [], plyo: [], strength: ['bench_press'], build: ['walking_lunge_db', 'cable_row_rotation', 'pallof_press'] },
-    vel: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['single_leg_hip_thrust'] },
+    acc: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['bench_press'], build: ['ab_wheel'] },
+    lat: { agility: [], plyo: ['pogo_jumps', 'skater_jumps'], strength: ['blg_split_sq'], build: ['pallof_press'] },
+    lin: { agility: [], plyo: [], strength: ['overhead_press', 'pendlay_row'], build: ['half_kneel_rot_chop'] },
+    vel: { agility: ['a_skips', 'b_skips'], plyo: ['pogo_jumps'], strength: ['trapbar_dl'], build: ['walking_kb_high_pull_coil'] },
     cond: { protocols: [{ exercise_key: 'treadmill_zone2', name: 'Treadmill Zone 2 — recovery flush', desc: '15-20 min light jog or walk. HR under ~120 bpm. Circulation only — no training stimulus intended.', rpe: 4, tags: ['cond'], kind: 'single_metric', hr_low: null, hr_high: 120 }] },
   },
 };

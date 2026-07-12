@@ -17,6 +17,8 @@ export const EXERCISE_REGION = {
   // ── UPPER (press / pull) ──
   bench_press:    'upper',  // muscle: 'push'
   floor_press:    'upper',  // muscle: 'push'
+  overhead_press: 'upper',  // muscle: 'vertical push'
+  pendlay_row:    'upper',  // muscle: 'back pull (bilateral, dead-stop)'
   pullup:         'upper',  // muscle: 'back pull'
   single_arm_row: 'upper',  // muscle: 'back unilateral'
 
