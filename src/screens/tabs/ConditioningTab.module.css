@@ -71,11 +71,26 @@
 }
 
 /* Norwegian 4x4 structured-input grid */
+/* Auto-fits however many rounds the protocol prescribes (4 for a Norwegian
+   4×4, 10 for RSA sprints) and wraps instead of squeezing. */
 .intervalGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
   gap: 8px;
   margin: 12px 0 4px;
+}
+
+.setsHint {
+  font-size: 14px;
+  color: var(--t3);
+  margin: 6px 0 2px;
+}
+
+.avgCount {
+  font-weight: 600;
+  color: var(--t3);
+  text-transform: none;
+  letter-spacing: 0;
 }
 
 .intervalCell {

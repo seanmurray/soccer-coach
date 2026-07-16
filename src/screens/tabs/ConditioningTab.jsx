@@ -5,8 +5,7 @@ import { FrcBlock } from '../../components/FrcBlock';
 import { SESSIONS } from '../../data/sessions';
 import { FRC_FULL } from '../../data/frc';
 import { useSessionStore } from '../../stores/sessionStore';
-import { SingleMetricCard } from './SingleMetricCard';
-import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
+import { MetricCard } from './MetricCard';
 
 // Conditioning protocols: pick 1-2 from the list. Selected protocols get
 // buffered into exercisePerf so we know which ones the user actually did.
@@ -65,11 +64,11 @@ export function ConditioningTab() {
         const isRecommended = p.recommendedModes?.includes(mode) ?? true;
         const warning = !isRecommended ? p.notRecommendedReason : null;
 
-        if (p.kind === 'norwegian_4x4') {
-          return <Norwegian4x4Card key={p.exercise_key ?? p.name} protocol={p} warning={warning} />;
-        }
-        if (p.kind === 'single_metric') {
-          return <SingleMetricCard key={p.exercise_key ?? p.name} protocol={p} warning={warning} />;
+        // Both tracked kinds render through MetricCard now — it handles 1 set
+        // or N off `protocol.sets`. The `kind` values are kept so untracked
+        // pick-only protocols still fall through to the generic card below.
+        if (p.kind === 'norwegian_4x4' || p.kind === 'single_metric') {
+          return <MetricCard key={p.exercise_key ?? p.name} protocol={p} warning={warning} />;
         }
         const isSel = selected.has(i);
         return (
@@ -102,119 +101,5 @@ export function ConditioningTab() {
         items={FRC_FULL}
       />
     </>
-  );
-}
-
-// Norwegian 4x4 — captures per-interval mph + auto-averages.
-// Encoded notes format:
-//   [8.75 mph · int1:8.5 · int2:8.5 · int3:9 · int4:9]
-// First tag is the primary measurement (avg mph) — measurementParse picks
-// that up so the value flows into the Progress charts under exercise_key
-// = 'norwegian_4x4'.
-
-// Pull int1..int4 back out of the encoded notes so a PWA reload mid-session
-// restores the typed values + the "Logged ✓" state from the persisted buffer.
-function parseIntervalsFromNotes(notes) {
-  if (!notes) return null;
-  const out = ['', '', '', ''];
-  for (let i = 1; i <= 4; i++) {
-    const m = notes.match(new RegExp(`int${i}:([0-9.]+)`));
-    if (m) out[i - 1] = m[1];
-  }
-  return out.some(Boolean) ? out : null;
-}
-
-function Norwegian4x4Card({ protocol, warning }) {
-  const dayType = useSessionStore((s) => s.dayType);
-  const pushPerf = useSessionStore((s) => s.pushExercisePerf);
-  // Look for an already-logged 4×4 in the persisted buffer — on reload this
-  // is how we know to show "Logged ✓" and pre-fill the interval inputs.
-  const existing = useSessionStore((s) =>
-    s.exercisePerfBuffer.find((p) => p.exercise_key === 'norwegian_4x4')
-  );
-
-  const [intervals, setIntervals] = useState(
-    () => parseIntervalsFromNotes(existing?.notes) ?? ['', '', '', '']
-  );
-  const [saved, setSaved] = useState(!!existing);
-
-  const nums = intervals.map((v) => (v === '' ? null : Number(v)));
-  const validCount = nums.filter((n) => Number.isFinite(n) && n > 0).length;
-  const avg = validCount === 4
-    ? Math.round((nums.reduce((a, b) => a + b, 0) / 4) * 100) / 100
-    : null;
-
-  const onLog = () => {
-    if (avg == null) return;
-    const tags = [
-      `${avg} mph`,
-      ...nums.map((n, i) => `int${i + 1}:${n}`),
-    ];
-    pushPerf({
-      exercise_key: 'norwegian_4x4',
-      exercise_name: 'Norwegian 4x4',
-      exercise_type: 'cond',
-      day_type: dayType,
-      quality: null,
-      effort_rpe: protocol.rpe,
-      ease: null,
-      notes: `[${tags.join(' · ')}]`,
-      performed_at: new Date().toISOString(),
-    });
-    setSaved(true);
-  };
-
-  const updateInterval = (idx, value) => {
-    setIntervals((prev) => prev.map((v, i) => (i === idx ? value : v)));
-    setSaved(false);
-  };
-
-  return (
-    <div className={`${styles.protocol} ${warning ? styles.notRecommended : ''}`}>
-      <div className={styles.head}>
-        <div>
-          <div className={styles.name}>{protocol.name}</div>
-          <div className={styles.rpe}>RPE {protocol.rpe} · 40 min total</div>
-        </div>
-      </div>
-      <div className={styles.body}>
-        <div className={styles.desc}>{protocol.desc}</div>
-        {warning && <div className={styles.warning}>{warning}</div>}
-
-        <div className={styles.intervalGrid}>
-          {[1, 2, 3, 4].map((n, i) => (
-            <div key={n} className={styles.intervalCell}>
-              <div className={styles.intervalLabel}>Int {n}</div>
-              <input
-                type="number"
-                inputMode="decimal"
-                step="0.1"
-                min="0"
-                placeholder="mph"
-                className={styles.intervalInput}
-                value={intervals[i]}
-                onChange={(e) => updateInterval(i, e.target.value)}
-              />
-              <div className={styles.intervalUnit}>mph</div>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.avgRow}>
-          <div className={styles.avgLabel}>Average</div>
-          <div className={styles.avgValue}>{avg != null ? `${avg} mph` : '—'}</div>
-        </div>
-
-        <button
-          type="button"
-          className={`${styles.logBtn} ${saved ? styles.saved : ''}`}
-          onClick={onLog}
-          disabled={avg == null || saved}
-        >
-          {saved ? 'Logged ✓' : 'Log 4×4 intervals'}
-        </button>
-        <ExerciseHistoryInline exerciseKey={protocol.exercise_key} kind="conditioning" />
-      </div>
-    </div>
   );
 }

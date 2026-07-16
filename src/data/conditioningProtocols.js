@@ -12,6 +12,22 @@
 //   sec (per-rep sprint time), sec/500m (rower / SkiErg split), sec total
 //
 // Pace inputs (sec/500m) accept mm:ss in the UI; we store decimal seconds.
+//
+// ─── PER-SET ENTRY ─────────────────────────────────────────────────────────
+// Multi-round protocols capture ONE VALUE PER ROUND rather than a single
+// typed-in average. Two reasons: machines reset or shut off mid-session, and
+// a machine's own "average" usually folds in rest intervals, which understates
+// true work output. The app averages (or totals) the rounds itself.
+//
+// How many rounds is a property of the PROTOCOL, not the metric — the same
+// exercise_key is prescribed with different round counts per readiness mode
+// (assault bike = 8 rounds at full, 6 at mod1, steady-state at mod2). So
+// `sets` lives on the protocol in data/sessions.js; the fields below are the
+// metric-level defaults that apply however many rounds get prescribed.
+//
+//   aggregate — how per-round values roll up into the tracked number.
+//               'avg' (default) or 'total'.
+//   setLabel  — per-field label prefix, e.g. "Int 1" / "Sprint 3". Default 'Set'.
 
 export const CONDITIONING_METRICS = {
   norwegian_4x4: {
@@ -20,6 +36,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: true,
     inputMode: 'decimal',
     min: 4, max: 14, step: 0.1,
+    setLabel: 'Int',
   },
   bangsbo_speed_endurance: {
     label: 'Avg work mph',
@@ -27,6 +44,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: true,
     inputMode: 'decimal',
     min: 6, max: 18, step: 0.1,
+    setLabel: 'Rep',
   },
   thirty_fifteen_ift: {
     label: 'Top stage speed',
@@ -41,6 +59,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: true,
     inputMode: 'decimal',
     min: 6, max: 18, step: 0.1,
+    setLabel: 'Sprint',
   },
   curved_tm_sprint: {
     label: 'Avg sprint mph',
@@ -48,6 +67,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: true,
     inputMode: 'decimal',
     min: 6, max: 18, step: 0.1,
+    setLabel: 'Sprint',
   },
   court_sprint_repeats: {
     label: 'Avg sprint time',
@@ -55,6 +75,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: false,
     inputMode: 'decimal',
     min: 3, max: 12, step: 0.1,
+    setLabel: 'Sprint',
   },
   skierg_1on2off: {
     label: 'Avg 500m split',
@@ -63,6 +84,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: false,
     inputMode: 'pace', // mm:ss
     min: 60, max: 240, step: 1,
+    setLabel: 'Rep',
   },
   rower_500m_repeats: {
     label: 'Avg 500m split',
@@ -71,6 +93,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: false,
     inputMode: 'pace',
     min: 60, max: 240, step: 1,
+    setLabel: 'Rep',
   },
   assault_bike_tabata: {
     label: 'Avg watts',
@@ -78,6 +101,7 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: true,
     inputMode: 'decimal',
     min: 100, max: 800, step: 5,
+    setLabel: 'Round',
   },
   bike_court_combo: {
     label: 'Total time',
@@ -85,6 +109,9 @@ export const CONDITIONING_METRICS = {
     higherIsBetter: false,
     inputMode: 'decimal',
     min: 120, max: 1200, step: 1,
+    // Per-round times sum into the tracked total rather than averaging.
+    aggregate: 'total',
+    setLabel: 'Round',
   },
   treadmill_zone2: {
     label: 'Avg mph',
@@ -145,6 +172,32 @@ export function formatMetricValue(value, metric) {
     return `${mm}:${ss}`;
   }
   return Number.isInteger(value) ? String(value) : value.toFixed(1);
+}
+
+// Roll per-set values up into the single tracked number.
+//
+// `values` is the raw string array (one per prescribed set); blanks and
+// unparseable entries are ignored, so a session cut short — or one where the
+// machine reset and lost a round — still logs from whatever rounds were
+// actually completed. Returns null when nothing usable was entered.
+//
+// Returns { value, count } where count = how many sets fed the number, so the
+// UI and the stored note can be honest about a partial session.
+export function aggregateSets(values, metric) {
+  if (!metric) return { value: null, count: 0 };
+  const nums = values
+    .map((v) => parseMetricInput(v, metric))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  if (nums.length === 0) return { value: null, count: 0 };
+
+  const sum = nums.reduce((a, b) => a + b, 0);
+  const raw = metric.aggregate === 'total' ? sum : sum / nums.length;
+  // Pace metrics are whole seconds; everything else keeps 2dp.
+  const value = metric.inputMode === 'pace'
+    ? Math.round(raw)
+    : Math.round(raw * 100) / 100;
+  return { value, count: nums.length };
 }
 
 // Parse user input back into decimal seconds (for pace) or float (for decimal).

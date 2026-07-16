@@ -1,5 +1,6 @@
 import styles from './SettingsScreen.module.css';
 import common from '../components/Common.module.css';
+import { NumField } from '../components/NumField';
 import { MAXES_CONFIG } from '../data/exercises';
 import { DAY_TYPE_INFO } from '../data/sessions';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -48,13 +49,12 @@ export function SettingsScreen() {
         {MAXES_CONFIG.map((m) => (
           <div key={m.key} className={styles.maxCard}>
             <div className={styles.maxCardLabel}>{m.label}</div>
-            <input
+            <NumField
               className={styles.maxInput}
-              type="number"
-              inputMode="numeric"
               placeholder={m.placeholder}
-              value={maxes[m.key] || ''}
-              onChange={(e) => setMax(m.key, Number(e.target.value) || 0)}
+              value={maxes[m.key] || null}
+              onChange={(n) => setMax(m.key, n ?? 0)}
+              aria-label={m.label}
             />
           </div>
         ))}

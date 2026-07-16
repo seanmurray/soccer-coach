@@ -1,4 +1,5 @@
 import styles from './SetRow.module.css';
+import { NumField } from './NumField';
 
 const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
 
@@ -36,24 +37,22 @@ export function SetRow({
     <div className={styles.row}>
       <div className={styles.num}>{setNum}</div>
 
-      <input
-        type="number"
-        inputMode="numeric"
+      {/* Reps are whole numbers; weight allows decimals (2.5 lb plates, 7.5 lb
+          DBs, per-hand loads). Both use NumField so a controlled input doesn't
+          eat the decimal point mid-typing — see NumField for the why. */}
+      <NumField
+        decimal={false}
         className={styles.input}
-        value={reps ?? ''}
-        onChange={(e) => onRepsChange(e.target.value === '' ? null : Number(e.target.value))}
-        placeholder="—"
+        value={reps}
+        onChange={onRepsChange}
         aria-label={`Set ${setNum} reps`}
       />
 
       {showWeight ? (
-        <input
-          type="number"
-          inputMode="numeric"
+        <NumField
           className={styles.input}
-          value={weight ?? ''}
-          onChange={(e) => onWeightChange(e.target.value === '' ? null : Number(e.target.value))}
-          placeholder="—"
+          value={weight}
+          onChange={onWeightChange}
           aria-label={`Set ${setNum} weight`}
         />
       ) : (
