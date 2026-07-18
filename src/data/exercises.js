@@ -529,6 +529,266 @@ export const EX = {
     cue: 'Neutral spine — do not let hips sag. Control the way out as much as the way back.',
     swaps: ['TRX fallout', 'Dead bug', 'Hollow body hold'],
   },
+
+  // ═══ HEADLINE-LIFT ROTATION VARIATIONS ═══════════════════════════════════
+  // Close cousins of the four home lifts, rotated in each mesocycle block.
+  // `maxKey` points at the home lift's working max (Settings); `maxRatio` is a
+  // research-based starting fraction of that max — the e1RM estimator refines
+  // it from logged sets over time. `recipeKey` (in periodization exMap) keeps
+  // the triphasic tempo/%/rep profile.
+
+  // Bench family
+  close_grip_bench: {
+    name: 'Close-grip bench press', muscle: 'push', tags: ['str'], type: 'strength',
+    maxKey: 'bench', maxRatio: 0.90,
+    url: YT('close grip bench press form'),
+    cue: 'Grip just inside shoulder width. Elbows tucked ~45°. Bar to lower sternum. More triceps and lockout strength than standard bench.',
+    swaps: ['Standard bench', 'Floor press', 'DB close press'],
+  },
+  wide_grip_bench: {
+    name: 'Wide-grip bench press', muscle: 'push', tags: ['str'], type: 'strength',
+    maxKey: 'bench', maxRatio: 0.95,
+    url: YT('wide grip bench press form'),
+    cue: 'Grip ~1.5x shoulder width. Shorter ROM, more pec. Keep shoulder blades pinned — do not let the wide grip round the shoulders forward.',
+    swaps: ['Standard bench', 'Incline barbell press', 'Weighted dips'],
+  },
+
+  // Squat family — rotates in for the Bulgarian split squat. Bilateral, so it
+  // uses its OWN working max ('bsq' in Settings), not a ratio off the BSS.
+  back_squat: {
+    name: 'Back squat', muscle: 'quad/glute bilateral', tags: ['str'], type: 'strength',
+    maxKey: 'bsq', maxRatio: 1.0,
+    url: YT('high bar back squat form'),
+    cue: 'Bar on traps, brace, sit between the hips. Knees track over toes, drive the floor away. Depth to at least parallel.',
+    swaps: ['Front squat', 'Safety-bar squat', 'Goblet squat'],
+  },
+  ssb_squat: {
+    name: 'Safety-bar squat', muscle: 'quad/glute bilateral', tags: ['str'], type: 'strength',
+    maxKey: 'bsq', maxRatio: 0.90,
+    url: YT('safety squat bar squat form'),
+    cue: 'SSB cambers load forward — fight to stay upright, more upper-back and quad. Elbows up into the pads. ~85-90% of your back-squat load.',
+    swaps: ['Front squat', 'Back squat', 'Zercher squat'],
+  },
+
+  // OHP family
+  push_press: {
+    name: 'Push press', muscle: 'push', tags: ['str'], type: 'strength',
+    maxKey: 'ohp', maxRatio: 1.20,
+    url: YT('push press form barbell'),
+    cue: 'Short dip-drive from the legs, then punch the bar overhead. Leg drive lets you overload the press — heavier than strict OHP. Finish with ribs down, bar over mid-foot.',
+    swaps: ['Strict OHP', 'Split jerk', 'DB push press'],
+  },
+  seated_db_press: {
+    name: 'Seated DB shoulder press', muscle: 'push', tags: ['str'], type: 'strength',
+    maxKey: 'ohp', maxRatio: 0.72,
+    url: YT('seated dumbbell shoulder press form'),
+    cue: 'Back supported, press DBs to lockout without clanging them together. No leg drive — pure shoulder. Total DB load ~70-75% of your barbell OHP.',
+    swaps: ['Standing DB press', 'Arnold press', 'Landmine press'],
+  },
+
+  // Trap-bar deadlift family
+  conventional_dl: {
+    name: 'Conventional deadlift', muscle: 'posterior chain', tags: ['str'], type: 'strength',
+    maxKey: 'trapbar', maxRatio: 0.90,
+    url: YT('conventional deadlift form'),
+    cue: 'Bar over mid-foot, lats tight, hips find their own height. Push the floor away and drag the bar up the shins. More hip and hamstring than the trap bar.',
+    swaps: ['Trap-bar DL', 'Sumo deadlift', 'RDL'],
+  },
+  deficit_trapbar: {
+    name: 'Deficit trap-bar deadlift', muscle: 'posterior chain', tags: ['str'], type: 'strength',
+    maxKey: 'trapbar', maxRatio: 0.88,
+    url: YT('deficit trap bar deadlift'),
+    cue: 'Stand on a 1-2" plate. Longer ROM builds off-the-floor strength and start position. Keep the same flat-back setup — the deficit is the challenge, do not round.',
+    swaps: ['Trap-bar DL', 'Block pull', 'Conventional DL'],
+  },
+
+  // Pendlay-row family
+  chest_supported_row: {
+    name: 'Chest-supported row', muscle: 'back pull', tags: ['str'], type: 'strength',
+    maxKey: 'pendlay', maxRatio: 0.92, role: 'pull',
+    url: YT('chest supported row incline bench'),
+    cue: 'Chest on an incline pad — takes the lower back out entirely. Row to the ribs, squeeze the mid-back, control down. Strict, no body english.',
+    swaps: ['Seal row', 'Pendlay row', 'Machine row'],
+  },
+  t_bar_row: {
+    name: 'T-bar row', muscle: 'back pull', tags: ['str'], type: 'strength',
+    maxKey: 'pendlay', maxRatio: 1.05, role: 'pull',
+    url: YT('t-bar row form'),
+    cue: 'Hinge to ~45°, flat back, drive elbows back and up to the lower chest. Neutral grip lets you load heavy. Slight body English OK, but the back does the work.',
+    swaps: ['Pendlay row', 'Chest-supported row', 'Meadows row'],
+  },
+
+  // ═══ BUILD ACCESSORIES — new + pool depth ════════════════════════════════
+  // `role` places each in a swap/rotation pool. Loaded ones are type:'strength'
+  // (SetTable with weight); they use the accessory default (3x8), no % max.
+
+  // — Push —
+  incline_db_press: {
+    name: 'Incline DB press', muscle: 'push', tags: ['str'], type: 'strength', role: 'push',
+    url: YT('incline dumbbell press form'),
+    cue: 'Bench ~30°. Press DBs up and slightly together, stretch at the bottom. Upper-chest and front-delt assistance for the bench.',
+    swaps: ['Incline barbell press', 'Flat DB press', 'Landmine press'],
+  },
+  dips: {
+    name: 'Weighted dips', muscle: 'push', tags: ['str'], type: 'strength', role: 'push',
+    url: YT('chest dips form'),
+    cue: 'Slight forward lean for chest, upright for triceps. Lower until upper arms ~parallel, press to lockout. Add a belt once bodyweight is easy. Pressing-lockout assistance for the overhead press.',
+    swaps: ['Close-grip push-up', 'Floor press', 'JM press'],
+  },
+  db_bench: {
+    name: 'Flat DB bench press', muscle: 'push', tags: ['str'], type: 'strength', role: 'push',
+    url: YT('flat dumbbell bench press form'),
+    cue: 'Independent DBs demand more stability and even out side-to-side. Full stretch at the bottom, press to lockout.',
+    swaps: ['Barbell bench', 'Incline DB press', 'Push-up (weighted)'],
+  },
+
+  // — Pull (adds to chest_supported_row / t_bar_row above) —
+  lat_pulldown: {
+    name: 'Lat pulldown', muscle: 'back pull', tags: ['str'], type: 'strength', role: 'pull',
+    url: YT('lat pulldown form'),
+    cue: 'Slight lean back, drive elbows down to the ribs, pull the bar to the collarbone. Vertical-pull assistance — pairs with the overhead press.',
+    swaps: ['Pull-up', 'Band-assisted pull-up', 'Straight-arm pulldown'],
+  },
+  inverted_row: {
+    name: 'Inverted row', muscle: 'back pull', tags: ['str'], type: 'strength', role: 'pull',
+    url: YT('inverted row bodyweight form'),
+    cue: 'Body straight and rigid, pull chest to the bar, squeeze the mid-back. Lower the feet or elevate them to scale. Horizontal pull that spares the lower back.',
+    swaps: ['Chest-supported row', 'Ring row', 'Single-arm DB row'],
+  },
+  face_pull: {
+    name: 'Face pull', muscle: 'rear delt / upper back', tags: ['str'], type: 'strength', role: 'pull',
+    url: YT('face pull rope form'),
+    cue: 'Rope at eye height, pull to the forehead with elbows high, externally rotate at the end. Rear-delt and shoulder-health work — high reps, no ego.',
+    swaps: ['Band pull-apart', 'Reverse pec-deck', 'Prone Y-raise'],
+  },
+
+  // — Single-leg (sagittal) —
+  reverse_lunge: {
+    name: 'Reverse lunge (DB)', muscle: 'unilateral lower body', tags: ['str'], type: 'strength', role: 'single_leg',
+    url: YT('reverse lunge dumbbell form'),
+    cue: 'Step back, drop the back knee to a whisper off the floor, drive through the front heel to stand. Easier on the knees than forward lunges — great for deceleration strength.',
+    swaps: ['Walking lunge', 'Split squat', 'Step-up'],
+  },
+  step_up: {
+    name: 'DB step-up', muscle: 'unilateral lower body', tags: ['str'], type: 'strength', role: 'single_leg',
+    url: YT('dumbbell step up form athletic'),
+    cue: 'Box at ~knee height. Drive through the top foot — do not push off the bottom foot. Control the lower. Directly builds single-leg drive for sprinting.',
+    swaps: ['Reverse lunge', 'Split squat', 'Pistol progression'],
+  },
+  split_squat_db: {
+    name: 'DB split squat', muscle: 'unilateral lower body', tags: ['str'], type: 'strength', role: 'single_leg',
+    url: YT('dumbbell split squat form'),
+    cue: 'Feet in a stagger, drop straight down, keep the front shin controlled. Stationary — no travel — so you can load and grind. Front-foot flat, drive through the heel.',
+    swaps: ['Bulgarian split squat', 'Reverse lunge', 'Step-up'],
+  },
+  sl_rdl: {
+    name: 'Single-leg RDL', muscle: 'hamstring / balance', tags: ['str', 'acc'], type: 'strength', role: 'single_leg',
+    url: YT('single leg romanian deadlift form'),
+    cue: 'Hinge over one leg, back flat, hips square (do not open up). Feel the hamstring stretch, stand by driving the hip through. Balance + hamstring + glute in one.',
+    swaps: ['B-stance RDL', 'DB RDL', 'Nordic curl'],
+  },
+
+  // — Lateral / frontal-plane lower —
+  lateral_lunge: {
+    name: 'Lateral lunge (DB)', muscle: 'hip abductor/adductor', tags: ['str', 'lat'], type: 'strength', role: 'lateral_lower',
+    url: YT('lateral lunge dumbbell form'),
+    cue: 'Big step to the side, sit back into that hip (hips back, not knee forward), other leg straight. Push back to center. Loads the adductors and frontal-plane hip.',
+    swaps: ['Goblet lateral lunge', 'Cossack squat', 'Slide-board lateral'],
+  },
+  cossack_squat: {
+    name: 'Cossack squat', muscle: 'hip abductor/adductor', tags: ['str', 'lat'], type: 'strength', role: 'lateral_lower',
+    url: YT('cossack squat form'),
+    cue: 'Wide stance, sink into one hip with that foot flat, other leg straight with toe up. Deep frontal-plane mobility + strength. Add a goblet load once bodyweight is smooth.',
+    swaps: ['Lateral lunge', 'Goblet lateral lunge', 'Lateral step-up'],
+  },
+  lateral_step_up: {
+    name: 'Lateral step-up', muscle: 'hip abductor', tags: ['str', 'lat'], type: 'strength', role: 'lateral_lower',
+    url: YT('lateral step up form'),
+    cue: 'Stand beside the box, drive up through the near foot without pushing off the floor foot. Trains lateral push-off for cutting.',
+    swaps: ['Lateral lunge', 'Cossack squat', 'Skater squat'],
+  },
+  skater_squat: {
+    name: 'Skater squat', muscle: 'unilateral lower / knee', tags: ['str', 'lat'], type: 'strength', role: 'lateral_lower',
+    url: YT('skater squat form'),
+    cue: 'Single-leg squat reaching the back knee toward the floor, torso hinged. Big knee-stability and single-leg strength demand. Counterbalance with light plates in the hands.',
+    swaps: ['Reverse lunge', 'Cossack squat', 'Step-down'],
+  },
+
+  // — Adductor / groin (injury prevention — highest-evidence for lateral COD) —
+  copenhagen_adduction: {
+    name: 'Copenhagen adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor',
+    url: YT('copenhagen adduction exercise progression'),
+    cue: 'Side plank with the TOP leg on a bench, bottom leg lifts up to meet it — driven by the adductor. Start short-lever (knee on bench) and progress to full. The Harøy protocol — the strongest groin-injury-prevention evidence in soccer. Build reps slowly; it gets sore.',
+    swaps: ['Short-lever Copenhagen', 'Adductor machine', 'Cossack squat', 'Side-lying adduction'],
+  },
+  side_lying_adduction: {
+    name: 'Side-lying hip adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor',
+    url: YT('side lying hip adduction form'),
+    cue: 'On your side, top leg crossed in front, lift the bottom (straight) leg toward the ceiling using the inner thigh. Slow. A gentler entry point / regression to the Copenhagen.',
+    swaps: ['Copenhagen adduction', 'Adductor machine', 'Cossack squat'],
+  },
+
+  // — Posterior chain (adds to nordic_curl / single_leg_hip_thrust) —
+  db_rdl: {
+    name: 'DB Romanian deadlift', muscle: 'hamstring / glute', tags: ['str', 'acc'], type: 'strength', role: 'posterior',
+    url: YT('dumbbell romanian deadlift form'),
+    cue: 'Soft knees, push hips back, DBs slide down the thighs. Flat back, stretch the hamstrings, stand by squeezing the glutes. Stop where the back would round.',
+    swaps: ['Barbell RDL', 'Single-leg RDL', 'Good morning'],
+  },
+  barbell_hip_thrust: {
+    name: 'Barbell hip thrust', muscle: 'glute', tags: ['str'], type: 'strength', role: 'posterior',
+    url: YT('barbell hip thrust form'),
+    cue: 'Shoulders on the bench, chin tucked, drive hips to full extension and squeeze — ribs down, no lumbar arch. Heavy glute work for sprint force.',
+    swaps: ['Single-leg hip thrust', 'Glute bridge', 'Cable pull-through'],
+  },
+  kb_swing: {
+    name: 'KB swing', muscle: 'posterior / power', tags: ['str', 'acc'], type: 'strength', role: 'posterior',
+    url: YT('kettlebell swing hardstyle form'),
+    cue: 'Hike the bell back, snap the hips forward — the bell floats to chest height from hip drive, not arm lift. Glutes and hamstrings, ballistic. Perfect for posterior-chain power.',
+    swaps: ['DB RDL', 'Cable pull-through', 'Broad jump'],
+  },
+
+  // — Rotational (adds to grappler / cable rot / chop / kb coil / mb slams) —
+  mb_scoop_toss: {
+    name: 'MB scoop toss', muscle: 'rotational power', tags: ['str', 'lat'], type: 'strength', role: 'rotational',
+    url: YT('medicine ball scoop toss side'),
+    cue: 'Side-on to a wall, load into the back hip, then explosively scoop-throw the ball sideways into the wall. Hip leads, everything follows. Pure rotational power.',
+    swaps: ['MB rotational slam', 'The grappler', 'Cable rotation'],
+  },
+
+  // — Anti-rotation (adds to pallof_press) —
+  suitcase_carry: {
+    name: 'Suitcase carry', muscle: 'anti-lateral-flexion core', tags: ['str'], type: 'strength', role: 'anti_rotation',
+    url: YT('suitcase carry form'),
+    cue: 'Load one hand only, stand tall, do NOT let the torso tip toward the weight. Walk with control. Trains the trunk to resist side-bend — huge for single-leg stance in sport.',
+    swaps: ['Pallof press', 'Side plank', 'Offset carry'],
+  },
+  bird_dog: {
+    name: 'Bird dog', muscle: 'anti-rotation core', tags: ['str'], type: 'strength', role: 'anti_rotation',
+    url: YT('bird dog exercise form'),
+    cue: 'Opposite arm and leg reach out, hips and shoulders stay square to the floor — no rotation. Slow and deliberate. Cheap, high-value spinal-stability work.',
+    swaps: ['Pallof press', 'Dead bug', 'Plank'],
+  },
+
+  // — Anti-extension core (adds to ab_wheel / mb_slam) —
+  dead_bug: {
+    name: 'Dead bug', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    url: YT('dead bug exercise form'),
+    cue: 'Low back pressed flat to the floor the entire time. Lower opposite arm and leg slowly, exhale, do not let the back arch. Teaches trunk control under limb movement.',
+    swaps: ['Ab wheel', 'Hollow hold', 'Bird dog'],
+  },
+  hollow_hold: {
+    name: 'Hollow body hold', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    url: YT('hollow body hold form'),
+    cue: 'Low back glued to the floor, arms and legs extended and lifted, body a shallow banana. Shorten the levers (tuck) to scale. The gymnast standard for a stiff trunk.',
+    swaps: ['Dead bug', 'Ab wheel', 'Plank'],
+  },
+  trx_fallout: {
+    name: 'TRX / band fallout', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    url: YT('trx fallout form'),
+    cue: 'Straps or band anchored high, arms extend overhead as the body falls forward, trunk braced so the hips do not sag. Ab-wheel stimulus, easier to scale by walking the feet.',
+    swaps: ['Ab wheel', 'Dead bug', 'Plank'],
+  },
 };
 
 // Working-max keys (Settings screen, load calc).

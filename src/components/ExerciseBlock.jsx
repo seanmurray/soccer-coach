@@ -8,6 +8,7 @@ import { ExerciseNote } from './ExerciseNote';
 
 export function ExerciseBlock({
   name,
+  badge,         // optional { text, tone } — rotation/swap indicator under name
   exerciseKey,   // optional — when provided, renders a persistent form-cue note
   target,        // e.g. "4×3" or "5×3 @ 185"
   load,          // optional rec load string (e.g. "185 lbs")
@@ -42,6 +43,18 @@ export function ExerciseBlock({
       >
         <div>
           <div className={styles.name}>{name}</div>
+          {badge && (
+            <div
+              style={{
+                display: 'inline-block', marginTop: 4, fontSize: 12.5, fontWeight: 700,
+                letterSpacing: '0.02em', padding: '3px 8px', borderRadius: 6,
+                color: badge.tone === 'swap' ? 'var(--blue)' : badge.tone === 'custom' ? 'var(--amber)' : 'var(--purple)',
+                background: badge.tone === 'swap' ? 'rgba(10,132,255,0.12)' : badge.tone === 'custom' ? 'var(--amber-bg)' : 'var(--purple-bg)',
+              }}
+            >
+              {badge.text}
+            </div>
+          )}
           {target && <div className={styles.target}>{target}</div>}
           {tags.length > 0 && (
             <div className={styles.tagRow}>

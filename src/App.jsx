@@ -14,6 +14,7 @@ import { PostSessionSheet } from './components/PostSessionSheet';
 import { ReadinessBaselineSync } from './components/ReadinessBaselineSync';
 import { useSessionStore } from './stores/sessionStore';
 import { useSwapsStore } from './stores/swapsStore';
+import { useSlotStore } from './stores/slotStore';
 import { useUpgradesStore } from './stores/upgradesStore';
 import { saveSession } from './lib/saveSession';
 import { fireDebrief } from './lib/debrief';
@@ -50,6 +51,7 @@ export default function App() {
   const resetSession = useSessionStore((s) => s.resetSession);
   const markSessionEnd = useSessionStore((s) => s.markSessionEnd);
   const clearSwaps = useSwapsStore((s) => s.clear);
+  const clearTodaySlots = useSlotStore((s) => s.clearToday);
   const clearUpgrades = useUpgradesStore((s) => s.clear);
 
   // Snapshot for save() — pulled lazily to avoid re-rendering the App on every
@@ -79,6 +81,7 @@ export default function App() {
   const handleStart = () => {
     startSession();
     clearSwaps();
+    clearTodaySlots();
     clearUpgrades();
     setTab('workout');
   };
@@ -129,6 +132,7 @@ export default function App() {
 
     resetSession();
     clearSwaps();
+    clearTodaySlots();
     clearUpgrades();
     setTab('history');
   };

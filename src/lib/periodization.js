@@ -20,7 +20,7 @@
 // athlete under one true rest every two months. The new shape gives a deload
 // every 5 weeks while keeping triphasic block order intact.
 
-import { EX_TO_MAX_KEY } from '../data/exercises';
+import { EX, EX_TO_MAX_KEY } from '../data/exercises';
 
 const MESO_LEN = 15;
 const PHASE_LEN = 4;            // 4 working weeks per phase
@@ -36,34 +36,35 @@ const PHASE_RECIPE = {
   accumulation: {
     reps: 4,
     sets: 5,
-    tempo: { bench: '[5|1|X]', trapbar: '[3|1|X]', blgsq: '[4|2|X]' },
-    basePct: { bench: 0.80, trapbar: 0.80, blgsq: 0.77 },
+    tempo: { bench: '[5|1|X]', trapbar: '[3|1|X]', blgsq: '[4|2|X]', squat: '[4|1|X]' },
+    basePct: { bench: 0.80, trapbar: 0.80, blgsq: 0.77, squat: 0.78 },
     note: 'Eccentric block: long lower, brief pause, explosive concentric. Bypasses GTO inhibition and builds tendon elasticity.',
   },
   transmutation: {
     reps: 3,
     sets: 5,
-    tempo: { bench: '[1|5|X]', trapbar: '[1|4|X]', blgsq: '[1|5|X]' },
-    basePct: { bench: 0.85, trapbar: 0.85, blgsq: 0.82 },
+    tempo: { bench: '[1|5|X]', trapbar: '[1|4|X]', blgsq: '[1|5|X]', squat: '[1|4|X]' },
+    basePct: { bench: 0.85, trapbar: 0.85, blgsq: 0.82, squat: 0.83 },
     note: 'Isometric block: long pause at the sticking point. Trains force production from a dead stop.',
   },
   realization: {
     reps: 2,
     sets: 6,
-    tempo: { bench: '[1|1|X]', trapbar: '[1|1|X]', blgsq: '[1|1|X]' },
-    basePct: { bench: 0.87, trapbar: 0.87, blgsq: 0.84 },
+    tempo: { bench: '[1|1|X]', trapbar: '[1|1|X]', blgsq: '[1|1|X]', squat: '[1|1|X]' },
+    basePct: { bench: 0.87, trapbar: 0.87, blgsq: 0.84, squat: 0.85 },
     note: 'Concentric / contrast block: maximum explosive intent. Pair each set with a jump for PAP.',
     contrast: {
       bench:   'After each set: 2 approach box jumps or broad jumps at max effort. 90 sec between pairs.',
       trapbar: 'After each heavy trap bar set: 1 max box jump. 90 sec rest. Heavy load potentiates CNS — the jump should feel lighter than normal.',
       blgsq:   'After each set: 1 single-leg broad jump each leg at max effort.',
+      squat:   'After each heavy squat set: 1 max box jump or squat jump. 90 sec rest. The heavy load potentiates the jump — it should feel springy.',
     },
   },
   deload: {
     reps: 5,
     sets: 4,
-    tempo: { bench: '[1|1|1]', trapbar: '[1|1|1]', blgsq: '[2|1|1]' },
-    basePct: { bench: 0.50, trapbar: 0.50, blgsq: 0.50 },
+    tempo: { bench: '[1|1|1]', trapbar: '[1|1|1]', blgsq: '[2|1|1]', squat: '[2|1|1]' },
+    basePct: { bench: 0.50, trapbar: 0.50, blgsq: 0.50, squat: 0.50 },
     note: 'Deload — movement quality only. 50% intensity. Let the previous block consolidate.',
   },
 };
@@ -119,6 +120,57 @@ export function getPhaseInfo(week) {
 export const getPhase = (week) => getPhaseInfo(week).phase;
 export const getPhaseLabel = (week) => getPhaseInfo(week).label;
 
+// ─── MESOCYCLE EXERCISE ROTATION ───────────────────────────
+// Every lift (headline strength + build accessories) rotates at each deload
+// boundary so nothing goes stale. Rotation unit = the 5-week block (4 loading
+// weeks + deload). A block runs ONE exercise the whole way so it can be
+// progressively overloaded, then swaps at the next block.
+//
+// Pattern A-B-A-C: the HOME exercise runs on every even block; the variations
+// cycle through the odd blocks between them, so the home lift keeps coming
+// back (every other block) and you never repeat the same off-block variation
+// consecutively.
+//
+//   block 0 (wk 1-5)   → home
+//   block 1 (wk 6-10)  → variations[0]
+//   block 2 (wk 11-15) → home
+//   block 3 (wk 16-20) → variations[1]
+//   block 4 (wk 21-25) → home
+//   block 5 (wk 26-30) → variations[0]  (wraps)
+//
+// The deload week sits in the SAME block as the 4 loading weeks before it, so
+// you deload the lift you just ran (consolidation), not the next one.
+
+const BLOCK_LEN = 5; // 4 loading weeks + 1 deload
+
+export function blockIndex(week) {
+  return Math.floor((Math.max(1, week) - 1) / BLOCK_LEN);
+}
+
+// Resolve which exercise a slot runs this week, given its home key and an
+// ordered list of variation keys. Empty/absent variations → always home.
+export function rotatedKey(homeKey, variations, week) {
+  const vars = variations ?? [];
+  if (vars.length === 0) return homeKey;
+  const b = blockIndex(week);
+  if (b % 2 === 0) return homeKey;              // even block → home
+  return vars[Math.floor(b / 2) % vars.length]; // odd block → cycle variations
+}
+
+// Human-readable rotation state for the UI badge.
+//   { isHome, homeKey, activeKey, block, label }
+export function rotationState(homeKey, variations, week) {
+  const activeKey = rotatedKey(homeKey, variations, week);
+  const b = blockIndex(week);
+  return {
+    isHome: activeKey === homeKey,
+    homeKey,
+    activeKey,
+    block: b,
+    label: activeKey === homeKey ? 'Home lift' : 'Rotated variation',
+  };
+}
+
 // ─── STRENGTH PRESCRIPTION ─────────────────────────────────
 // Returns { sets, reps, pct, tempo, note, contrast?, target_rpe }.
 // `season` ('off'|'pre'|'in'|'playoff') scales set count only; defaults to
@@ -127,15 +179,21 @@ export function getStrengthPrescription(exKey, week, mode, season = 'pre') {
   const info = getPhaseInfo(week);
   const recipe = PHASE_RECIPE[info.phase];
 
-  // overhead_press and pendlay_row are the new lin-day superset. Both share
-  // the `bench` recipe because basePct is expressed as % of that lift's OWN
-  // 1RM — the same relative intensity works for any upper-body barbell
-  // compound. Tempos are close enough for a first pass; dial in per-lift
-  // later if the athlete's data suggests a different profile.
+  // Maps each strength lift (home + rotation variations) to a phase recipe.
+  // basePct is % of that lift's OWN working max, so all upper-body barbell
+  // compounds share the `bench` profile, bilateral hinges share `trapbar`,
+  // bilateral squats share `squat`, and the single-leg BSS keeps `blgsq`.
   const exMap = {
+    // Upper press + pull family (bench, OHP, pendlay + their variations)
     bench_press: 'bench', floor_press: 'bench',
-    overhead_press: 'bench', pendlay_row: 'bench',
-    trapbar_dl: 'trapbar',
+    close_grip_bench: 'bench', wide_grip_bench: 'bench',
+    overhead_press: 'bench', push_press: 'bench', seated_db_press: 'bench',
+    pendlay_row: 'bench', chest_supported_row: 'bench', t_bar_row: 'bench',
+    // Bilateral hinge family
+    trapbar_dl: 'trapbar', conventional_dl: 'trapbar', deficit_trapbar: 'trapbar',
+    // Bilateral squat family (rotates in for the single-leg BSS)
+    back_squat: 'squat', ssb_squat: 'squat',
+    // Single-leg
     blg_split_sq: 'blgsq',
   };
   const key = exMap[exKey] || 'bench';
@@ -186,9 +244,14 @@ function deriveTargetRpe(phase, mode, weekInPhase) {
 // ─── LOAD CALC ─────────────────────────────────────────────
 // Recommended load = max × pct, rounded to nearest 2.5 lbs.
 export function calcLoad(exKey, pct, maxes) {
-  const k = EX_TO_MAX_KEY[exKey];
+  const ex = EX[exKey];
+  // Rotation variations carry their own maxKey (which of your working maxes to
+  // read) + maxRatio (their fraction of it). Home lifts fall back to the
+  // exercise→max map with a 1.0 ratio.
+  const k = ex?.maxKey ?? EX_TO_MAX_KEY[exKey];
   if (!k || !maxes?.[k] || !pct) return 0;
-  return Math.round((maxes[k] * pct) / 2.5) * 2.5;
+  const ratio = ex?.maxRatio ?? 1;
+  return Math.round((maxes[k] * ratio * pct) / 2.5) * 2.5;
 }
 
 // Render "[5|1|X]" → "Eccentric: 5 sec · Iso: 1 sec · Concentric: explosive".
