@@ -13,6 +13,7 @@ const initialTimerPrefs = {
   autoStart: true,
   audio: true,
   vibrate: true,
+  keepAwake: true, // hold a screen wake lock while a rest timer is running
 };
 
 export const useSettingsStore = create(

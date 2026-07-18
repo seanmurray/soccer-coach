@@ -1,6 +1,7 @@
 import styles from './SettingsScreen.module.css';
 import common from '../components/Common.module.css';
 import { NumField } from '../components/NumField';
+import { TimerSoundRecorder } from '../components/TimerSoundRecorder';
 import { MAXES_CONFIG } from '../data/exercises';
 import { DAY_TYPE_INFO } from '../data/sessions';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -108,6 +109,13 @@ export function SettingsScreen() {
           checked={timerPrefs.vibrate}
           onChange={(v) => setTimerPref('vibrate', v)}
         />
+        <ToggleRow
+          label="Keep screen on during rest"
+          sub="Stops the phone sleeping mid-timer so the sound plays"
+          checked={timerPrefs.keepAwake !== false}
+          onChange={(v) => setTimerPref('keepAwake', v)}
+        />
+        <TimerSoundRecorder />
       </div>
 
       <div className={common.sectionLabel}>Supabase</div>

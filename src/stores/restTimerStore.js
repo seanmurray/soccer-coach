@@ -5,6 +5,7 @@
 import { create } from 'zustand';
 import { getRestTime } from '../lib/periodization';
 import { useSettingsStore } from './settingsStore';
+import { playTimerSound } from '../lib/timerSound';
 
 let intervalId = null;
 let audioCtx = null;
@@ -35,7 +36,9 @@ function playTone(freq, duration, type = 'sine', volume = 0.18) {
 const audio = {
   tick:  () => playTone(880, 0.08, 'sine', 0.08),
   beep:  () => playTone(880, 0.16, 'sine', 0.20),
-  end:   () => playTone(523, 0.6,  'sine', 0.25),
+  // End-of-rest sound: play the user's custom clip if they've set one,
+  // otherwise the synth tone. (Foreground only — see lib/timerSound.)
+  end:   () => { if (!playTimerSound()) playTone(523, 0.6, 'sine', 0.25); },
 };
 
 export const useRestTimer = create((set, get) => ({

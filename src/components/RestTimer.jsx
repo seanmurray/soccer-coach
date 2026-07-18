@@ -1,6 +1,36 @@
+import { useEffect } from 'react';
 import styles from './RestTimer.module.css';
 import { useShallow } from 'zustand/react/shallow';
 import { useRestTimer } from '../stores/restTimerStore';
+import { useSettingsStore } from '../stores/settingsStore';
+
+// Hold a screen wake lock while a rest timer is on screen so the phone doesn't
+// dim/sleep mid-rest and swallow the end sound. Auto-released by the browser
+// when the page is hidden (switching apps), so we re-acquire on return. This
+// only helps the "phone on the desk, app open" case — a backgrounded PWA can't
+// keep the lock or fire audio. Supported on iOS 16.4+ and Android Chrome.
+function useWakeLock(active) {
+  useEffect(() => {
+    if (!active || !('wakeLock' in navigator)) return undefined;
+    let lock = null;
+    let cancelled = false;
+    const acquire = async () => {
+      try {
+        lock = await navigator.wakeLock.request('screen');
+      } catch { /* denied / not allowed while hidden — ignore */ }
+    };
+    acquire();
+    const onVisible = () => {
+      if (document.visibilityState === 'visible' && !cancelled) acquire();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => {
+      cancelled = true;
+      document.removeEventListener('visibilitychange', onVisible);
+      if (lock) lock.release().catch(() => {});
+    };
+  }, [active]);
+}
 
 const CIRCUMFERENCE = 138; // r=22 → 2πr ≈ 138.2
 
@@ -24,6 +54,10 @@ export function RestTimer() {
   );
   const adjust = useRestTimer((s) => s.adjust);
   const skip = useRestTimer((s) => s.skip);
+  const keepAwake = useSettingsStore((s) => s.timerPrefs.keepAwake);
+
+  // Default on for existing installs whose persisted prefs predate this flag.
+  useWakeLock(visible && keepAwake !== false);
 
   if (!visible) return null;
 
