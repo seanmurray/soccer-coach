@@ -36,35 +36,44 @@ const PHASE_RECIPE = {
   accumulation: {
     reps: 4,
     sets: 5,
-    tempo: { bench: '[5|1|X]', trapbar: '[3|1|X]', blgsq: '[4|2|X]', squat: '[4|1|X]' },
-    basePct: { bench: 0.80, trapbar: 0.80, blgsq: 0.77, squat: 0.78 },
+    // `press` = bench profile with a gentler 3s eccentric (a 5s lower overhead
+    // is rough on the shoulder). `row` = row-specific tempos: a dead-stop lift
+    // like the Pendlay should not carry a slow eccentric — controlled 3s lower,
+    // explosive pull.
+    tempo: { bench: '[5|1|X]', trapbar: '[3|1|X]', blgsq: '[4|2|X]', squat: '[4|1|X]', press: '[3|1|X]', row: '[3|1|X]' },
+    basePct: { bench: 0.80, trapbar: 0.80, blgsq: 0.77, squat: 0.78, press: 0.80, row: 0.80 },
     note: 'Eccentric block: long lower, brief pause, explosive concentric. Bypasses GTO inhibition and builds tendon elasticity.',
   },
   transmutation: {
     reps: 3,
     sets: 5,
-    tempo: { bench: '[1|5|X]', trapbar: '[1|4|X]', blgsq: '[1|5|X]', squat: '[1|4|X]' },
-    basePct: { bench: 0.85, trapbar: 0.85, blgsq: 0.82, squat: 0.83 },
+    // row iso = 2s squeeze at the top (a real pause-row, not a 5s hold).
+    tempo: { bench: '[1|5|X]', trapbar: '[1|4|X]', blgsq: '[1|5|X]', squat: '[1|4|X]', press: '[1|5|X]', row: '[1|2|X]' },
+    basePct: { bench: 0.85, trapbar: 0.85, blgsq: 0.82, squat: 0.83, press: 0.85, row: 0.85 },
     note: 'Isometric block: long pause at the sticking point. Trains force production from a dead stop.',
   },
   realization: {
     reps: 2,
     sets: 6,
-    tempo: { bench: '[1|1|X]', trapbar: '[1|1|X]', blgsq: '[1|1|X]', squat: '[1|1|X]' },
-    basePct: { bench: 0.87, trapbar: 0.87, blgsq: 0.84, squat: 0.85 },
+    // row concentric block = [X|1|X]: dead-stop explosive pull — where the
+    // Pendlay actually belongs.
+    tempo: { bench: '[1|1|X]', trapbar: '[1|1|X]', blgsq: '[1|1|X]', squat: '[1|1|X]', press: '[1|1|X]', row: '[X|1|X]' },
+    basePct: { bench: 0.87, trapbar: 0.87, blgsq: 0.84, squat: 0.85, press: 0.87, row: 0.87 },
     note: 'Concentric / contrast block: maximum explosive intent. Pair each set with a jump for PAP.',
     contrast: {
       bench:   'After each set: 2 approach box jumps or broad jumps at max effort. 90 sec between pairs.',
       trapbar: 'After each heavy trap bar set: 1 max box jump. 90 sec rest. Heavy load potentiates CNS — the jump should feel lighter than normal.',
       blgsq:   'After each set: 1 single-leg broad jump each leg at max effort.',
       squat:   'After each heavy squat set: 1 max box jump or squat jump. 90 sec rest. The heavy load potentiates the jump — it should feel springy.',
+      press:   'After each set: 2 explosive plyo push-ups or a hard med-ball chest pass. 90 sec rest.',
+      row:     'After each set: 1 max med-ball scoop toss or an explosive band row for speed. 90 sec rest.',
     },
   },
   deload: {
     reps: 5,
     sets: 4,
-    tempo: { bench: '[1|1|1]', trapbar: '[1|1|1]', blgsq: '[2|1|1]', squat: '[2|1|1]' },
-    basePct: { bench: 0.50, trapbar: 0.50, blgsq: 0.50, squat: 0.50 },
+    tempo: { bench: '[1|1|1]', trapbar: '[1|1|1]', blgsq: '[2|1|1]', squat: '[2|1|1]', press: '[1|1|1]', row: '[2|1|1]' },
+    basePct: { bench: 0.50, trapbar: 0.50, blgsq: 0.50, squat: 0.50, press: 0.50, row: 0.50 },
     note: 'Deload — movement quality only. 50% intensity. Let the previous block consolidate.',
   },
 };
@@ -184,11 +193,14 @@ export function getStrengthPrescription(exKey, week, mode, season = 'pre') {
   // compounds share the `bench` profile, bilateral hinges share `trapbar`,
   // bilateral squats share `squat`, and the single-leg BSS keeps `blgsq`.
   const exMap = {
-    // Upper press + pull family (bench, OHP, pendlay + their variations)
+    // Horizontal press family (eccentric-tempo friendly)
     bench_press: 'bench', floor_press: 'bench',
     close_grip_bench: 'bench', wide_grip_bench: 'bench',
-    overhead_press: 'bench', push_press: 'bench', seated_db_press: 'bench',
-    pendlay_row: 'bench', chest_supported_row: 'bench', t_bar_row: 'bench',
+    // Overhead press family — gentler eccentric than the bench
+    overhead_press: 'press', push_press: 'press', seated_db_press: 'press',
+    // Pull family — row-specific tempos (the Pendlay is a dead-stop lift, so
+    // no slow eccentric; the explosive block is its home)
+    pendlay_row: 'row', chest_supported_row: 'row', t_bar_row: 'row',
     // Bilateral hinge family
     trapbar_dl: 'trapbar', conventional_dl: 'trapbar', deficit_trapbar: 'trapbar',
     // Bilateral squat family (rotates in for the single-leg BSS)
