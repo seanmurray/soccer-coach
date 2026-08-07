@@ -90,6 +90,11 @@ export const BUILD_PLAN = {
   lin: ['pullup', 'half_kneel_rot_chop', 'dead_bug', 'dips'],
   // vel — Trap-bar (lower / posterior). hamstring injury-prev > rotational > core > glute.
   vel: ['nordic_curl', 'walking_kb_high_pull_coil', 'hollow_hold', 'single_leg_hip_thrust'],
+  // cond — optional post-conditioning FINISHER. Conditioning is cardio, so the
+  // legs aren't maxed; use leftover time to catch up on the high-value
+  // "insurance" work (groin prehab + core). Both slots swap through their pools
+  // and take a custom entry, so you can log whatever you actually missed.
+  cond: ['copenhagen_adduction', 'dead_bug'],
 };
 
 // How many build slots survive at each readiness mode (top-N of BUILD_PLAN).

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import styles from './ConditioningTab.module.css';
 import { ConditioningWarning } from '../../components/ConditioningWarning';
 import { FrcBlock } from '../../components/FrcBlock';
+import { BuildSlot } from '../../components/BuildSlot';
 import { SESSIONS } from '../../data/sessions';
 import { FRC_FULL } from '../../data/frc';
 import { useSessionStore } from '../../stores/sessionStore';
+import { buildHomesFor } from '../../data/rotation';
 import { MetricCard } from './MetricCard';
 
 // Conditioning protocols: pick 1-2 from the list. Selected protocols get
@@ -16,7 +18,9 @@ import { MetricCard } from './MetricCard';
 // Progress charts can plot it over time.
 export function ConditioningTab() {
   const mode = useSessionStore((s) => s.mode);
+  const week = useSessionStore((s) => s.week);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
+  const finisherHomes = buildHomesFor('cond', mode);
   // Stable sort: recommended-for-current-mode first, original order preserved within each group.
   const protocols = SESSIONS.full.cond.protocols
     .map((p, i) => ({ p, i, rec: p.recommendedModes?.includes(mode) ?? true }))
@@ -93,6 +97,24 @@ export function ConditioningTab() {
           </div>
         );
       })}
+
+      {/* Optional finisher — leftover-time accessory/core work to catch up on
+          anything missed recently. Each slot swaps through its pool and takes
+          a custom entry, so it can be whatever you actually want to hit. */}
+      {finisherHomes.length > 0 && (
+        <>
+          <div style={{ fontSize: 14, color: 'var(--t3)', margin: '22px 0 4px', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            Finisher — optional
+          </div>
+          <div style={{ fontSize: 14, color: 'var(--t3)', marginBottom: 10, lineHeight: 1.5 }}>
+            Got time left? Log accessory or core work you've missed lately. Swap
+            either slot or add your own.
+          </div>
+          {finisherHomes.map((homeKey) => (
+            <BuildSlot key={homeKey} homeKey={homeKey} week={week} />
+          ))}
+        </>
+      )}
 
       <FrcBlock
         variant="full"

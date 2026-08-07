@@ -524,7 +524,7 @@ export const EX = {
     swaps: ['Band chop', 'DB rotational chop'],
   },
   ab_wheel: {
-    name: 'Ab wheel rollout', muscle: 'anti-extension core', tags: ['str'], type: 'strength',
+    name: 'Ab wheel rollout', muscle: 'anti-extension core', tags: ['str'], type: 'strength', bodyweight: true,
     url: 'https://movements.overtimeathletes.com/strength/core/ab-wheel/',
     cue: 'Neutral spine — do not let hips sag. Control the way out as much as the way back.',
     swaps: ['TRX fallout', 'Dead bug', 'Hollow body hold'],
@@ -716,13 +716,13 @@ export const EX = {
 
   // — Adductor / groin (injury prevention — highest-evidence for lateral COD) —
   copenhagen_adduction: {
-    name: 'Copenhagen adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor',
+    name: 'Copenhagen adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor', bodyweight: true,
     url: YT('copenhagen adduction exercise progression'),
     cue: 'Side plank with the TOP leg on a bench, bottom leg lifts up to meet it — driven by the adductor. Start short-lever (knee on bench) and progress to full. The Harøy protocol — the strongest groin-injury-prevention evidence in soccer. Build reps slowly; it gets sore.',
     swaps: ['Short-lever Copenhagen', 'Adductor machine', 'Cossack squat', 'Side-lying adduction'],
   },
   side_lying_adduction: {
-    name: 'Side-lying hip adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor',
+    name: 'Side-lying hip adduction', muscle: 'adductor', tags: ['str', 'lat'], type: 'strength', role: 'adductor', bodyweight: true,
     url: YT('side lying hip adduction form'),
     cue: 'On your side, top leg crossed in front, lift the bottom (straight) leg toward the ceiling using the inner thigh. Slow. A gentler entry point / regression to the Copenhagen.',
     swaps: ['Copenhagen adduction', 'Adductor machine', 'Cossack squat'],
@@ -764,7 +764,7 @@ export const EX = {
     swaps: ['Pallof press', 'Side plank', 'Offset carry'],
   },
   bird_dog: {
-    name: 'Bird dog', muscle: 'anti-rotation core', tags: ['str'], type: 'strength', role: 'anti_rotation',
+    name: 'Bird dog', muscle: 'anti-rotation core', tags: ['str'], type: 'strength', role: 'anti_rotation', bodyweight: true,
     url: YT('bird dog exercise form'),
     cue: 'Opposite arm and leg reach out, hips and shoulders stay square to the floor — no rotation. Slow and deliberate. Cheap, high-value spinal-stability work.',
     swaps: ['Pallof press', 'Dead bug', 'Plank'],
@@ -772,19 +772,19 @@ export const EX = {
 
   // — Anti-extension core (adds to ab_wheel / mb_slam) —
   dead_bug: {
-    name: 'Dead bug', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    name: 'Dead bug', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true,
     url: YT('dead bug exercise form'),
     cue: 'Low back pressed flat to the floor the entire time. Lower opposite arm and leg slowly, exhale, do not let the back arch. Teaches trunk control under limb movement.',
     swaps: ['Ab wheel', 'Hollow hold', 'Bird dog'],
   },
   hollow_hold: {
-    name: 'Hollow body hold', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    name: 'Hollow body hold', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true,
     url: YT('hollow body hold form'),
     cue: 'Low back glued to the floor, arms and legs extended and lifted, body a shallow banana. Shorten the levers (tuck) to scale. The gymnast standard for a stiff trunk.',
     swaps: ['Dead bug', 'Ab wheel', 'Plank'],
   },
   trx_fallout: {
-    name: 'TRX / band fallout', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension',
+    name: 'TRX / band fallout', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true,
     url: YT('trx fallout form'),
     cue: 'Straps or band anchored high, arms extend overhead as the body falls forward, trunk braced so the hips do not sag. Ab-wheel stimulus, easier to scale by walking the feet.',
     swaps: ['Ab wheel', 'Dead bug', 'Plank'],
