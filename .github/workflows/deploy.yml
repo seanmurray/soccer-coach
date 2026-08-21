@@ -9,6 +9,9 @@ on:
     # EVERY changed file matches).
     paths-ignore:
       - 'supabase/**'
+      # Native iOS shell (Capacitor) — changes there never affect the PWA bundle.
+      - 'ios/**'
+      - 'capacitor.config.json'
   workflow_dispatch:
 
 # Required so the Pages deployment can publish from this workflow.
