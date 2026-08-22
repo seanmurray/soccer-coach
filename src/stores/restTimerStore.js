@@ -6,8 +6,11 @@ import { create } from 'zustand';
 import { getRestTime } from '../lib/periodization';
 import { useSettingsStore } from './settingsStore';
 import { playTimerSound } from '../lib/timerSound';
+import { scheduleRestEndNotification, cancelRestEndNotification } from '../lib/timerNotification';
 
 let intervalId = null;
+let endsAt = 0; // epoch ms; ticks derive remaining from this so the countdown
+                // self-corrects after iOS suspends the webview in background
 let audioCtx = null;
 
 function getAudioCtx() {
@@ -67,6 +70,11 @@ export const useRestTimer = create((set, get) => ({
 
     if (intervalId) clearInterval(intervalId);
 
+    endsAt = Date.now() + total * 1000;
+    // Native: schedule the end-of-rest notification so the ding fires even if
+    // the app is backgrounded or the screen locks. No-op on web.
+    scheduleRestEndNotification({ endsAt, exerciseName, sound: prefs.audio });
+
     set({ visible: true, exerciseName, total, remaining, rpeNote: note });
 
     if (prefs.audio) audio.tick();
@@ -74,8 +82,8 @@ export const useRestTimer = create((set, get) => ({
 
     intervalId = setInterval(() => {
       const cur = get().remaining;
-      const next = cur - 1;
-      if (next === 5 && prefs.audio) {
+      const next = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
+      if (next === 5 && cur > 5 && prefs.audio) {
         // 3 quick beeps at 5 sec.
         audio.beep();
         setTimeout(() => audio.beep(), 220);
@@ -84,12 +92,15 @@ export const useRestTimer = create((set, get) => ({
       if (next <= 0) {
         clearInterval(intervalId);
         intervalId = null;
-        if (prefs.audio) audio.end();
-        if (prefs.vibrate && navigator.vibrate) navigator.vibrate([100, 60, 100]);
+        // If we're resuming from background well past the end, the native
+        // notification already announced it — don't ding a second time.
+        const endedWhileLive = Date.now() - endsAt < 2500;
+        if (endedWhileLive && prefs.audio) audio.end();
+        if (endedWhileLive && prefs.vibrate && navigator.vibrate) navigator.vibrate([100, 60, 100]);
         set({ visible: false, remaining: 0 });
         return;
       }
-      set({ remaining: next });
+      if (next !== cur) set({ remaining: next });
     }, 1000);
   },
 
@@ -97,12 +108,19 @@ export const useRestTimer = create((set, get) => ({
     const cur = get();
     const remaining = Math.max(0, cur.remaining + deltaSec);
     const total = Math.max(cur.total, remaining);
+    endsAt = Date.now() + remaining * 1000;
+    scheduleRestEndNotification({
+      endsAt,
+      exerciseName: cur.exerciseName,
+      sound: useSettingsStore.getState().timerPrefs.audio,
+    });
     set({ remaining, total });
   },
 
   skip: () => {
     if (intervalId) clearInterval(intervalId);
     intervalId = null;
+    cancelRestEndNotification();
     set({ visible: false, remaining: 0 });
   },
 }));
