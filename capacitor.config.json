@@ -1,6 +1,6 @@
 {
   "appId": "com.seanmurray.soccercoach",
-  "appName": "Soccer Coach",
+  "appName": "Speed Machine",
   "webDir": "dist",
   "ios": {
     "contentInset": "never",
