@@ -134,6 +134,22 @@ export async function saveSession({
   if (sessionError) return { ok: false, error: sessionError };
   const sessionId = session.id;
 
+  // The four inserts below are not a transaction (PostgREST can't span one
+  // across requests). If a child insert fails after the header landed, the
+  // user retries from the sheet and would save a SECOND complete session.
+  // Compensate: on any child failure, delete everything written under this
+  // session id so the retry starts from zero. Best-effort — if the cleanup
+  // itself fails (e.g. connection dropped entirely) the orphan is at least
+  // visible in History rather than silently doubled.
+  const rollback = async () => {
+    try {
+      await supabase.from('soccer_sets').delete().eq('session_id', sessionId);
+      await supabase.from('soccer_exercise_perf').delete().eq('session_id', sessionId);
+      await supabase.from('soccer_module_usage').delete().eq('session_id', sessionId);
+      await supabase.from('soccer_sessions').delete().eq('id', sessionId);
+    } catch { /* best effort */ }
+  };
+
   // Sets — flatten, attach FK + performed_at, write in one batch.
   if (setsBuffer.length > 0) {
     const setsRows = setsBuffer.map((s) => ({
@@ -155,7 +171,7 @@ export async function saveSession({
       mode: s.mode ?? mode,
     }));
     const { error } = await supabase.from('soccer_sets').insert(setsRows);
-    if (error) return { ok: false, error };
+    if (error) { await rollback(); return { ok: false, error }; }
   }
 
   // Exercise feedback (agility, plyo, cond).
@@ -176,7 +192,7 @@ export async function saveSession({
       notes: p.notes,
     }));
     const { error } = await supabase.from('soccer_exercise_perf').insert(perfRows);
-    if (error) return { ok: false, error };
+    if (error) { await rollback(); return { ok: false, error }; }
   }
 
   // Module usage. opened_at/closed_at are timestamptz, performed_at is date.
@@ -193,7 +209,7 @@ export async function saveSession({
       exercises_total: m.exercises_total,
     }));
     const { error } = await supabase.from('soccer_module_usage').insert(modRows);
-    if (error) return { ok: false, error };
+    if (error) { await rollback(); return { ok: false, error }; }
   }
 
   // Mirror to localStorage for the conditioning interference banner.
