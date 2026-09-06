@@ -35,7 +35,7 @@ export function usePRTimeline() {
       const [setsRes, perfRes] = await Promise.all([
         supabase
           .from('soccer_sets')
-          .select('session_id, exercise_key, exercise_name, actual_reps, actual_weight, rpe'),
+          .select('session_id, exercise_key, exercise_name, actual_reps, unit, actual_weight, rpe'),
         supabase
           .from('soccer_exercise_perf')
           .select('session_id, exercise_key, exercise_name, notes'),

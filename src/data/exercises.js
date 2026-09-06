@@ -758,7 +758,7 @@ export const EX = {
 
   // — Anti-rotation (adds to pallof_press) —
   suitcase_carry: {
-    name: 'Suitcase carry', muscle: 'anti-lateral-flexion core', tags: ['str'], type: 'strength', role: 'anti_rotation',
+    name: 'Suitcase carry', muscle: 'anti-lateral-flexion core', tags: ['str'], type: 'strength', role: 'anti_rotation', unit: 'secs',
     url: YT('suitcase carry form'),
     cue: 'Load one hand only, stand tall, do NOT let the torso tip toward the weight. Walk with control. Trains the trunk to resist side-bend — huge for single-leg stance in sport.',
     swaps: ['Pallof press', 'Side plank', 'Offset carry'],
@@ -778,11 +778,37 @@ export const EX = {
     swaps: ['Ab wheel', 'Hollow hold', 'Bird dog'],
   },
   hollow_hold: {
-    name: 'Hollow body hold', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true,
+    name: 'Hollow body hold', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true, unit: 'secs',
     url: YT('hollow body hold form'),
     cue: 'Low back glued to the floor, arms and legs extended and lifted, body a shallow banana. Shorten the levers (tuck) to scale. The gymnast standard for a stiff trunk.',
     swaps: ['Dead bug', 'Ab wheel', 'Plank'],
   },
+  // — Calf / Achilles (tendon stiffness = ground-contact elasticity) —
+  standing_calf_raise: {
+    name: 'Standing calf raise (DB)', target: '3×10 (pause at stretch)', muscle: 'gastrocnemius', tags: ['str'], type: 'strength', role: 'calf',
+    url: YT('standing dumbbell calf raise full range'),
+    cue: 'Ball of the foot on a plate or step, full stretch at the bottom, pause, drive to full tiptoe. Straight knee = gastroc. Slow down, fast up — no bouncing out of the bottom.',
+    swaps: ['Single-leg calf raise', 'Seated calf raise', 'Eccentric SL calf raise'],
+  },
+  sl_calf_raise_ecc: {
+    name: 'Eccentric SL calf raise', target: '3×10 each — 3 sec down', muscle: 'gastrocnemius / Achilles', tags: ['str'], type: 'strength', role: 'calf', bodyweight: true,
+    url: YT('eccentric single leg calf raise Achilles tendon'),
+    cue: 'Rise on two feet, shift to one, lower on it for a slow 3-count — full tiptoe to heel below the step. The Alfredson pattern: eccentric Achilles loading, the highest-evidence tendon-injury insurance for running and jumping athletes.',
+    swaps: ['Standing calf raise (DB)', 'Seated calf raise', 'SL calf iso hold'],
+  },
+  seated_calf_raise: {
+    name: 'Seated calf raise', target: '3×12', muscle: 'soleus', tags: ['str'], type: 'strength', role: 'calf',
+    url: YT('seated calf raise dumbbell on knee'),
+    cue: 'Knees bent ~90° (DBs or plates on the thighs), ball of the foot elevated, full range. Bent knee shifts the work to the soleus — the endurance calf muscle doing most of the stabilizing every stride.',
+    swaps: ['Standing calf raise (DB)', 'Eccentric SL calf raise'],
+  },
+  sl_calf_iso_hold: {
+    name: 'SL calf iso hold', target: '3×45 sec each side', muscle: 'calf / Achilles tendon', tags: ['str'], type: 'strength', role: 'calf', bodyweight: true, unit: 'secs',
+    url: YT('single leg calf isometric hold loaded tendon stiffness'),
+    cue: 'Single-leg heel raise held at MID-range (not the top), 45-60 sec. Add a DB in the same-side hand as it gets easy. Isometrics build tendon stiffness = elastic energy return at ground contact — a prerequisite for high-quality sprinting.',
+    swaps: ['Eccentric SL calf raise', 'Standing calf raise (DB)'],
+  },
+
   trx_fallout: {
     name: 'TRX / band fallout', muscle: 'anti-extension core', tags: ['str'], type: 'strength', role: 'anti_extension', bodyweight: true,
     url: YT('trx fallout form'),

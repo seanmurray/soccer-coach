@@ -145,6 +145,9 @@ export async function saveSession({
       exercise_name: s.exercise_name,
       set_num: s.set_num,
       actual_reps: s.actual_reps,
+      // 'reps' | 'secs' — how to read actual_reps. Column added 2026-09;
+      // null on historical rows means reps.
+      unit: s.unit ?? 'reps',
       actual_weight: s.actual_weight,
       rpe: s.rpe,
       rec_weight: s.rec_weight,

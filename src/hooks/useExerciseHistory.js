@@ -28,7 +28,7 @@ export function useExerciseHistory(exerciseKey, kind, limit = DEFAULT_LIMIT) {
       if (kind === 'sets') {
         const { data, error } = await supabase
           .from('soccer_sets')
-          .select('session_id, performed_at, set_num, actual_reps, actual_weight, rpe')
+          .select('session_id, performed_at, set_num, actual_reps, unit, actual_weight, rpe')
           .eq('exercise_key', exerciseKey)
           .order('performed_at', { ascending: false })
           .order('set_num', { ascending: true })
@@ -46,6 +46,7 @@ export function useExerciseHistory(exerciseKey, kind, limit = DEFAULT_LIMIT) {
           bucket.sets.push({
             set_num: row.set_num,
             actual_reps: row.actual_reps,
+            unit: row.unit, // 'secs' | 'reps' | null (pre-2026-09 rows = reps)
             actual_weight: row.actual_weight,
             rpe: row.rpe,
           });

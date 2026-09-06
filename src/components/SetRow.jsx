@@ -3,12 +3,45 @@ import { NumField } from './NumField';
 
 const RPE_VALUES = [6, 6.5, 7, 7.5, 8, 8.5, 9, 9.5, 10];
 
-export function SetTableHeader({ showWeight = true }) {
+// The unit label ("Reps"/"Sec") is a toggle: exercises like carries and holds
+// live in seconds, others in reps, and some can be either. Likewise a
+// bodyweight exercise's empty weight column offers "+lbs" once the athlete
+// progresses to external load (e.g. weighted Copenhagen). Both prefs persist
+// per exercise in the settings store.
+export function SetTableHeader({
+  showWeight = true,
+  unit = 'reps',
+  onToggleUnit,
+  canToggleWeight = false,
+  onToggleWeight,
+}) {
   return (
     <div className={styles.tableHeader}>
       <div className={styles.colLabel}>#</div>
-      <div className={styles.colLabel}>Reps</div>
-      <div className={styles.colLabel}>{showWeight ? 'Lbs' : ''}</div>
+      {onToggleUnit ? (
+        <button
+          type="button"
+          className={`${styles.colLabel} ${styles.colToggle}`}
+          onClick={onToggleUnit}
+          aria-label={`Logging in ${unit === 'secs' ? 'seconds' : 'reps'} — tap to switch`}
+        >
+          {unit === 'secs' ? 'Sec' : 'Reps'} ⇄
+        </button>
+      ) : (
+        <div className={styles.colLabel}>{unit === 'secs' ? 'Sec' : 'Reps'}</div>
+      )}
+      {canToggleWeight ? (
+        <button
+          type="button"
+          className={`${styles.colLabel} ${styles.colToggle}`}
+          onClick={onToggleWeight}
+          aria-label={showWeight ? 'Tracking weight — tap for bodyweight' : 'Bodyweight — tap to track weight'}
+        >
+          {showWeight ? 'Lbs ⇄' : '+ lbs'}
+        </button>
+      ) : (
+        <div className={styles.colLabel}>{showWeight ? 'Lbs' : ''}</div>
+      )}
       <div className={styles.colLabel}>Rec</div>
       <div className={styles.colLabel}>RPE</div>
       <div className={styles.colLabel}></div>
@@ -28,6 +61,7 @@ export function SetRow({
   rpe, onRpeChange,
   done, onToggleDone,
   showWeight = true,
+  unit = 'reps',
 }) {
   const recVariantCls =
     recVariant === 'warn'   ? styles.warn :
@@ -45,7 +79,7 @@ export function SetRow({
         className={styles.input}
         value={reps}
         onChange={onRepsChange}
-        aria-label={`Set ${setNum} reps`}
+        aria-label={`Set ${setNum} ${unit === 'secs' ? 'seconds' : 'reps'}`}
       />
 
       {showWeight ? (

@@ -17,6 +17,19 @@
   text-align: center;
 }
 
+/* Tappable header label (unit / weight toggles). Inherits colLabel type but
+   reads as interactive; min-height keeps the tap target honest on touch. */
+.colToggle {
+  background: none;
+  border: 1px dashed var(--t3);
+  border-radius: var(--r1);
+  padding: 4px 2px;
+  min-height: 28px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.colToggle:active { color: var(--t1); border-color: var(--t1); }
+
 .row {
   display: grid;
   grid-template-columns: 36px 1fr 1fr 70px 60px 44px;

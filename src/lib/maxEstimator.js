@@ -96,6 +96,7 @@ export function buildMaxSuggestions(sets, maxes) {
     const maxKey = EX_TO_MAX_KEY[s.exercise_key];
     if (!maxKey) continue;
     if (!s.actual_weight || !s.actual_reps) continue;
+    if (s.unit === 'secs') continue; // time-logged sets carry no rep count
     (byLift[maxKey] ??= []).push(s);
   }
 

@@ -39,6 +39,20 @@ export const useSettingsStore = create(
       timerPrefs: initialTimerPrefs,
       setTimerPref: (key, value) =>
         set((s) => ({ timerPrefs: { ...s.timerPrefs, [key]: value } })),
+
+      // Per-exercise logging overrides, keyed by exercise key.
+      //   exUnits:    'reps' | 'secs' — overrides the exercise's default unit
+      //               (EX[key].unit, else 'reps'). Farmer-type carries and
+      //               holds live in seconds; others can be either.
+      //   exWeighted: true/false — overrides the bodyweight flag, e.g. a
+      //               Copenhagen that has progressed to external load.
+      // Absent key = use the exercise definition's default.
+      exUnits: {},
+      setExUnit: (key, unit) =>
+        set((s) => ({ exUnits: { ...s.exUnits, [key]: unit } })),
+      exWeighted: {},
+      setExWeighted: (key, weighted) =>
+        set((s) => ({ exWeighted: { ...s.exWeighted, [key]: weighted } })),
     }),
     {
       name: 'soccer-coach-settings',

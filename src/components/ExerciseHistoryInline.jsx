@@ -53,7 +53,9 @@ function summarizeSets(sets) {
   const rpes = valid.map((s) => s.rpe ?? 0).filter((n) => n > 0);
   const topRpe = rpes.length ? Math.max(...rpes) : null;
 
-  const parts = [`${valid.length}×${topReps}`];
+  // Seconds-logged sets read "3×45 sec" instead of bare reps.
+  const secs = valid.some((s) => s.unit === 'secs');
+  const parts = [`${valid.length}×${topReps}${secs ? ' sec' : ''}`];
   if (topWeight > 0) parts.push(`@ ${topWeight} lbs`);
   if (topRpe != null) parts.push(`RPE ${topRpe}`);
   return parts.join(' · ');

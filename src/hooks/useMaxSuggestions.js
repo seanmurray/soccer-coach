@@ -24,7 +24,7 @@ export function useMaxSuggestions() {
 
       const { data, error } = await supabase
         .from('soccer_sets')
-        .select('session_id, exercise_key, actual_reps, actual_weight, rpe, performed_at')
+        .select('session_id, exercise_key, actual_reps, unit, actual_weight, rpe, performed_at')
         .gte('performed_at', sinceStr)
         .order('performed_at', { ascending: false });
 

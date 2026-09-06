@@ -36,6 +36,7 @@ export const BUILD_POOLS = {
   glute:         ['single_leg_hip_thrust', 'barbell_hip_thrust', 'kb_swing'],
   rotational:    ['mb_rotational_slam', 'the_grappler', 'cable_row_rotation', 'cable_press_rotation', 'half_kneel_rot_chop', 'walking_kb_high_pull_coil', 'mb_slam', 'mb_scoop_toss'],
   anti_rotation: ['pallof_press', 'suitcase_carry', 'bird_dog'],
+  calf:          ['sl_calf_iso_hold', 'standing_calf_raise', 'sl_calf_raise_ecc', 'seated_calf_raise'],
   anti_extension:['ab_wheel', 'dead_bug', 'hollow_hold', 'trx_fallout'],
 };
 

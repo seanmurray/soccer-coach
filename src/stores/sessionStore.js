@@ -122,8 +122,27 @@ export const useSessionStore = create(persist((set, get) => ({
   // created_at, which is the save/insert time and includes debrief-sheet lag.
   markSessionEnd: () => set({ sessionEndedAt: new Date().toISOString() }),
 
-  pushSet: (record) => set((s) => ({ setsBuffer: [...s.setsBuffer, record] })),
-  pushExercisePerf: (record) => set((s) => ({ exercisePerfBuffer: [...s.exercisePerfBuffer, record] })),
+  // Replace-not-append: the same set can be pushed more than once — un-done →
+  // re-done, or a PWA reload restores the buffer while SetTable's local done
+  // state resets and the user re-taps every set. Appending here double-logged
+  // whole sessions (8 affected sessions found in soccer_sets, 2026-07/08).
+  // Last write wins: the re-push carries the corrected values.
+  pushSet: (record) => set((s) => ({
+    setsBuffer: [
+      ...s.setsBuffer.filter(
+        (r) => !(r.exercise_key === record.exercise_key && r.set_num === record.set_num)
+      ),
+      record,
+    ],
+  })),
+  // Same rule per exercise: FeedbackBlock's Save can be tapped repeatedly
+  // after edits; only the latest feedback for an exercise should persist.
+  pushExercisePerf: (record) => set((s) => ({
+    exercisePerfBuffer: [
+      ...s.exercisePerfBuffer.filter((r) => r.exercise_key !== record.exercise_key),
+      record,
+    ],
+  })),
   pushModuleUsage: (record) => set((s) => ({ moduleUsageBuffer: [...s.moduleUsageBuffer, record] })),
 
   setWarmupChecked: (idx, checked) => set((s) => {

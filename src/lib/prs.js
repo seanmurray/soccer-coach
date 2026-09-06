@@ -21,6 +21,8 @@ import { metricFor } from '../data/conditioningProtocols';
 
 // Returns the e1RM for a soccer_sets row, or null if the row lacks weight/reps.
 function setE1RM(s) {
+  // Seconds-logged sets (carries, holds) have no rep count — no e1RM.
+  if (s.unit === 'secs') return null;
   const w = Number(s.actual_weight);
   const r = Number(s.actual_reps);
   const rpe = Number(s.rpe);

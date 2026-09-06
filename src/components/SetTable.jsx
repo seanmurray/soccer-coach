@@ -6,6 +6,7 @@ import { useExerciseHistory } from '../hooks/useExerciseHistory';
 import { useSessionStore } from '../stores/sessionStore';
 import { useSettingsStore } from '../stores/settingsStore';
 import { useRestTimer } from '../stores/restTimerStore';
+import { EX } from '../data/exercises';
 
 // SetTable — owns per-set local state for one exercise, buffers each
 // completed set into the session store, and triggers the rest timer.
@@ -36,6 +37,19 @@ export function SetTable({
   const pushSet = useSessionStore((s) => s.pushSet);
   const startTimer = useRestTimer((t) => t.start);
 
+  // Effective unit and weight visibility: per-exercise user override from
+  // settings, else the exercise definition's default, else reps/`showWeight`
+  // as passed in. The weight toggle is only offered on bodyweight-default
+  // exercises (a Copenhagen can progress to load); loaded lifts keep their
+  // weight column unconditionally.
+  const unitOverride = useSettingsStore((s) => s.exUnits[exerciseKey]);
+  const weightOverride = useSettingsStore((s) => s.exWeighted[exerciseKey]);
+  const setExUnit = useSettingsStore((s) => s.setExUnit);
+  const setExWeighted = useSettingsStore((s) => s.setExWeighted);
+  const unit = unitOverride ?? EX[exerciseKey]?.unit ?? 'reps';
+  const canToggleWeight = !showWeight || weightOverride != null;
+  const effShowWeight = weightOverride ?? showWeight;
+
   const numSets = prescription?.sets ?? 3;
   const baseReps = prescription?.reps ?? 5;
   const targetRPE = prescription?.target_rpe ?? 8;
@@ -51,10 +65,10 @@ export function SetTable({
   //   - swap-aware override path: use the parent's pre-scaled rec untouched
   //   - otherwise: max × phase% × mode, then seed from last session's top
   //     working set (bounded carryover — closes the APRE loop)
-  const calcRec = showWeight ? calcLoad(exerciseKey, prescription?.pct, maxes) : 0;
+  const calcRec = effShowWeight ? calcLoad(exerciseKey, prescription?.pct, maxes) : 0;
   const baseRec = recOverridePresent
     ? (recOverride ?? null)
-    : (showWeight ? seedBaseRec({ calcRec, prescription, lastTop }) : 0);
+    : (effShowWeight ? seedBaseRec({ calcRec, prescription, lastTop }) : 0);
 
   // Per-row state. RPE pre-fills to the target so the user only changes it
   // when the set actually felt different (spec response, item 3).
@@ -70,7 +84,7 @@ export function SetTable({
 
   // The next-set recommendation accounting for prior completed sets.
   function recForSet(idx) {
-    if (!showWeight) return { value: null, variant: 'ok', note: null };
+    if (!effShowWeight) return { value: null, variant: 'ok', note: null };
     if (baseRec == null || baseRec === 0) return { value: null, variant: 'ok', note: null };
 
     const priorRows = rows.slice(0, idx);
@@ -96,7 +110,7 @@ export function SetTable({
     if (!willBeDone) return;
 
     const reps = row.reps ?? baseReps;
-    const weight = showWeight ? (row.weight ?? recForSet(idx).value ?? 0) : null;
+    const weight = effShowWeight ? (row.weight ?? recForSet(idx).value ?? 0) : null;
     const rpe = row.rpe ?? targetRPE;
 
     pushSet({
@@ -104,6 +118,7 @@ export function SetTable({
       exercise_name: exerciseName,
       set_num: idx + 1,
       actual_reps: reps,
+      unit,
       actual_weight: weight,
       rpe,
       rec_weight: recForSet(idx).value,
@@ -130,7 +145,13 @@ export function SetTable({
 
   return (
     <>
-      <SetTableHeader showWeight={showWeight} />
+      <SetTableHeader
+        showWeight={effShowWeight}
+        unit={unit}
+        onToggleUnit={() => setExUnit(exerciseKey, unit === 'secs' ? 'reps' : 'secs')}
+        canToggleWeight={canToggleWeight}
+        onToggleWeight={() => setExWeighted(exerciseKey, !effShowWeight)}
+      />
       {rows.map((row, idx) => {
         const rec = recForSet(idx);
         return (
@@ -147,7 +168,8 @@ export function SetTable({
             onRpeChange={(v) => update(idx, { rpe: v })}
             done={row.done}
             onToggleDone={() => handleToggleDone(idx)}
-            showWeight={showWeight}
+            showWeight={effShowWeight}
+            unit={unit}
           />
         );
       })}

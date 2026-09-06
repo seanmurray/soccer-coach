@@ -47,8 +47,9 @@ export const SESSIONS = {
       plyo: ['snap_downs', 'broad_jump', 'half_kneel_box_jump', 'sprinter_step_up'],
       strength: ['bench_press'],
       // Bench = upper push. Build fills: knee-dominant lower (accel-day complement),
-      // vertical pull, rotational power, anti-extension core (sprint posture).
-      build: ['walking_lunge_db', 'pullup', 'mb_rotational_slam', 'ab_wheel'],
+      // vertical pull, rotational power, anti-extension core (sprint posture),
+      // calf (ankle stiffness = first-steps ground contact).
+      build: ['walking_lunge_db', 'pullup', 'mb_rotational_slam', 'ab_wheel', 'standing_calf_raise'],
     },
     lat: {
       agility: ['lat_power_shuffle', 'carioca_qstep', 'half_arc_run', 'lat_shuffle_react', 'y_cut', 'jump_cut'],
@@ -77,7 +78,9 @@ export const SESSIONS = {
       // Trap bar = heavy bilateral hinge. Build is UPPER-dominant — no more
       // legs after big lower + max-V mechanics. Rotational pull, horizontal
       // push variant, single-leg posterior (accessory), anti-lateral core.
-      build: ['cable_row_rotation', 'floor_press', 'single_leg_hip_thrust', 'walking_kb_high_pull_coil'],
+      // Exception: the calf iso hold — near-zero CNS cost, and Achilles
+      // stiffness work belongs next to max-velocity exposure.
+      build: ['cable_row_rotation', 'floor_press', 'single_leg_hip_thrust', 'walking_kb_high_pull_coil', 'sl_calf_iso_hold'],
     },
     cond: {
       // Soccer-specific conditioning — protocols adapted to user's equipment
