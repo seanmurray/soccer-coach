@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soccer Performance Coach</title>
+<style>
+:root{
+  --bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;
+  --text:#1a1a18;--text2:#6b6b67;--text3:#9b9b97;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --green:#1D9E75;--amber:#EF9F27;--red:#E24B4A;--purple:#534AB7;
+  --r-md:8px;--r-lg:12px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1c1c1a;--bg2:#242422;--bg3:#2c2c2a;--text:#f0efeb;--text2:#a0a09c;--text3:#6e6e6a;--border:rgba(255,255,255,0.1);--border2:rgba(255,255,255,0.2)}
+  .mode-full{background:#1a3010!important;color:#7fcf5a!important}.mode-mod{background:#2e2010!important;color:#d4a040!important}.mode-rec{background:#2e1010!important;color:#d46060!important}
+  .tag-acc{background:#0a1e30!important;color:#60a8d4!important}.tag-lat{background:#1a0e30!important;color:#9080d4!important}.tag-lin{background:#0a2010!important;color:#60d480!important}.tag-vel{background:#2a0e0e!important;color:#d46060!important}.tag-cond{background:#0e1e10!important;color:#60c470!important}.tag-str{background:#1a1410!important;color:#c4a050!important}
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);min-height:100vh;padding:16px}
+.app{max-width:720px;margin:0 auto;padding:1rem 0}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--bg);border:.5px solid var(--border);border-radius:var(--r-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.section-label{font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.rings-row{display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.ring-wrap{display:flex;flex-direction:column;align-items:center;gap:4px}
+.ring-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em}
+.readiness-ring{position:relative;width:68px;height:68px}
+.readiness-ring svg{transform:rotate(-90deg)}
+.ring-text{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.ring-pct{font-size:14px;font-weight:500;color:var(--text)}
+.mode-badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.mode-full{background:#EAF3DE;color:#27500A}.mode-mod{background:#FAEEDA;color:#633806}.mode-rec{background:#FCEBEB;color:#791F1F}
+/* Stepper controls */
+.stepper{display:flex;align-items:center;gap:0;margin-bottom:10px}
+.stepper-label{font-size:12px;color:var(--text2);min-width:110px;flex-shrink:0}
+.stepper-controls{display:flex;align-items:center;flex:1}
+.stepper-btn{width:44px;height:44px;border:.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:22px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:background .1s;flex-shrink:0;user-select:none;-webkit-user-select:none;border-radius:0}
+.stepper-btn:first-child{border-radius:var(--r-md) 0 0 var(--r-md)}
+.stepper-btn:last-child{border-radius:0 var(--r-md) var(--r-md) 0}
+.stepper-btn:active{background:var(--border)}
+.stepper-val{flex:1;text-align:center;font-size:16px;font-weight:600;color:var(--text);border-top:.5px solid var(--border2);border-bottom:.5px solid var(--border2);height:44px;display:flex;align-items:center;justify-content:center;background:var(--bg);cursor:text;min-width:0}
+.stepper-unit{font-size:11px;color:var(--text3);margin-left:3px}
+/* Slider (used in workout feedback only) */
+.slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.slider-row label{font-size:12px;color:var(--text2);min-width:110px}
+.slider-row input[type=range]{flex:1;accent-color:var(--text)}
+.slider-val{font-size:13px;font-weight:500;min-width:42px;text-align:right;color:var(--text)}
+.ai-box{background:var(--bg2);border-radius:0 var(--r-md) var(--r-md) 0;padding:12px;margin-bottom:12px;border-left:2px solid var(--border2)}
+.ai-label{font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em}
+.ai-text{font-size:13px;color:var(--text2);line-height:1.5}
+.btn{padding:8px 16px;border-radius:var(--r-md);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;border:.5px solid var(--border2);background:var(--bg);color:var(--text);transition:all .15s}
+.btn:hover{background:var(--bg2)}.btn-primary{background:var(--text);color:var(--bg);border-color:var(--text)}.btn-primary:hover{opacity:.85}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.nav{display:flex;gap:4px;margin-bottom:16px;border-bottom:.5px solid var(--border);padding-bottom:8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.nav-btn{padding:4px 10px;font-size:12px;border-radius:var(--r-md);cursor:pointer;background:none;border:none;color:var(--text2);font-family:inherit;white-space:nowrap}
+.nav-btn.active{background:var(--bg2);color:var(--text);font-weight:500}
+.tag{display:inline-block;padding:2px 7px;border-radius:10px;font-size:11px;margin:2px}
+.tag-acc{background:#E6F1FB;color:#0C447C}.tag-lat{background:#EEEDFE;color:#3C3489}.tag-lin{background:#EAF3DE;color:#27500A}.tag-vel{background:#FCEBEB;color:#791F1F}.tag-cond{background:#E1F5EE;color:#085041}.tag-str{background:#FAEEDA;color:#633806}
+.ex-block{border:.5px solid var(--border);border-radius:var(--r-md);margin-bottom:8px;overflow:hidden}
+.ex-header{display:flex;align-items:flex-start;justify-content:space-between;padding:10px 12px;background:var(--bg2);cursor:pointer;user-select:none;gap:8px}
+.ex-name{font-size:14px;font-weight:500;color:var(--text)}
+.ex-meta{font-size:11px;color:var(--text2);text-align:right;flex-shrink:0}
+.ex-body{padding:10px 12px;border-top:.5px solid var(--border)}
+.video-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--green);text-decoration:none;margin-top:4px;padding:3px 8px;border:.5px solid var(--green);border-radius:20px}
+.video-link:hover{background:rgba(29,158,117,0.1)}
+.swap-section{margin-top:8px;padding-top:8px;border-top:.5px solid var(--border)}
+.swap-item{padding:4px 0;font-size:12px;color:var(--text2)}
+/* Set rows - 6 col with load rec */
+.set-grid{display:grid;grid-template-columns:26px 1fr 1fr 72px 60px 24px;gap:5px;align-items:center;margin-bottom:6px}
+.set-label{font-size:11px;color:var(--text3)}
+.set-input{background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r-md);padding:4px 4px;font-size:12px;color:var(--text);text-align:center;font-family:inherit;width:100%}
+.rpe-sel{background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r-md);padding:4px 2px;font-size:11px;color:var(--text);font-family:inherit;width:100%}
+.rec-cell{font-size:11px;color:var(--green);font-weight:500;text-align:center;padding:3px 3px;background:rgba(29,158,117,0.08);border-radius:var(--r-md);border:.5px solid rgba(29,158,117,0.25);white-space:nowrap}
+.rec-cell.warn{color:var(--amber);background:rgba(239,159,39,0.08);border-color:rgba(239,159,39,0.3)}
+.rec-cell.danger{color:var(--red);background:rgba(226,75,74,0.08);border-color:rgba(226,75,74,0.25)}
+.set-done{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;background:none;color:transparent;flex-shrink:0}
+.set-done.done{background:var(--green);border-color:var(--green);color:#fff}
+.adapt-note{font-size:11px;color:var(--amber);margin-top:4px;padding:5px 8px;background:rgba(239,159,39,0.08);border-radius:var(--r-md);border:.5px solid rgba(239,159,39,0.25);display:none}
+/* Plyo feedback */
+.speed-feedback{background:var(--bg2);border-radius:var(--r-md);padding:10px;margin-top:8px}
+.speed-feedback textarea{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:52px}
+/* Upgrade pill */
+.upgrade-pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--amber);background:rgba(239,159,39,0.1);border:.5px solid rgba(239,159,39,0.3);border-radius:20px;padding:3px 9px;margin-top:6px;cursor:pointer}
+.upgrade-block{display:none;background:rgba(239,159,39,0.06);border:.5px solid rgba(239,159,39,0.25);border-radius:var(--r-md);padding:10px 12px;margin-top:8px}
+.upgrade-block.visible{display:block}
+/* FRC */
+.frc-block{background:rgba(83,74,183,0.06);border:.5px solid rgba(83,74,183,0.25);border-radius:var(--r-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.frc-title{font-size:13px;font-weight:500;color:var(--purple);margin-bottom:2px}
+.frc-sub{font-size:11px;color:var(--text3);margin-bottom:10px}
+.frc-item{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:.5px solid rgba(83,74,183,0.12);font-size:12px;color:var(--text2);line-height:1.45}
+.frc-item:last-child{border-bottom:none}
+.frc-cb{width:16px;height:16px;accent-color:var(--purple);cursor:pointer;flex-shrink:0;margin-top:1px}
+.frc-badge{display:inline-block;font-size:10px;padding:1px 6px;border-radius:8px;background:rgba(83,74,183,0.12);color:var(--purple);margin-left:4px;flex-shrink:0;white-space:nowrap}
+/* Warmup */
+.warmup-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:.5px solid var(--border);font-size:13px;color:var(--text2)}
+.warmup-item:last-child{border-bottom:none}
+.warmup-cb{width:16px;height:16px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+/* Week bar */
+.week-bar{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.phase-badge{font-size:11px;padding:3px 8px;border-radius:10px;background:var(--bg2);color:var(--text2)}
+.week-btn{padding:4px 10px;border-radius:var(--r-md);border:.5px solid var(--border2);background:var(--bg);font-size:12px;cursor:pointer;font-family:inherit;color:var(--text)}
+/* Day selector */
+.day-selector{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:12px}
+.day-btn{padding:8px 4px;border-radius:var(--r-md);border:.5px solid var(--border2);background:var(--bg);cursor:pointer;font-size:11px;font-weight:500;color:var(--text2);font-family:inherit;text-align:center;transition:all .15s}
+.day-btn .day-sub{font-size:9px;color:inherit;opacity:.7;margin-top:2px}
+.day-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+/* Tempo */
+.tempo-badge{font-family:monospace;font-size:11px;background:rgba(83,74,183,0.12);color:var(--purple);padding:2px 7px;border-radius:6px}
+.contrast-note{background:rgba(29,158,117,0.08);border:.5px solid rgba(29,158,117,0.3);border-radius:var(--r-md);padding:8px 12px;font-size:12px;color:var(--green);margin-top:8px}
+/* Day order */
+.day-order-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:.5px solid var(--border);border-radius:var(--r-md);margin-bottom:6px}
+.day-order-btn{width:34px;height:34px;border:.5px solid var(--border2);background:var(--bg2);border-radius:var(--r-md);cursor:pointer;font-size:16px;color:var(--text2);display:flex;align-items:center;justify-content:center}
+.day-order-btn:hover{background:var(--bg3)}
+/* Misc */
+.history-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:.5px solid var(--border);font-size:12px;flex-wrap:wrap;gap:4px}
+.history-row:last-child{border-bottom:none}
+.sb-status{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:12px}
+.sb-dot{width:6px;height:6px;border-radius:50%;background:var(--border2)}.sb-dot.connected{background:var(--green)}.sb-dot.error{background:var(--red)}
+.cfg-input{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 10px;font-size:12px;color:var(--text);width:100%;font-family:monospace;margin-bottom:6px}
+.wmax-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.wmax-item{background:var(--bg2);border-radius:var(--r-md);padding:10px}
+.wmax-label{font-size:11px;color:var(--text3);margin-bottom:4px}
+.wmax-input{background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:5px 8px;font-size:13px;color:var(--text);width:100%;font-family:inherit}
+.rec-lbl{font-size:11px;color:var(--green);margin-top:3px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--text3);animation:pulse 1.2s ease-in-out infinite;display:inline-block;margin:0 2px}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,80%,100%{opacity:.3;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+input[type=number]::-webkit-inner-spin-button{opacity:.4}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- READINESS -->
+<div id="screen-readiness" class="screen active">
+  <div class="sb-status">
+    <div class="sb-dot" id="sb-dot"></div>
+    <span id="sb-status-text">Supabase: not configured</span>
+    <button class="btn btn-sm" onclick="showScreen('screen-settings')" style="margin-left:auto">Settings</button>
+  </div>
+  <div class="week-bar">
+    <span style="font-size:13px;font-weight:500;color:var(--text)" id="week-display">Week 1</span>
+    <span class="phase-badge" id="phase-display">Accumulation</span>
+    <div style="margin-left:auto;display:flex;gap:4px">
+      <button class="week-btn" onclick="changeWeek(-1)">&#8592;</button>
+      <button class="week-btn" onclick="changeWeek(1)">&#8594;</button>
+    </div>
+  </div>
+  <p class="section-label">Morning readiness</p>
+  <div class="card">
+    <div class="rings-row">
+      <div class="ring-wrap">
+        <div class="readiness-ring">
+          <svg width="68" height="68" viewBox="0 0 68 68"><circle cx="34" cy="34" r="26" fill="none" stroke-width="5" stroke="var(--border)"/><circle id="ring-rec" cx="34" cy="34" r="26" fill="none" stroke-width="5" stroke="#1D9E75" stroke-linecap="round" stroke-dasharray="163" stroke-dashoffset="163"/></svg>
+          <div class="ring-text"><span class="ring-pct" id="val-rec">72%</span></div>
+        </div>
+        <span class="ring-title">Recovery</span>
+      </div>
+      <div class="ring-wrap">
+        <div class="readiness-ring">
+          <svg width="68" height="68" viewBox="0 0 68 68"><circle cx="34" cy="34" r="26" fill="none" stroke-width="5" stroke="var(--border)"/><circle id="ring-slp" cx="34" cy="34" r="26" fill="none" stroke-width="5" stroke="#534AB7" stroke-linecap="round" stroke-dasharray="163" stroke-dashoffset="163"/></svg>
+          <div class="ring-text"><span class="ring-pct" id="val-slp">72%</span></div>
+        </div>
+        <span class="ring-title">Sleep</span>
+      </div>
+      <div style="flex:1;min-width:130px">
+        <div class="section-label" style="margin-bottom:4px">Training mode</div>
+        <span class="mode-badge mode-full" id="mode-badge">Full training</span>
+        <div id="mode-detail" style="font-size:11px;color:var(--text2);margin-top:6px;line-height:1.4"></div>
+      </div>
+    </div>
+    <div class="stepper">
+      <span class="stepper-label">Recovery (Athlytic)</span>
+      <div class="stepper-controls">
+        <button class="stepper-btn" onclick="stepVal('rec',-1,0,100)">&#8722;</button>
+        <div class="stepper-val" id="sv-rec" onclick="editStepper('rec',0,100)" title="Tap to type exact value">72<span class="stepper-unit">%</span></div>
+        <button class="stepper-btn" onclick="stepVal('rec',1,0,100)">+</button>
+      </div>
+    </div>
+    <div class="stepper">
+      <span class="stepper-label">Sleep quality</span>
+      <div class="stepper-controls">
+        <button class="stepper-btn" onclick="stepVal('slp',-1,0,100)">&#8722;</button>
+        <div class="stepper-val" id="sv-slp" onclick="editStepper('slp',0,100)" title="Tap to type exact value">72<span class="stepper-unit">%</span></div>
+        <button class="stepper-btn" onclick="stepVal('slp',1,0,100)">+</button>
+      </div>
+    </div>
+    <div class="stepper">
+      <span class="stepper-label">Body feel</span>
+      <div class="stepper-controls">
+        <button class="stepper-btn" onclick="stepVal('body',-1,1,5)">&#8722;</button>
+        <div class="stepper-val" id="sv-body" onclick="editStepper('body',1,5)" title="Tap to type exact value">3<span class="stepper-unit">/5</span></div>
+        <button class="stepper-btn" onclick="stepVal('body',1,1,5)">+</button>
+      </div>
+    </div>
+    <div class="stepper">
+      <span class="stepper-label">Motivation</span>
+      <div class="stepper-controls">
+        <button class="stepper-btn" onclick="stepVal('mot',-1,1,5)">&#8722;</button>
+        <div class="stepper-val" id="sv-mot" onclick="editStepper('mot',1,5)" title="Tap to type exact value">3<span class="stepper-unit">/5</span></div>
+        <button class="stepper-btn" onclick="stepVal('mot',1,1,5)">+</button>
+      </div>
+    </div>
+  </div>
+  <p class="section-label">Today's session</p>
+  <div class="day-selector" id="day-selector"></div>
+  <div class="ai-box"><div class="ai-label">Coach insight</div><div class="ai-text" id="readiness-ai">Tap your readiness scores above to see today's recommendation.</div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="goToWorkout()">Start session &rarr;</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-history')">History</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-maxes')">Working maxes</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-dayorder')">Reorder days</button>
+  </div>
+</div>
+
+<!-- WORKOUT -->
+<div id="screen-workout" class="screen">
+  <div id="workout-header" style="margin-bottom:8px;font-size:13px;color:var(--text2)"></div>
+  <div class="nav" id="workout-nav"></div>
+  <div id="workout-content"></div>
+  <div class="ai-box" style="margin-top:12px"><div class="ai-label">Session adaptation</div><div class="ai-text" id="workout-ai"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="finishWorkout()">Log session &rarr;</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-readiness')">&larr; Back</button>
+  </div>
+</div>
+
+<!-- LOG -->
+<div id="screen-log" class="screen">
+  <p class="section-label">Session complete</p>
+  <div id="log-metrics" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px"></div>
+  <div class="card">
+    <div class="section-label" style="margin-bottom:8px">Post-session feedback</div>
+    <div class="slider-row"><label>Overall RPE</label><input type="range" min="6" max="10" step=".5" value="7.5" id="sl-rpe" oninput="document.getElementById('lbl-rpe').textContent=this.value"><span class="slider-val" id="lbl-rpe">7.5</span></div>
+    <div class="slider-row"><label>Energy level</label><input type="range" min="1" max="5" step="1" value="3" id="sl-energy" oninput="document.getElementById('lbl-energy').textContent=this.value+'/5'"><span class="slider-val" id="lbl-energy">3/5</span></div>
+    <div class="slider-row"><label>Box jump (inches)</label><input type="range" min="10" max="42" step="1" value="22" id="sl-jump" oninput="document.getElementById('lbl-jump').textContent=this.value+'&quot;'"><span class="slider-val" id="lbl-jump">22"</span></div>
+  </div>
+  <div class="ai-box"><div class="ai-label">AI debrief</div><div class="ai-text" id="log-ai"><span class="dot"></span><span class="dot"></span><span class="dot"></span></div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveSession()">Save session</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-history')">View history</button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div id="screen-history" class="screen">
+  <p class="section-label">Recent sessions</p>
+  <div id="history-list"></div>
+  <div class="btn-row"><button class="btn btn-sm" onclick="showScreen('screen-readiness')">&larr; Today</button></div>
+</div>
+
+<!-- WORKING MAXES -->
+<div id="screen-maxes" class="screen">
+  <p class="section-label">Working maxes</p>
+  <div class="wmax-grid" id="wmax-grid"></div>
+  <div class="ai-box"><div class="ai-label">How loads are calculated</div><div class="ai-text">Enter your current working maxes. Recommended loads calculate as a phase-appropriate % of these numbers, then adapt intra-session based on your logged RPE.</div></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveMaxes()">Save</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-readiness')">&larr; Back</button>
+  </div>
+</div>
+
+<!-- DAY ORDER -->
+<div id="screen-dayorder" class="screen">
+  <p class="section-label">Session order</p>
+  <div class="ai-box" style="margin-bottom:12px"><div class="ai-text">Reorder your training days to match your schedule. Day numbers update automatically. Move Conditioning anywhere — the label follows.</div></div>
+  <div id="day-order-list"></div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="saveDayOrder()">Save order</button>
+    <button class="btn btn-sm" onclick="showScreen('screen-readiness')">Cancel</button>
+    <button class="btn btn-sm" onclick="resetDayOrder()">Reset</button>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div id="screen-settings" class="screen">
+  <p class="section-label">Supabase connection</p>
+  <div class="card">
+    <div class="ai-text" style="margin-bottom:10px">Paste your Supabase project URL and anon key, then run the SQL below once.</div>
+    <input class="cfg-input" id="sb-url" placeholder="https://xxxx.supabase.co" oninput="saveSBConfig()">
+    <input class="cfg-input" id="sb-key" placeholder="eyJhbGci..." oninput="saveSBConfig()">
+    <div class="sb-status" style="margin-bottom:8px"><div class="sb-dot" id="sb-dot2"></div><span id="sb-status2">Not connected</span></div>
+    <button class="btn btn-sm" onclick="testSB()">Test connection</button>
+  </div>
+  <div class="card">
+    <div class="section-label" style="margin-bottom:6px">SQL — run once</div>
+    <pre style="background:var(--bg2);border-radius:var(--r-md);padding:10px;font-size:11px;color:var(--text2);overflow-x:auto;white-space:pre-wrap">create table if not exists soccer_sessions (
+  id uuid default gen_random_uuid() primary key,
+  created_at timestamptz default now(),
+  recovery_pct int, sleep_pct int, body_feel int, motivation int,
+  mode text, day_type text, week_num int,
+  session_rpe numeric, energy int, jump_in int, ai_debrief text
+);</pre>
+  </div>
+  <div class="btn-row"><button class="btn btn-sm" onclick="showScreen('screen-readiness')">&larr; Back</button></div>
+</div>
+
+</div><!-- /app -->
+<script>
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+var S = {
+  rec:72, slp:72, body:3, mot:3, mode:'full',
+  dayType:'acc', week:1,
+  dayOrder:['acc','lat','lin','vel','cond'],
+  sbUrl:'', sbKey:'', sbConnected:false,
+  history:[], lastRPE:7.5, lastEnergy:3, lastJump:22, lastDebrief:'',
+  maxes:{ trapbar:0, bsq:0, bench:0, blgsq:0 }
+};
+
+// Per-exercise intra-session load state
+var sessionLoads = {};
+
+// ═══════════════════════════════════════════════════════════
+// PHASE & PERIODIZATION
+// ═══════════════════════════════════════════════════════════
+function getPhase(week) {
+  var w = ((week - 1) % 9) + 1;
+  if (w <= 2) return 'accumulation';
+  if (w <= 5) return 'transmutation';
+  if (w <= 8) return 'realization';
+  return 'deload';
+}
+function getPhaseLabel(week) {
+  return {accumulation:'Accumulation',transmutation:'Transmutation',realization:'Realization',deload:'Deload'}[getPhase(week)];
+}
+
+function getStrengthPrescription(exKey, week, mode) {
+  var phase = getPhase(week);
+  var w = ((week - 1) % 9) + 1;
+  var p = {
+    accumulation: {
+      full:     { bench:{sets:5,reps:w===1?4:3,pct:w===1?.78:.82,tempo:'[5|1|X]',note:'Slow eccentric, pause, explosive up'},
+                  trapbar:{sets:5,reps:w===1?4:3,pct:w===1?.78:.82,tempo:'[3|1|X]',note:'Eccentric control, drive through floor'},
+                  blgsq:{sets:5,reps:w===1?5:4,pct:w===1?.75:.78,tempo:'[4|2|X]',note:'Slow lower, iso pause at bottom'} },
+      modified: { bench:{sets:4,reps:4,pct:.68,tempo:'[3|1|X]',note:'Cap RPE 7'},
+                  trapbar:{sets:4,reps:4,pct:.68,tempo:'[3|1|X]',note:'Cap RPE 7'},
+                  blgsq:{sets:3,reps:6,pct:.65,tempo:'[3|1|X]',note:'Cap RPE 7'} },
+      recovery: { bench:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'50% — technique only'},
+                  trapbar:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'50% — technique only'},
+                  blgsq:{sets:2,reps:8,pct:.45,tempo:'[2|1|1]',note:'Very light'} }
+    },
+    transmutation: {
+      full:     { bench:{sets:5,reps:w<=4?3:2,pct:w<=4?.82:.87,tempo:'[1|5|X]',note:'5 sec iso pause at sticking point'},
+                  trapbar:{sets:5,reps:w<=4?3:2,pct:w<=4?.82:.87,tempo:'[1|4|X]',note:'Iso pause at knee height'},
+                  blgsq:{sets:5,reps:w<=4?4:3,pct:w<=4?.80:.85,tempo:'[1|5|X]',note:'5 sec iso at parallel'} },
+      modified: { bench:{sets:4,reps:3,pct:.72,tempo:'[1|3|X]',note:'Cap RPE 7'},
+                  trapbar:{sets:4,reps:3,pct:.72,tempo:'[1|3|X]',note:'Cap RPE 7'},
+                  blgsq:{sets:3,reps:5,pct:.68,tempo:'[1|3|X]',note:'Cap RPE 7'} },
+      recovery: { bench:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'Deload'},
+                  trapbar:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'Deload'},
+                  blgsq:{sets:2,reps:8,pct:.45,tempo:'[1|1|1]',note:'Very light'} }
+    },
+    realization: {
+      full:     { bench:{sets:6,reps:w<=7?3:2,pct:w<=7?.85:.88,tempo:'[1|1|X]',note:'Max concentric intent',contrast:'After each set: 2 approach box jumps or broad jumps at max effort. 90 sec rest between pairs.'},
+                  trapbar:{sets:6,reps:w<=7?3:2,pct:w<=7?.85:.88,tempo:'[1|1|X]',note:'Contrast — pair with box jump',contrast:'After each heavy trap bar set: 1 max box jump. 90 sec rest. The heavy set potentiates CNS — the jump should feel lighter than normal.'},
+                  blgsq:{sets:5,reps:w<=7?4:3,pct:w<=7?.83:.86,tempo:'[1|1|X]',note:'Explosive concentric',contrast:'After each set: 1 single-leg broad jump each leg at max effort.'} },
+      modified: { bench:{sets:4,reps:3,pct:.75,tempo:'[1|1|X]',note:'Cap RPE 7 — still explosive'},
+                  trapbar:{sets:4,reps:3,pct:.75,tempo:'[1|1|X]',note:'Cap RPE 7'},
+                  blgsq:{sets:3,reps:5,pct:.72,tempo:'[1|1|X]',note:'Cap RPE 7'} },
+      recovery: { bench:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'Deload'},
+                  trapbar:{sets:3,reps:5,pct:.50,tempo:'[1|1|1]',note:'Deload'},
+                  blgsq:{sets:2,reps:8,pct:.45,tempo:'[1|1|1]',note:'Very light'} }
+    },
+    deload: {
+      full:     { bench:{sets:4,reps:5,pct:.50,tempo:'[1|1|1]',note:'50% — movement quality'},
+                  trapbar:{sets:4,reps:5,pct:.50,tempo:'[1|1|1]',note:'50%'},
+                  blgsq:{sets:3,reps:8,pct:.50,tempo:'[2|1|1]',note:'Light'} },
+      modified: { bench:{sets:3,reps:5,pct:.45,tempo:'[1|1|1]',note:'Very light'},
+                  trapbar:{sets:3,reps:5,pct:.45,tempo:'[1|1|1]',note:'Very light'},
+                  blgsq:{sets:2,reps:8,pct:.40,tempo:'[1|1|1]',note:'Very light'} },
+      recovery: { bench:{sets:2,reps:5,pct:.40,tempo:'[1|1|1]',note:'Minimal'},
+                  trapbar:{sets:2,reps:5,pct:.40,tempo:'[1|1|1]',note:'Minimal'},
+                  blgsq:{sets:2,reps:6,pct:.40,tempo:'[1|1|1]',note:'Minimal'} }
+    }
+  };
+  var modeMap = {bench_press:'bench',floor_press:'bench',trapbar_dl:'trapbar',blg_split_sq:'blgsq'};
+  var key = modeMap[exKey] || 'bench';
+  var modeData = p[phase] && p[phase][mode] ? p[phase][mode] : p[phase]['full'];
+  return modeData[key] || p.accumulation.full.bench;
+}
+
+function calcLoad(exKey, pct) {
+  var modeMap = {bench_press:'bench',floor_press:'bench',trapbar_dl:'trapbar',blg_split_sq:'blgsq'};
+  var k = modeMap[exKey];
+  if (!k || !S.maxes[k] || !pct) return 0;
+  return Math.round(S.maxes[k] * pct / 2.5) * 2.5;
+}
+
+function tempoExplain(tempo) {
+  var clean = tempo.replace(/[\[\]]/g,'');
+  var parts = clean.split('|');
+  if (parts.length !== 3) return '';
+  var labels = ['Eccentric (lower)','Isometric (pause)','Concentric (lift)'];
+  return parts.map(function(p,i){ return labels[i]+': '+(p==='X'?'explosive':p+' sec'); }).join(' · ');
+}
+
+// ═══════════════════════════════════════════════════════════
+// DATA — OTA WARM-UP
+// ═══════════════════════════════════════════════════════════
+var WARMUP_OTA_URL = 'https://movements.overtimeathletes.com/stretches-activation-2/dynamic/dynamic-warm-up/';
+var WARMUP = [
+  'High knee tuck — 10 yds','High knee run (lotta steps) — 10 yds',
+  'Hurdler stretch (heel to butt, push hip fwd) — 10 yds','Butt kick run — 10 yds',
+  'Straight leg march (kick to hand) — 10 yds','Lunge with arm reach — 10 yds',
+  'Reverse lunge — 10 yds','Lateral lunge (hips back) — both directions',
+  'Waiter bows (flat back) — 10 yds','10 bodyweight squats (hands behind head)',
+  'Low lateral shuffle — both directions','Karaoke quick step — both directions',
+  'Monster walk fwd/back (hip circle band) — 10 yds'
+];
+
+// ═══════════════════════════════════════════════════════════
+// DATA — FRC MOBILITY (Bergles / Kinstretch)
+// ═══════════════════════════════════════════════════════════
+var FRC_SHORT = [
+  {text:'Hip CARs — slow full-circle rotation, 3x each direction each side', badge:'CARs',
+   cue:'Femur traces largest possible circle. Trunk and opposite leg stay completely still. Everything under tension except the working joint.'},
+  {text:'Ankle CARs — 3x each direction each side', badge:'CARs',
+   cue:'Full dorsiflexion → plantar flexion → inversion → eversion. Key for sprint mechanics and landing resilience.'},
+  {text:'Thoracic rotation CARs — hands on head, 3x each side', badge:'CARs',
+   cue:'Isolate thoracic. Lumbar stays still. Reach for maximum rotation.'},
+  {text:'Hip 90/90 PAILs/RAILs — 2 min hold → PAILs 10 sec → RAILs 10 sec, each side', badge:'PAILs/RAILs',
+   cue:'PAILs: push floor-side knee into ground (contracting INTO stretch). RAILs: pull yourself deeper, opposing hip working. Ramp tension slowly to ~80% max. Never force.'},
+  {text:'Ankle dorsiflexion PAILs/RAILs — half-kneeling lunge, 90 sec → 2x cycles each side', badge:'PAILs/RAILs',
+   cue:'Heel flat, shin drives forward. PAILs: press heel into ground. RAILs: pull shin forward further. Highest carry-over FRC drill for sprinting and cutting.'}
+];
+
+var FRC_FULL = [
+  {text:'Hip CARs — 5x each direction each side. Slower than you think necessary.', badge:'CARs'},
+  {text:'Ankle CARs — 5x each direction each side', badge:'CARs'},
+  {text:'Thoracic rotation CARs — 5x each side', badge:'CARs'},
+  {text:'Shoulder CARs — arm traces largest possible circle, 3x each direction each side', badge:'CARs',
+   cue:'Keep scapula engaged. Circle should feel like it tests your limit in every direction.'},
+  {text:'Hip 90/90 PAILs/RAILs — 3 min passive hold → 3x PAILs/RAILs cycles, each side', badge:'PAILs/RAILs',
+   cue:'Full protocol: hold, breathe, ramp tension progressively. Rest 60 sec between sides.'},
+  {text:'Hip internal rotation PAILs/RAILs — seated IR stretch → 3x cycles each side', badge:'PAILs/RAILs',
+   cue:'Seated, shin perpendicular. Rotate thigh inward. PAILs = push shin outward, RAILs = pull deeper into IR.'},
+  {text:'Ankle dorsiflexion PAILs/RAILs — 3 min hold → 3x cycles each side', badge:'PAILs/RAILs'},
+  {text:'Couch stretch (hip flexor) PAILs/RAILs — 2 min → 2x cycles each side', badge:'PAILs/RAILs',
+   cue:'Rear shin against wall. PAILs = press rear shin backward into wall. RAILs = pull hip further into extension.'},
+  {text:'Loaded SL calf isometric hold — mid-range heel raise, hold 45-60 sec, 3x each side', badge:'Lower leg',
+   cue:'Mid-range (not top), knee soft, hip-loaded stance. Add weight same side as stance leg. Lower leg stiffness is a prerequisite for high-quality sprinting — Bergles.'},
+  {text:'Tibialis wall hold — dorsiflexed foot pressed against wall, 3x30 sec each side', badge:'Lower leg',
+   cue:'Anterolateral lower leg — undertrained in most athletes. Strengthens the braking side of the ankle for decel and cutting.'}
+];
+
+// ═══════════════════════════════════════════════════════════
+// DATA — EXERCISES
+// ═══════════════════════════════════════════════════════════
+// URLs: OTA movements library. Bad/404 URLs use YouTube search fallback.
+var YT = function(name){ return 'https://www.youtube.com/results?search_query='+encodeURIComponent(name+' exercise drill'); };
+
+var EX = {
+  // AGILITY — Acceleration
+  falling_starts:{name:'Falling starts',target:'4×10 yds',tags:['acc'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/acceleration/falling-starts/',
+    cue:'Lean until you MUST catch yourself. Forces golden position — forward shin angle, horizontal force production.'},
+  wall_starts:{name:'Wall starts',target:'4×5 sec',tags:['acc'],type:'agility',
+    url:YT('wall starts acceleration drill'),
+    cue:'Drive knee high and hip forward — feel the horizontal force. Arms pump opposite to legs.'},
+  two_pt_starts:{name:'2-point starts',target:'6×10 yds',tags:['acc'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/acceleration/2-point-start/',
+    cue:'First 3 steps — low angle, pushing back not up. Eyes stay forward.'},
+  band_piston_run:{name:'Band resisted piston run',target:'4×5 yds',tags:['acc'],type:'agility',
+    url:YT('band resisted acceleration piston run'),
+    cue:'Band forces horizontal lean. Drive knees, not heels. Short powerful ground contacts.'},
+  ball_drops:{name:'Ball drops (react sprint)',target:'8×1 (build to longest)',tags:['acc'],type:'agility',
+    url:YT('ball drop reaction sprint drill'),
+    cue:'React — first step wins. Drive horizontal out of reaction.'},
+  decel_series:{name:'Decel series (multi/2/1-step stop)',target:'2×20 yds each type',tags:['acc'],type:'agility',
+    url:'https://blog.overtimeathletes.com/deceleration-exercises-for-athletes-how-to-cut-harder-and-reduce-injury-risk/',
+    cue:'Own every landing position. Absorb through full ROM — soft landing = good decel = fast re-acceleration.'},
+  half_kneel_starts:{name:'Half-kneeling starts',target:'4×10 yds each side',tags:['acc'],type:'agility',
+    url:YT('half kneeling start sprint drill'),
+    cue:'Drive the rear knee through, create positive shin angle immediately.'},
+  // AGILITY — Lateral
+  lat_power_shuffle:{name:'Lateral power shuffle',target:'2×20 yds each',tags:['lat'],type:'agility',
+    url:'https://movements.overtimeathletes.com/agility/change-of-direction/lateral-shuffle/',
+    cue:'Stay wide and low. Push laterally, not vertically. Big step, quick recovery.'},
+  carioca_qstep:{name:'Carioca quick step',target:'2×10 yds each direction',tags:['lat'],type:'agility',
+    url:'https://movements.overtimeathletes.com/agility/change-of-direction/carioca/',
+    cue:'Push knee across — keep toes straight as long as possible. Hip drive is everything.'},
+  mirror_drill:{name:'Mirror drill',target:'4×5 sec',tags:['lat'],type:'agility',
+    url:YT('mirror drill reactive agility'),
+    cue:'Stay in athletic stance. React to first movement — not to fakes. Low and ready.'},
+  lat_shuffle_react:{name:'Lateral shuffle to react sprint',target:'4×1',tags:['lat'],type:'agility',
+    url:YT('lateral shuffle sprint reaction drill'),
+    cue:'Plant outside foot hard — redirect energy into sprint. Hip leads.'},
+  y_cut:{name:'Y-cut with reaction',target:'4×1',tags:['lat'],type:'agility',
+    url:YT('y cut agility drill'),
+    cue:'Penultimate step plants wide — next step redirects. Read the cue early.'},
+  jump_cut:{name:'Jump cut with reaction',target:'4×1',tags:['lat'],type:'agility',
+    url:YT('jump cut agility drill'),
+    cue:'Two-foot plant — absorb and redirect simultaneously.'},
+  half_arc_run:{name:'Half arc run',target:'4×1 each direction',tags:['lat'],type:'agility',
+    url:YT('half arc run agility drill'),
+    cue:'Inside foot leads the curve. Lean into the turn.'},
+  // AGILITY — Linear
+  two_pt_stop_go:{name:'2-point stop & go (off command)',target:'4×1',tags:['lin'],type:'agility',
+    url:YT('stop and go acceleration drill'),
+    cue:'Brake hard, own position, re-accelerate. First step out of the stop is the skill.'},
+  pro_shuttle:{name:'Pro shuttle (5-10-5)',target:'2×1 each direction',tags:['lin'],type:'agility',
+    url:'https://movements.overtimeathletes.com/agility/change-of-direction/pro-agility-shuttle/',
+    cue:'Plant outside foot at 5 yds — push horizontally, not a jump turn.'},
+  l_drill:{name:'L drill',target:'2×1 each direction',tags:['lin'],type:'agility',
+    url:'https://movements.overtimeathletes.com/agility/change-of-direction/l-drill/',
+    cue:'Round the cone tightly — inside foot plants, hip drives direction.'},
+  lat_shuffle_ball_drops:{name:'Lateral shuffle ball drops',target:'8×1',tags:['lin','lat'],type:'agility',
+    url:YT('lateral shuffle ball drop reaction drill'),
+    cue:'React, plant, catch. Lateral shuffle keeps hips loaded and ready.'},
+  backpedal_ball_drops:{name:'Back pedal ball drops',target:'8×1',tags:['lin'],type:'agility',
+    url:YT('backpedal ball drop reaction drill'),
+    cue:'Stay on balls of feet. Quick to react and turn. Eyes forward.'},
+  figure_8_drill:{name:'Figure-8 drill',target:'2×1 each direction',tags:['lin','lat'],type:'agility',
+    url:YT('figure 8 agility cone drill'),
+    cue:'Sharp entry and exit — decel into each curve, accelerate out.'},
+  // AGILITY — Max Velocity
+  high_knee_run:{name:'High knee run',target:'2×10 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/max-velocity/high-knee-run/',
+    cue:'Cycle — not punch. Foot dorsiflexed, cycles through hip. Stay tall.'},
+  butt_kick_run:{name:'Butt kick run',target:'2×10 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/max-velocity/butt-kick/',
+    cue:'Hamstring pulls heel to butt — quick off the ground.'},
+  a_skips:{name:'A skips',target:'2×20 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/max-velocity/a-skip/',
+    cue:'Punch knee up, paw down. Opposite arm drives. Land on ball of foot.'},
+  b_skips:{name:'B skips',target:'2×20 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/max-velocity/b-skip/',
+    cue:'Full leg cycle — paw the ground down and back.'},
+  sl_high_knee:{name:'Single-leg high knee run',target:'2×10 yds each',tags:['vel'],type:'agility',
+    url:YT('single leg high knee run speed drill'),
+    cue:'One leg drives — develops asymmetric power and balance at speed.'},
+  sl_cycling:{name:'Single-leg cycling',target:'2×10 yds each',tags:['vel'],type:'agility',
+    url:YT('single leg cycling speed drill'),
+    cue:'Full hip extension, full cycle. Keep head still. Arms drive.'},
+  str_leg_bounds:{name:'Straight-leg bounds',target:'2×20 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/power/horizontal/straight-leg-bounds/',
+    cue:'Stiff ankle, paw the ground. Cover distance with minimal ground contact.'},
+  alternating_bounds:{name:'Alternating bounds',target:'2×20 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/power/horizontal/alternating-bounds/',
+    cue:'Drive knee through — reach for distance on each bound.'},
+  step_over_runs:{name:'Step-over runs',target:'4×50 yds',tags:['vel'],type:'agility',
+    url:YT('step over run speed drill'),
+    cue:'High knee, step over, claw down. Good mechanics at speed.'},
+  build_ups:{name:'Build-ups (60%→max)',target:'4×50 yds',tags:['vel'],type:'agility',
+    url:'https://movements.overtimeathletes.com/speed/max-velocity/build-ups/',
+    cue:'Gradual acceleration — hit max velocity at 35-40 yds, hold for 10.'},
+  // PLYOMETRICS
+  pogo_jumps:{name:'Pogo jumps',target:'2×10 sec',tags:['cond'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/pogo-jumps/',
+    cue:'Ankle joint only. Minimal knee bend. Rapid ground contact — like a bouncing ball.',
+    upgrade:null},
+  squat_jumps:{name:'Squat jumps',target:'4×8',tags:['vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/squat-jump/',
+    cue:'Full squat, explosive extension. Stick landing soft.',
+    upgrade:null},
+  broad_jump:{name:'Broad jump',target:'4×3',tags:['acc'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/horizontal/broad-jump/',
+    cue:'Drive horizontally — swing arms, load hips, cover distance.',
+    upgrade:{name:'Band-resisted broad jumps',desc:'Light band anchored behind hips. Slight backward pull forces better landing balance and develops horizontal power with added challenge. 4×3.',prereq:'Broad jump distance is consistent and landings stable.',url:'https://blog.overtimeathletes.com/resisted-broad-jumps-for-lower-body-power/'}},
+  sl_broad_jump:{name:'Single-leg broad jump',target:'4×3 each leg',tags:['acc'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-broad-jump/',
+    cue:'Load through hip, drive knee — pure horizontal force production.',
+    upgrade:{name:'SL double/triple broad jump',desc:'Land and immediately reload for a second (or third) jump without stopping. Develops rate of force development — reload and explode. 4×2 sequences.',prereq:'Single broad jump is easy and distance is consistent.',url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-broad-jump/'}},
+  sl_triple_jump:{name:'Single-leg triple jump',target:'4×1 each leg',tags:['acc','vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/horizontal/single-leg-triple-jump/',
+    cue:'Short ground contacts — reload and explode each landing.',
+    upgrade:{name:'SL triple jump from low box',desc:'Start on 6-8" box, step off and execute triple jump immediately. Extra initial velocity into first contact challenges reactive strength beyond flat-ground version.',prereq:'Flat-ground SL triple jump is dialed — consistent distance and landing control.',url:YT('single leg triple jump plyometric')}},
+  box_jump:{name:'Box jump',target:'6×1',tags:['vel','acc'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/box-jump/',
+    cue:'Swing arms, extend fully, land soft on box. Step down — do not jump down.',
+    upgrade:{name:'Continuous hurdle hops',desc:'Set 3-4 hurdles at hip height. Bounce over consecutively with minimal ground contact. Develops ankle stiffness and tendon elasticity at speed.',prereq:'Box jumps feel easy and ground contact is quick and quiet.',url:YT('continuous hurdle hops plyometric')}},
+  approach_box_jump:{name:'Approach box jump',target:'6×2',tags:['vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/approach-box-jump/',
+    cue:'2-3 step approach, load, explode. Use momentum.',upgrade:null},
+  seated_box_jump:{name:'Seated box jump (no CMJ)',target:'8×1',tags:['acc'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/seated-box-jump/',
+    cue:'No stretch reflex — pure concentric power. Sit, pause briefly, explode.',upgrade:null},
+  sl_box_jump:{name:'Single-leg box jump (land 2)',target:'4×1 each leg',tags:['vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/single-leg-box-jump/',
+    cue:'Drive off one foot, land controlled on both. Track knee over toe.',upgrade:null},
+  half_kneel_box_jump:{name:'Half-kneeling box jump',target:'4×1 each side',tags:['acc'],type:'plyo',
+    url:YT('half kneeling box jump'),
+    cue:'Starting strength from dead position — drive through hip extension. No momentum.',upgrade:null},
+  snap_downs:{name:'Snap downs',target:'8×1',tags:['acc'],type:'plyo',
+    url:YT('snap down plyometric landing drill'),
+    cue:'Jump, snap feet down fast, absorb hard. Own the landing position completely.',
+    upgrade:{name:'High altitude drops (Bergles)',desc:'Drop from significantly elevated height (24-36"). Hold one leg up, drive both feet down simultaneously before contact. Uses crossed-extensor reflex — massive eccentric impulse develops lower leg stiffness and elastic spring quality.',prereq:'Standard snap downs feel controlled and landing is always stable.',url:'https://www.tiktok.com/@joeybergles/video/7180516758015708462'}},
+  depth_drops:{name:'Depth drops',target:'8×1',tags:['acc'],type:'plyo',
+    url:YT('depth drop plyometric landing'),
+    cue:'Step off, land and absorb — hips loaded, knees tracking toes. Own position.',
+    upgrade:{name:'Altitude drop leg to depth jump',desc:'Hold one leg up, step off elevated box, snap both feet down, immediately rebound into max jump. Less time on ground = more elastic power. Advanced — earn this with perfect standard depth drops.',prereq:'Depth drops are easy and ground contact is minimal.',url:'https://www.tiktok.com/@joeybergles/video/7180516758015708462'}},
+  skater_jumps:{name:'Skater jumps',target:'4×4 each direction',tags:['lat'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/horizontal/skater-jump/',
+    cue:'Lateral leap, stick landing, minimal wobble. Cover distance each rep.',
+    upgrade:{name:'Reactive skater jumps (visual cue)',desc:'Standard skater pattern but hold each landing until visual cue to redirect. Adds the reactive component — trains the read-react-redirect sequence specific to soccer cutting.',prereq:'Skater jump landings are solid and controlled.',url:'https://movements.overtimeathletes.com/power/horizontal/skater-jump/'}},
+  ascending_skaters:{name:'Ascending skater jumps',target:'2×10 yds each',tags:['lat'],type:'plyo',
+    url:YT('ascending skater jumps lateral bounds'),
+    cue:'Progressive lateral distance — each rep farther than the last.',upgrade:null},
+  lateral_bounds:{name:'Lateral alternating bounds',target:'4×20 yds',tags:['lat'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/horizontal/alternating-bounds/',
+    cue:'Maximum lateral distance per bound — stick each landing.',upgrade:null},
+  v_jumps:{name:'V jumps',target:'4×1',tags:['lat'],type:'plyo',
+    url:YT('v jump lateral plyometric'),
+    cue:'Explosive direction change in air — land and redirect.',upgrade:null},
+  russian_lunge:{name:'Russian lunge',target:'4×4 each side',tags:['lat','acc'],type:'plyo',
+    url:YT('russian lunge plyometric deceleration'),
+    cue:'Jump into lunge, lock hips instantly — isometric stabilization at landing.',
+    upgrade:{name:'Russian lunge to sprint',desc:'Perform Russian lunge, immediately sprint out of the landing position on the final rep. Couples deceleration-absorption with re-acceleration — exactly the soccer cut pattern.',prereq:'Russian lunges are stable and consistent — hip lock feels natural.',url:YT('russian lunge to sprint soccer drill')}},
+  russian_speed_lunge:{name:'Russian speed lunge',target:'4×4 each side',tags:['lat','acc'],type:'plyo',
+    url:YT('russian speed lunge plyometric'),
+    cue:'Quick hip switches at same level — do not rise between switches.',upgrade:null},
+  blg_squat_jump:{name:'Bulgarian split squat jump',target:'4×4 each side',tags:['acc','vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/bulgarian-split-squat-jump/',
+    cue:'Full range, explosive. Rear foot elevated — hip loaded. Land controlled.',
+    upgrade:{name:'BSQ jump to single-leg stick',desc:'Max effort jump, land on SAME leg, stick for 3 sec. Isolates the unilateral landing — eccentric + isometric absorb. Extremely high transfer to soccer.',prereq:'BSQ jumps feel explosive and controlled.',url:'https://movements.overtimeathletes.com/power/vertical/bulgarian-split-squat-jump/'}},
+  sprinter_step_up:{name:'Sprinter step-up launch',target:'8×1 each side',tags:['acc'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/vertical/sprinter-step-up/',
+    cue:'Drive knee through ceiling — vertical propulsion from one leg.',upgrade:null},
+  decel_step_up:{name:'Decel sprinter step-up',target:'4×4 each side',tags:['acc','lat'],type:'plyo',
+    url:YT('deceleration sprinter step up'),
+    cue:'Eccentric control on way down. Own position at bottom.',upgrade:null},
+  sl_snap_down:{name:'Single-leg snap down',target:'4×1 each leg',tags:['acc'],type:'plyo',
+    url:YT('single leg snap down landing drill'),
+    cue:'Jump forward, land one foot, absorb completely. Hip and ankle control.',upgrade:null},
+  mb_slam:{name:'Med ball slam',target:'4×6',tags:['vel'],type:'plyo',
+    url:'https://movements.overtimeathletes.com/power/upper-body/med-ball-slam/',
+    cue:'Full extension overhead, violent slam — reset fast. Total body power.',upgrade:null},
+  mb_rotational_slam:{name:'Rotational med ball slam',target:'4×5 each side',tags:['lat'],type:'plyo',
+    url:YT('rotational med ball slam'),
+    cue:'Rotate and slam — hip drives the rotation, shoulders follow.',upgrade:null},
+  // STRENGTH
+  trapbar_dl:{name:'Trap bar deadlift',muscle:'posterior chain',tags:['str','vel'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/lower-body/trap-bar-deadlift/',
+    cue:'Hips back, chest tall, drive floor away. Hip extension finishes the lift.',
+    swaps:['Romanian deadlift (lower back — reduce ROM)','Hex bar high handle (knee issue)','BB rack pull from knee (upper back focus)','DB sumo deadlift (no barbell)']},
+  blg_split_sq:{name:'Bulgarian split squat',muscle:'quad/glute unilateral',tags:['str','acc'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/lower-body/bulgarian-split-squat/',
+    cue:'Front shin vertical, drive through heel. Rear foot is just a kickstand.',
+    swaps:['DB reverse lunge elevated (less stability demand)','Step-ups (knee issue)','Single-leg press (equipment sub)','Goblet squat (bilateral fallback)']},
+  bench_press:{name:'Bench press',muscle:'push',tags:['str'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/upper-body/bench-press/',
+    cue:'Scapulae retracted, bar to sternum, drive through chest.',
+    swaps:['DB bench press (no barbell)','Floor press (shoulder issue)','Larsen press (anterior shoulder sensitivity)','Incline DB press (no flat bench)']},
+  floor_press:{name:'Floor press',muscle:'push',tags:['str'],type:'strength',
+    url:YT('floor press barbell'),
+    cue:'Upper arm hits floor between reps. Dead stop — pure concentric. More tricep than bench.',
+    swaps:['Bench press (standard)','DB floor press (no barbell)']},
+  nordic_curl:{name:'Nordic hamstring curl',muscle:'hamstring eccentric',tags:['str','acc'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/lower-body/nordic-hamstring-curl/',
+    cue:'Slow controlled descent — as long as you can resist. Use hands to push back up.',
+    swaps:['Slider leg curl (no partner)','Band SL hamstring curl','Leg curl machine','GHR machine']},
+  single_leg_hip_thrust:{name:'Single-leg hip thrust',muscle:'glute',tags:['str','acc'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/lower-body/single-leg-hip-thrust/',
+    cue:'Drive through heel, full hip extension at top. No lumbar hyperextension.',
+    swaps:['Bilateral barbell hip thrust','Glute bridge SL bodyweight','Cable pull-through','KB swing']},
+  pullup:{name:'Pull-ups',muscle:'back pull',tags:['str'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/upper-body/pull-up/',
+    cue:'Dead hang start, scapulae depress first, chin clears bar.',
+    swaps:['Band-assisted pull-ups','Lat pulldown','Single-arm row','TRX row']},
+  single_arm_row:{name:'Single-arm DB row',muscle:'back unilateral',tags:['str'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/upper-body/single-arm-row/',
+    cue:'Pull elbow to hip — not up. Slight rotation at top.',
+    swaps:['Cable single-arm row','Incline chest-supported row','Barbell row','Band row']},
+  goblet_lat_lunge:{name:'Goblet lateral lunge',muscle:'hip abductor',tags:['str','lat'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/lower-body/lateral-lunge/',
+    cue:'Big step out, hips back — not knees forward. Feel adductor load.',
+    swaps:['Lateral band walk','Sumo goblet squat','Side step-up']},
+  pallof_press:{name:'Pallof press',muscle:'anti-rotation core',tags:['str'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/core/pallof-press/',
+    cue:'Brace core, extend arms, resist rotation. Core fights the cable.',
+    swaps:['Band Pallof press','Half-kneeling cable chop','Swiss ball stir the pot']},
+  cable_woodchop:{name:'Cable woodchop',muscle:'rotational core',tags:['str','lat'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/core/cable-woodchop/',
+    cue:'Hip rotation leads — shoulders follow. Keep arms relatively straight.',
+    swaps:['Band woodchop','Med ball rotational slam','Landmine rotation']},
+  ab_wheel:{name:'Ab wheel rollout',muscle:'anti-extension core',tags:['str'],type:'strength',
+    url:'https://movements.overtimeathletes.com/strength/core/ab-wheel/',
+    cue:'Neutral spine — do not let hips sag. Control the way out as much as the way back.',
+    swaps:['TRX fallout','Dead bug','Hollow body hold']}
+};
+
+// ═══════════════════════════════════════════════════════════
+// DATA — SESSION PROGRAMS
+// ═══════════════════════════════════════════════════════════
+var SESSIONS = {
+  full:{
+    acc:{agility:['falling_starts','band_piston_run','two_pt_starts','ball_drops','decel_series'],
+         plyo:['snap_downs','broad_jump','half_kneel_box_jump','sprinter_step_up'],
+         strength:['bench_press'],build:['single_arm_row','pullup','ab_wheel']},
+    lat:{agility:['lat_power_shuffle','carioca_qstep','mirror_drill','lat_shuffle_react','y_cut','jump_cut'],
+         plyo:['v_jumps','skater_jumps','ascending_skaters','russian_lunge','russian_speed_lunge'],
+         strength:['blg_split_sq'],build:['goblet_lat_lunge','nordic_curl','cable_woodchop']},
+    lin:{agility:['two_pt_stop_go','pro_shuttle','l_drill','lat_shuffle_ball_drops','backpedal_ball_drops','figure_8_drill'],
+         plyo:['lateral_bounds','sl_snap_down','blg_squat_jump','russian_lunge'],
+         strength:['bench_press'],build:['single_arm_row','pullup','pallof_press']},
+    vel:{agility:['high_knee_run','butt_kick_run','a_skips','b_skips','sl_high_knee','sl_cycling','str_leg_bounds','alternating_bounds','step_over_runs','build_ups'],
+         plyo:['sl_broad_jump','sl_triple_jump','box_jump'],
+         strength:['trapbar_dl'],build:['blg_split_sq','goblet_lat_lunge','single_leg_hip_thrust']},
+    cond:{protocols:[
+      {name:'Assault bike — tabata',desc:'8 rounds: 20 sec all-out / 10 sec rest. 90-100% max output each interval.',rpe:9,tags:['cond']},
+      {name:'Curved treadmill sprint intervals',desc:'6×30 sec sprint / 90 sec walk. No motor — your legs drive it.',rpe:8,tags:['cond','acc']},
+      {name:'Rower — 500m repeats',desc:'4×500m, rest = work time ×1.5. Consistent splits — not faster first, dying last.',rpe:8,tags:['cond']},
+      {name:'SkiErg — 1 min on / 2 min off',desc:'5 rounds at 85-90% max effort.',rpe:8,tags:['cond']},
+      {name:'Basketball court repeat sprints',desc:'8×full court sprint / walk back.',rpe:9,tags:['cond','acc']},
+      {name:'Assault bike + court sprint combo',desc:'4 rounds: 30s bike sprint + immediately 1 full court sprint.',rpe:9,tags:['cond','acc']}
+    ]}
+  },
+  modified:{
+    acc:{agility:['two_pt_starts','wall_starts','decel_series'],plyo:['snap_downs','seated_box_jump'],strength:['bench_press'],build:['single_arm_row','ab_wheel']},
+    lat:{agility:['lat_power_shuffle','mirror_drill','y_cut'],plyo:['skater_jumps','v_jumps'],strength:['blg_split_sq'],build:['nordic_curl','cable_woodchop']},
+    lin:{agility:['pro_shuttle','figure_8_drill','lat_shuffle_ball_drops'],plyo:['lateral_bounds'],strength:['bench_press'],build:['single_arm_row','pallof_press']},
+    vel:{agility:['a_skips','b_skips','alternating_bounds','build_ups'],plyo:['sl_broad_jump','box_jump'],strength:['trapbar_dl'],build:['blg_split_sq','single_leg_hip_thrust']},
+    cond:{protocols:[{name:'Easy bike or court jog',desc:'20 min at RPE 5-6 — aerobic flush. HR 130-150.',rpe:5,tags:['cond']}]}
+  },
+  recovery:{
+    acc:{agility:['a_skips','b_skips'],plyo:['pogo_jumps'],strength:['bench_press'],build:['pallof_press']},
+    lat:{agility:[],plyo:['pogo_jumps','skater_jumps'],strength:['blg_split_sq'],build:['cable_woodchop']},
+    lin:{agility:[],plyo:[],strength:['bench_press'],build:['single_arm_row','pallof_press']},
+    vel:{agility:['a_skips','b_skips'],plyo:['pogo_jumps'],strength:['trapbar_dl'],build:['single_leg_hip_thrust']},
+    cond:{protocols:[{name:'Easy bike (HR < 130)',desc:'15-20 min light aerobic — recovery flush only.',rpe:4,tags:['cond']}]}
+  }
+};
+
+var MODE_INSIGHTS = {
+  full:{acc:'CNS is primed. Lead with acceleration — falling starts at full intent before fatigue. Plyo block next. Strength last with tempo work.',lat:'Lateral COD first while fresh. Mirror drill needs full cognitive engagement. Bulgarian split squats: eccentric control and iso pause.',lin:'Linear agility quality over quantity. Pro shuttle and L-drill are CNS-demanding — full recovery between reps.',vel:'Max velocity is skill work first — stay technical through build-ups. Trap bar contrast: heavy set → box jump. This is the session to chase speed.',cond:'Full conditioning capacity. Push repeat sprint intervals hard — RPE 8-9 on work, true recovery between sets.'},
+  modified:{acc:'Cap all efforts at 85%. Acceleration work stays but pull back intent. No max sprints. Strength cap RPE 7.',lat:'Lateral work preserved, volume cut. Mirror drill 2 rounds max.',lin:'Linear agility reduced. Pro shuttle stays, L-drill stays. 2 attempts max each direction.',vel:'Velocity drills at 85% — run build-ups but stop before true max. Trap bar at 70%.',cond:'Pull intensity back. Aerobic flush — HR 130-150 range. No all-out sprint intervals.'},
+  recovery:{acc:'Active recovery only. Light skip work for mechanics, very light lifting. 30 min max.',lat:'Pogo jumps and skater jumps at low intensity. Hip mobility focus.',lin:'Skip agility today. Light pulling and core work.',vel:'A/B skips for mechanics — not speed. Light trap bar, perfect form.',cond:'Easy bike at Zone 2 only. Recovery flush.'}
+};
+
+var DAY_TYPE_INFO = {
+  acc:{sub:'Acceleration',color:'acc'},
+  lat:{sub:'Lateral COD',color:'lat'},
+  lin:{sub:'Linear Agility',color:'lin'},
+  vel:{sub:'Max Velocity',color:'vel'},
+  cond:{sub:'Conditioning',color:'cond'}
+};
+
+var MAXES_CONFIG = [
+  {key:'trapbar',label:'Trap bar deadlift',placeholder:'e.g. 315'},
+  {key:'bsq',label:'Back / front squat',placeholder:'e.g. 225'},
+  {key:'bench',label:'Bench press',placeholder:'e.g. 185'},
+  {key:'blgsq',label:'Bulgarian split squat',placeholder:'e.g. 80 each'}
+];
+
+// ═══════════════════════════════════════════════════════════
+// STEPPER CONTROLS
+// ═══════════════════════════════════════════════════════════
+function stepVal(key, delta, min, max) {
+  S[key] = Math.min(max, Math.max(min, S[key] + delta));
+  renderStepperVal(key);
+  updateReadiness();
+}
+
+function renderStepperVal(key) {
+  var el = document.getElementById('sv-' + key);
+  if (!el) return;
+  var isPct = (key === 'rec' || key === 'slp');
+  el.innerHTML = S[key] + '<span class="stepper-unit">' + (isPct ? '%' : '/5') + '</span>';
+  // sync ring display
+  var ringEl = document.getElementById('val-' + key);
+  if (ringEl) ringEl.textContent = S[key] + (isPct ? '%' : '/5');
+}
+
+function editStepper(key, min, max) {
+  var el = document.getElementById('sv-' + key);
+  if (!el) return;
+  var isPct = (key === 'rec' || key === 'slp');
+  var inp = document.createElement('input');
+  inp.type = 'number';
+  inp.value = S[key];
+  inp.min = min; inp.max = max;
+  inp.style.cssText = 'width:100%;text-align:center;font-size:16px;font-weight:600;border:none;background:transparent;color:var(--text);outline:none;font-family:inherit;height:100%';
+  el.innerHTML = '';
+  el.appendChild(inp);
+  inp.focus(); inp.select();
+  function commit() {
+    var v = parseInt(inp.value);
+    if (!isNaN(v)) S[key] = Math.min(max, Math.max(min, v));
+    renderStepperVal(key);
+    updateReadiness();
+  }
+  inp.addEventListener('blur', commit);
+  inp.addEventListener('keydown', function(e){ if(e.key==='Enter'){commit();inp.blur();} });
+}
+
+// ═══════════════════════════════════════════════════════════
+// RINGS & READINESS
+// ═══════════════════════════════════════════════════════════
+function setRing(id, pct, color) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.setAttribute('stroke-dashoffset', Math.round(163 - (pct/100)*163));
+  el.setAttribute('stroke', color);
+}
+
+function computeMode() {
+  var c = (S.rec*0.4) + (S.slp*0.25) + (S.body/5*17.5) + (S.mot/5*17.5);
+  return c >= 65 ? 'full' : c >= 42 ? 'modified' : 'recovery';
+}
+
+function updateReadiness() {
+  setRing('ring-rec', S.rec, S.rec>=70?'#1D9E75':S.rec>=45?'#EF9F27':'#E24B4A');
+  setRing('ring-slp', S.slp, S.slp>=70?'#534AB7':S.slp>=45?'#EF9F27':'#E24B4A');
+  S.mode = computeMode();
+  var badge = document.getElementById('mode-badge');
+  if (badge) {
+    badge.className = 'mode-badge ' + {full:'mode-full',modified:'mode-mod',recovery:'mode-rec'}[S.mode];
+    badge.textContent = {full:'Full training',modified:'Modified training',recovery:'Recovery day'}[S.mode];
+  }
+  var detail = document.getElementById('mode-detail');
+  if (detail) detail.textContent = {full:'All blocks · Full volume · Full intent',modified:'Volume –25% · Max RPE 7 · 85% effort',recovery:'Light movement · No max effort'}[S.mode];
+  var ai = document.getElementById('readiness-ai');
+  if (ai) ai.textContent = (MODE_INSIGHTS[S.mode]||{})[S.dayType] || '';
+}
+
+// ═══════════════════════════════════════════════════════════
+// WEEK & DAY ORDER
+// ═══════════════════════════════════════════════════════════
+function renderWeekBar() {
+  var wd = document.getElementById('week-display');
+  var pd = document.getElementById('phase-display');
+  if (wd) wd.textContent = 'Week ' + S.week;
+  if (pd) pd.textContent = getPhaseLabel(S.week);
+}
+
+function changeWeek(d) {
+  S.week = Math.max(1, S.week + d);
+  localStorage.setItem('soccer_week', S.week);
+  renderWeekBar();
+}
+
+function loadDayOrder() {
+  try {
+    var saved = JSON.parse(localStorage.getItem('soccer_day_order') || 'null');
+    if (Array.isArray(saved) && saved.length === 5) return saved;
+  } catch(e) {}
+  return ['acc','lat','lin','vel','cond'];
+}
+
+function saveDayOrder() {
+  localStorage.setItem('soccer_day_order', JSON.stringify(S.dayOrder));
+  renderDaySelector();
+  showScreen('screen-readiness');
+}
+
+function resetDayOrder() {
+  S.dayOrder = ['acc','lat','lin','vel','cond'];
+  renderDayOrderList();
+}
+
+function moveDayItem(idx, dir) {
+  var ni = idx + dir;
+  if (ni < 0 || ni >= S.dayOrder.length) return;
+  var tmp = S.dayOrder[idx];
+  S.dayOrder[idx] = S.dayOrder[ni];
+  S.dayOrder[ni] = tmp;
+  renderDayOrderList();
+}
+
+function renderDayOrderList() {
+  var el = document.getElementById('day-order-list');
+  if (!el) return;
+  var html = '';
+  for (var i = 0; i < S.dayOrder.length; i++) {
+    var k = S.dayOrder[i];
+    var info = DAY_TYPE_INFO[k] || {sub:k,color:'acc'};
+    var upDisabled = i===0 ? ' style="opacity:.3;cursor:default"' : '';
+    var dnDisabled = i===S.dayOrder.length-1 ? ' style="opacity:.3;cursor:default"' : '';
+    var ii = i; // closure
+    html += '<div class="day-order-item">' +
+      '<div style="flex:1"><span class="tag tag-'+info.color+'" style="margin:0 6px 0 0">Day '+(i+1)+'</span>' +
+      '<span style="font-size:13px;font-weight:500;color:var(--text)">'+info.sub+'</span></div>' +
+      '<div style="display:flex;gap:6px">' +
+      '<button class="day-order-btn"'+upDisabled+' onclick="moveDayItem('+i+',-1)">&#8679;</button>' +
+      '<button class="day-order-btn"'+dnDisabled+' onclick="moveDayItem('+i+',1)">&#8681;</button>' +
+      '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+function renderDaySelector() {
+  var el = document.getElementById('day-selector');
+  if (!el) return;
+  var html = '';
+  for (var i = 0; i < S.dayOrder.length; i++) {
+    var k = S.dayOrder[i];
+    var info = DAY_TYPE_INFO[k] || {sub:k};
+    var active = S.dayType === k ? ' active' : '';
+    html += '<button class="day-btn'+active+'" onclick="selectDay(\''+k+'\')"><div>Day '+(i+1)+'</div><div class="day-sub">'+info.sub+'</div></button>';
+  }
+  el.innerHTML = html;
+}
+
+function selectDay(d) {
+  S.dayType = d;
+  renderDaySelector();
+  updateReadiness();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BUILD WORKOUT
+// ═══════════════════════════════════════════════════════════
+function goToWorkout() {
+  buildWorkout();
+  showScreen('screen-workout');
+  var info = DAY_TYPE_INFO[S.dayType] || {sub:S.dayType};
+  var hdr = document.getElementById('workout-header');
+  if (hdr) hdr.textContent = 'Week '+S.week+' \u00b7 '+getPhaseLabel(S.week)+' \u00b7 '+info.sub+' day';
+  fetchWorkoutAI();
+}
+
+function videoLink(url, name) {
+  if (!url) return '';
+  return '<a href="'+url+'" target="_blank" class="video-link">&#9654; Watch demo</a>';
+}
+
+function tagsHtml(tags) {
+  if (!tags) return '';
+  var h = '';
+  for (var i=0;i<tags.length;i++) h += '<span class="tag tag-'+tags[i]+'">'+tags[i]+'</span>';
+  return h;
+}
+
+// ── INTRA-SESSION LOAD ADAPTATION ──
+function initSessionLoad(exId, sets, baseRec) {
+  sessionLoads[exId] = {baseRec:baseRec||0, sets:sets, recs:[], note:''};
+  for (var i=0;i<sets;i++) sessionLoads[exId].recs.push(baseRec||0);
+  refreshRecCells(exId);
+}
+
+function onSetDone(exId, setIdx, targetRPE) {
+  var sl = sessionLoads[exId];
+  if (!sl) return;
+  var loadEl = document.getElementById(exId+'_l'+(setIdx+1));
+  var rpeEl = document.getElementById(exId+'_e'+(setIdx+1));
+  var repsEl = document.getElementById(exId+'_r'+(setIdx+1));
+  var actualLoad = loadEl ? (parseFloat(loadEl.value)||0) : 0;
+  var actualRPE = rpeEl ? (parseFloat(rpeEl.value)||targetRPE) : targetRPE;
+  var actualReps = repsEl ? (parseInt(repsEl.value)||3) : 3;
+  if (!actualLoad) return;
+  var gap = actualRPE - targetRPE;
+  var delta = 0;
+  if (gap <= -2) delta = 10;
+  else if (gap <= -1) delta = 5;
+  else if (gap < -0.5) delta = 2.5;
+  else if (Math.abs(gap) <= 0.5) delta = 0;
+  else if (gap < 1) delta = -2.5;
+  else if (gap < 1.5) delta = -5;
+  else delta = -10;
+  var nextRec = Math.round((actualLoad + delta) / 2.5) * 2.5;
+  for (var i = setIdx+1; i < sl.sets; i++) sl.recs[i] = nextRec;
+  if (delta > 0) sl.note = 'Feeling strong \u2014 bumping next sets +'+Math.abs(delta)+' lbs';
+  else if (delta < 0) sl.note = 'Getting heavy \u2014 dropping next sets -'+Math.abs(delta)+' lbs'+(gap>=1.5?' \u2014 consider stopping here':'');
+  else sl.note = 'Spot on RPE \u2014 keep same load';
+  refreshRecCells(exId);
+}
+
+function refreshRecCells(exId) {
+  var sl = sessionLoads[exId];
+  if (!sl) return;
+  for (var i=0;i<sl.sets;i++) {
+    var el = document.getElementById(exId+'_rec'+(i+1));
+    if (!el) continue;
+    var v = sl.recs[i];
+    el.textContent = v ? Math.round(v)+' lbs' : '\u2014';
+    el.className = 'rec-cell';
+  }
+  var noteEl = document.getElementById(exId+'_note');
+  if (noteEl && sl.note) { noteEl.textContent = sl.note; noteEl.style.display='block'; }
+}
+
+function onLoadInput(exId, setIdx, totalSets, baseRec) {
+  if (!sessionLoads[exId]) initSessionLoad(exId, totalSets, baseRec);
+  var sl = sessionLoads[exId];
+  if (setIdx === 0 && sl.recs[1] === (sl.baseRec||0)) {
+    // Propagate first-set actual load to remaining recs if not yet adapted
+    var loadEl = document.getElementById(exId+'_l1');
+    if (loadEl && loadEl.value) {
+      var v = parseFloat(loadEl.value);
+      if (v > 0) { for (var i=1;i<totalSets;i++) sl.recs[i] = v; refreshRecCells(exId); }
+    }
+  }
+}
+
+// ── SET ROW BUILDERS (string concat — no nested template literals) ──
+function rpeOptsHTML(vals, target) {
+  var h = '';
+  for (var i=0;i<vals.length;i++) h += '<option'+(vals[i]===target?' selected':'')+'>'+vals[i]+'</option>';
+  return h;
+}
+
+function buildSetRows(exId, sets, defaultReps, baseRec, targetRPE, rpeVals) {
+  var recStr = baseRec ? Math.round(baseRec)+' lbs' : '\u2014';
+  var h = '<div class="set-grid" style="font-size:10px;color:var(--text3)">' +
+    '<span></span><span>Reps</span><span>Actual (lbs)</span>' +
+    '<span style="text-align:center;color:var(--green)">Rec</span>' +
+    '<span>RPE</span><span></span></div>';
+  for (var s=1;s<=sets;s++) {
+    var si = s-1;
+    h += '<div class="set-grid">' +
+      '<span class="set-label">S'+s+'</span>' +
+      '<input class="set-input" type="number" value="'+defaultReps+'" placeholder="'+defaultReps+'" id="'+exId+'_r'+s+'">' +
+      '<input class="set-input" type="number" placeholder="lbs" id="'+exId+'_l'+s+'" oninput="onLoadInput(\''+exId+'\','+si+','+sets+','+(baseRec||0)+')">' +
+      '<div class="rec-cell" id="'+exId+'_rec'+s+'">'+recStr+'</div>' +
+      '<select class="rpe-sel" id="'+exId+'_e'+s+'">'+rpeOptsHTML(rpeVals,targetRPE)+'</select>' +
+      '<div class="set-done" id="'+exId+'_done'+s+'" onclick="toggleSetDone(\''+exId+'\','+si+','+targetRPE+',this)"></div>' +
+      '</div>';
+  }
+  h += '<div class="adapt-note" id="'+exId+'_note"></div>';
+  return h;
+}
+
+function toggleSetDone(exId, setIdx, targetRPE, el) {
+  el.classList.toggle('done');
+  el.textContent = el.classList.contains('done') ? '\u2713' : '';
+  if (el.classList.contains('done')) onSetDone(exId, setIdx, targetRPE);
+}
+
+// ── FRC HTML BUILDERS ──
+function buildFRCItems(items, prefix) {
+  var h = '';
+  for (var i=0;i<items.length;i++) {
+    var f = items[i];
+    var cueHtml = f.cue ? '<div style="font-size:11px;color:var(--text3);margin-top:2px;font-style:italic">'+f.cue+'</div>' : '';
+    h += '<div class="frc-item">' +
+      '<input type="checkbox" class="frc-cb" id="'+prefix+i+'">' +
+      '<label for="'+prefix+i+'" style="cursor:pointer;flex:1">'+f.text+cueHtml+'</label>' +
+      '<span class="frc-badge">'+f.badge+'</span>' +
+      '</div>';
+  }
+  return h;
+}
+
+function toggleBlock(contentId, btnId, showText, hideText) {
+  var el = document.getElementById(contentId);
+  var btn = document.getElementById(btnId);
+  if (!el || !btn) return;
+  var showing = el.style.display !== 'none';
+  el.style.display = showing ? 'none' : 'block';
+  btn.textContent = showing ? showText : hideText;
+}
+
+function toggleUpgrade(id) {
+  var el = document.getElementById(id);
+  if (el) el.classList.toggle('visible');
+}
+
+// ── CONDITIONING SELECT ──
+function toggleCondSelect(i) {
+  var body = document.getElementById('cd-'+i);
+  var btn = document.getElementById('cds-'+i);
+  if (!body || !btn) return;
+  var open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? 'Select' : 'Selected \u2713';
+  btn.style.background = open ? '' : 'var(--green)';
+  btn.style.color = open ? '' : '#fff';
+  btn.style.borderColor = open ? '' : 'var(--green)';
+}
+
+function stepCondVal(id, delta, min, max) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  var v = Math.min(max, Math.max(min, Math.round((parseFloat(el.textContent)||min) + delta)*10)/10);
+  el.textContent = Math.round(v*10)/10;
+}
+
+// ── BUILD WORKOUT TABS ──
+function buildWorkout() {
+  sessionLoads = {};
+  var prog = SESSIONS[S.mode] && SESSIONS[S.mode][S.dayType] ? SESSIONS[S.mode][S.dayType] : SESSIONS.full[S.dayType];
+  var isCond = S.dayType === 'cond';
+  var tabs = isCond ? ['warmup','conditioning'] : ['warmup','agility','plyometrics','strength','build'];
+  var tabLabels = {warmup:'Warm-up',agility:'Agility',plyometrics:'Plyometrics',strength:'Strength',build:'Build/Trunk',conditioning:'Conditioning'};
+
+  var navHtml = '';
+  for (var ti=0;ti<tabs.length;ti++) {
+    navHtml += '<button class="nav-btn'+(ti===0?' active':'')+'" onclick="showTab(\''+tabs[ti]+'\',this)">'+tabLabels[tabs[ti]]+'</button>';
+  }
+  document.getElementById('workout-nav').innerHTML = navHtml;
+
+  var content = document.getElementById('workout-content');
+  content.innerHTML = '';
+
+  for (var ti=0;ti<tabs.length;ti++) {
+    var tab = tabs[ti];
+    var div = document.createElement('div');
+    div.id = 'tab-'+tab;
+    div.style.display = ti===0 ? 'block' : 'none';
+
+    if (tab === 'warmup') {
+      var wuHtml = '<p class="section-label">OTA dynamic warm-up — 8-10 min ' +
+        '<a href="'+WARMUP_OTA_URL+'" target="_blank" class="video-link" style="margin-left:6px;font-size:10px">&#9654; Watch full sequence</a></p>' +
+        '<div class="card">';
+      for (var wi=0;wi<WARMUP.length;wi++) {
+        wuHtml += '<div class="warmup-item"><input type="checkbox" class="warmup-cb" id="wu-'+wi+'"><label for="wu-'+wi+'" style="cursor:pointer;flex:1">'+WARMUP[wi]+'</label></div>';
+      }
+      wuHtml += '</div>';
+      // FRC short block
+      wuHtml += '<div class="frc-block">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+        '<div><div class="frc-title">FRC Mobility — optional, 8 min (after OTA, before plyos)</div>' +
+        '<div class="frc-sub">Bergles-derived: CARs + PAILs/RAILs. Builds active joint range and lower leg stiffness. Do after OTA warm-up, before your first speed or plyo rep.</div></div>' +
+        '<button class="btn btn-sm" id="frc-short-btn" onclick="toggleBlock(\'frc-short-content\',\'frc-short-btn\',\'Show\',\'Hide\')">Show</button></div>' +
+        '<div id="frc-short-content" style="display:none">'+buildFRCItems(FRC_SHORT,'frc-')+'</div></div>';
+      div.innerHTML = wuHtml;
+
+    } else if (tab === 'agility') {
+      var drills = prog.agility || [];
+      if (!drills.length) {
+        div.innerHTML = '<div class="ai-box"><div class="ai-text">No agility drills today — active recovery or light movement only.</div></div>';
+      } else {
+        var h = '<p class="section-label">Agility / Speed work</p>';
+        for (var di=0;di<drills.length;di++) {
+          var ex = EX[drills[di]]; if (!ex) continue;
+          var id = 'ag-'+di;
+          h += '<div class="ex-block">' +
+            '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
+            '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div></div>' +
+            '<div class="ex-meta">'+ex.target+'</div></div>' +
+            '<div class="ex-body" id="'+id+'" style="display:none">' +
+            '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+ex.cue+'</div>' +
+            videoLink(ex.url, ex.name) +
+            '<div class="speed-feedback" style="margin-top:8px">' +
+            '<div class="section-label" style="margin-bottom:4px">Feedback</div>' +
+            '<div class="slider-row"><label>Quality (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-q" oninput="document.getElementById(\''+id+'-ql\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-ql">3/5</span></div>' +
+            '<div class="slider-row"><label>Effort RPE</label><input type="range" min="5" max="10" step=".5" value="7.5" id="'+id+'-r" oninput="document.getElementById(\''+id+'-rl\').textContent=this.value"><span class="slider-val" id="'+id+'-rl">7.5</span></div>' +
+            '<textarea placeholder="Notes (feel, times, issues...)" style="background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:48px;margin-top:4px"></textarea>' +
+            '</div></div></div>';
+        }
+        div.innerHTML = h;
+      }
+
+    } else if (tab === 'plyometrics') {
+      var plys = prog.plyo || [];
+      if (!plys.length) {
+        div.innerHTML = '<div class="ai-box"><div class="ai-text">No plyometrics in recovery mode.</div></div>';
+      } else {
+        var h = '<p class="section-label">Plyometrics</p>';
+        for (var pi=0;pi<plys.length;pi++) {
+          var ex = EX[plys[pi]]; if (!ex) continue;
+          var id = 'pl-'+pi;
+          var upgHtml = '';
+          if (ex.upgrade) {
+            var upg = ex.upgrade;
+            upgHtml = '<div class="upgrade-pill" onclick="toggleUpgrade(\'upg-'+id+'\')">' +
+              '&#9889; Feeling strong? Try the upgrade</div>' +
+              '<div class="upgrade-block" id="upg-'+id+'">' +
+              '<div style="font-size:12px;font-weight:500;color:var(--amber);margin-bottom:4px">'+upg.name+'</div>' +
+              '<div style="font-size:12px;color:var(--text2);margin-bottom:4px">'+upg.desc+'</div>' +
+              '<div style="font-size:11px;color:var(--text3);font-style:italic;margin-bottom:4px">When to use: '+upg.prereq+'</div>' +
+              videoLink(upg.url, upg.name) + '</div>';
+          }
+          h += '<div class="ex-block">' +
+            '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
+            '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div></div>' +
+            '<div class="ex-meta">'+ex.target+'</div></div>' +
+            '<div class="ex-body" id="'+id+'" style="display:none">' +
+            '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+ex.cue+'</div>' +
+            videoLink(ex.url, ex.name) + upgHtml +
+            '<div class="speed-feedback" style="margin-top:8px">' +
+            '<div class="section-label" style="margin-bottom:4px">Feedback</div>' +
+            '<div class="slider-row"><label>Explosiveness (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-e" oninput="document.getElementById(\''+id+'-el\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-el">3/5</span></div>' +
+            '<div class="slider-row"><label>Landing quality (1-5)</label><input type="range" min="1" max="5" step="1" value="3" id="'+id+'-l" oninput="document.getElementById(\''+id+'-ll\').textContent=this.value+\'/5\'"><span class="slider-val" id="'+id+'-ll">3/5</span></div>' +
+            '<textarea placeholder="Notes (height, distance, feel...)" style="background:var(--bg);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:48px;margin-top:4px"></textarea>' +
+            '</div></div></div>';
+        }
+        div.innerHTML = h;
+      }
+
+    } else if (tab === 'strength') {
+      var strKeys = prog.strength || [];
+      var h = '<p class="section-label">Strength</p>';
+      for (var si=0;si<strKeys.length;si++) {
+        var ex = EX[strKeys[si]]; if (!ex) continue;
+        var pres = getStrengthPrescription(strKeys[si], S.week, S.mode);
+        var id = 'st-'+si;
+        var baseRec = calcLoad(strKeys[si], pres.pct);
+        var setRows = buildSetRows(id, pres.sets||5, pres.reps, baseRec, 8, [6,6.5,7,7.5,8,8.5,9,9.5,10]);
+        var loadNote = baseRec ? '<span style="color:var(--green)">~'+Math.round(baseRec)+' lbs ('+Math.round(pres.pct*100)+'%)</span>' : '';
+        var contrastHtml = pres.contrast ? '<div class="contrast-note">&#9889; Contrast pair: '+pres.contrast+'</div>' : '';
+        var swapHtml = '';
+        if (ex.swaps) {
+          swapHtml = '<div class="swap-section"><div class="section-label" style="margin-bottom:4px">Equipment / injury swaps:</div>';
+          for (var xi=0;xi<ex.swaps.length;xi++) swapHtml += '<div class="swap-item">'+ex.swaps[xi]+'</div>';
+          swapHtml += '</div>';
+        }
+        h += '<div class="ex-block">' +
+          '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
+          '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div>' +
+          '<div style="margin-top:4px"><span class="tempo-badge">'+pres.sets+'x'+pres.reps+' @ '+pres.tempo+'</span></div></div>' +
+          '<div class="ex-meta">'+pres.note+'<br>'+loadNote+'</div></div>' +
+          '<div class="ex-body" id="'+id+'" style="display:none">' +
+          '<div style="font-size:12px;color:var(--text2);margin-bottom:8px">' +
+          '<strong>Tempo '+pres.tempo+'</strong> — '+tempoExplain(pres.tempo)+'<br><br>'+ex.cue+'</div>' +
+          videoLink(ex.url, ex.name) +
+          '<div style="margin-top:10px">'+setRows+'</div>' +
+          contrastHtml + swapHtml + '</div></div>';
+        (function(eid, sets, rec){ setTimeout(function(){ initSessionLoad(eid, sets, rec); }, 20); })(id, pres.sets||5, baseRec);
+      }
+      div.innerHTML = h;
+
+    } else if (tab === 'build') {
+      var bldKeys = prog.build || [];
+      var h = '<p class="section-label">Build / Accessories / Trunk</p>';
+      for (var bi=0;bi<bldKeys.length;bi++) {
+        var ex = EX[bldKeys[bi]]; if (!ex) continue;
+        var id = 'bd-'+bi;
+        var setRows = buildSetRows(id, 3, 8, 0, 7, [5,6,6.5,7,7.5,8]);
+        var swapHtml = '';
+        if (ex.swaps) {
+          swapHtml = '<div class="swap-section"><div class="section-label" style="margin-bottom:4px">Swaps:</div>';
+          for (var xi=0;xi<Math.min(2,ex.swaps.length);xi++) swapHtml += '<div class="swap-item">'+ex.swaps[xi]+'</div>';
+          swapHtml += '</div>';
+        }
+        h += '<div class="ex-block">' +
+          '<div class="ex-header" onclick="toggleBlock(\''+id+'\',null,null,null)">' +
+          '<div><div class="ex-name">'+ex.name+'</div><div style="margin-top:3px">'+tagsHtml(ex.tags)+'</div></div>' +
+          '<div class="ex-meta">3x8 @RPE 7</div></div>' +
+          '<div class="ex-body" id="'+id+'" style="display:none">' +
+          '<div style="font-size:12px;color:var(--text2);margin-bottom:6px">'+ex.cue+'</div>' +
+          videoLink(ex.url, ex.name) +
+          '<div style="margin-top:10px">'+setRows+'</div>' + swapHtml + '</div></div>';
+        (function(eid){ setTimeout(function(){ initSessionLoad(eid, 3, 0); }, 20); })(id);
+      }
+      div.innerHTML = h;
+
+    } else if (tab === 'conditioning') {
+      var protos = prog.protocols || [];
+      var h = '<p class="section-label">Soccer conditioning — pick 1 or 2 protocols</p>' +
+        '<div class="ai-box" style="margin-bottom:12px"><div class="ai-text">Choose based on equipment available. One protocol done with full effort beats two done half-heartedly. On full readiness: bias toward assault bike or court sprints for soccer specificity.</div></div>';
+      for (var ci=0;ci<protos.length;ci++) {
+        var p = protos[ci];
+        h += '<div class="ex-block">' +
+          '<div class="ex-header" style="cursor:default">' +
+          '<div><div class="ex-name">'+p.name+'</div><div style="margin-top:3px">'+tagsHtml(p.tags)+'</div></div>' +
+          '<div style="display:flex;align-items:center;gap:8px">' +
+          '<span class="ex-meta">RPE '+p.rpe+'</span>' +
+          '<button class="btn btn-sm" id="cds-'+ci+'" onclick="toggleCondSelect('+ci+')" style="min-width:64px">Select</button>' +
+          '</div></div>' +
+          '<div class="ex-body" id="cd-'+ci+'" style="display:none">' +
+          '<div style="font-size:13px;color:var(--text2);margin-bottom:10px">'+p.desc+'</div>' +
+          '<div class="stepper" style="margin-bottom:8px"><span class="stepper-label">Actual RPE</span>' +
+          '<div class="stepper-controls">' +
+          '<button class="stepper-btn" onclick="stepCondVal(\'crpe-'+ci+'\',-0.5,4,10)">&#8722;</button>' +
+          '<div class="stepper-val" id="crpe-'+ci+'">'+p.rpe+'</div>' +
+          '<button class="stepper-btn" onclick="stepCondVal(\'crpe-'+ci+'\',0.5,4,10)">+</button>' +
+          '</div></div>' +
+          '<div class="stepper" style="margin-bottom:8px"><span class="stepper-label">Rounds done</span>' +
+          '<div class="stepper-controls">' +
+          '<button class="stepper-btn" onclick="stepCondVal(\'crds-'+ci+'\',-1,1,20)">&#8722;</button>' +
+          '<div class="stepper-val" id="crds-'+ci+'">4</div>' +
+          '<button class="stepper-btn" onclick="stepCondVal(\'crds-'+ci+'\',1,1,20)">+</button>' +
+          '</div></div>' +
+          '<textarea style="background:var(--bg2);border:.5px solid var(--border2);border-radius:var(--r-md);padding:6px 8px;font-size:12px;color:var(--text);font-family:inherit;width:100%;resize:vertical;min-height:48px" placeholder="Notes..."></textarea>' +
+          '</div></div>';
+      }
+      // Full FRC block at end of conditioning
+      h += '<div class="frc-block" style="margin-top:16px">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">' +
+        '<div><div class="frc-title">Full FRC Mobility — after conditioning, ~20 min</div>' +
+        '<div class="frc-sub">Complete Bergles protocol: CARs all joints + PAILs/RAILs + lower leg isometrics. Do when you have time after conditioning — this is the version that creates lasting joint change.</div></div>' +
+        '<button class="btn btn-sm" id="frc-full-btn" onclick="toggleBlock(\'frc-full-content\',\'frc-full-btn\',\'Show\',\'Hide\')">Show</button></div>' +
+        '<div id="frc-full-content" style="display:none">'+buildFRCItems(FRC_FULL,'ffrc-')+'</div></div>';
+      div.innerHTML = h;
+    }
+
+    content.appendChild(div);
+  }
+}
+
+function toggleBlock(contentId, btnId, showText, hideText) {
+  var el = document.getElementById(contentId);
+  if (!el) return;
+  var showing = el.style.display !== 'none';
+  el.style.display = showing ? 'none' : 'block';
+  if (btnId) {
+    var btn = document.getElementById(btnId);
+    if (btn && showText) btn.textContent = showing ? showText : hideText;
+  }
+}
+
+function showTab(tab, btn) {
+  var tabs = document.querySelectorAll('[id^="tab-"]');
+  for (var i=0;i<tabs.length;i++) tabs[i].style.display='none';
+  var btns = document.querySelectorAll('.nav-btn');
+  for (var i=0;i<btns.length;i++) btns[i].classList.remove('active');
+  var t = document.getElementById('tab-'+tab);
+  if (t) t.style.display='block';
+  if (btn) btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════
+// AI
+// ═══════════════════════════════════════════════════════════
+async function fetchWorkoutAI() {
+  var el = document.getElementById('workout-ai');
+  el.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  try {
+    var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
+    var r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:160,messages:[{role:'user',content:'Soccer performance coach. Week '+S.week+', '+getPhaseLabel(S.week)+' phase. Recovery '+S.rec+'%, Sleep '+S.slp+'%, Body '+S.body+'/5, Motivation '+S.mot+'/5. Mode: '+S.mode+'. Today: '+info.sub+' day. Goals: acceleration, top-end speed, vertical jump, lateral agility, indoor soccer repeat sprint fitness. Advanced athlete. ONE specific technical coaching cue for today — 2 sentences max. Direct, actionable.'}]})
+    });
+    var d = await r.json();
+    el.textContent = d.content[0].text;
+  } catch(e) { el.textContent = (MODE_INSIGHTS[S.mode]||{})[S.dayType]||''; }
+}
+
+function finishWorkout() {
+  showScreen('screen-log');
+  var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
+  document.getElementById('log-metrics').innerHTML =
+    '<div style="background:var(--bg2);border-radius:var(--r-md);padding:10px 12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Mode</div><div style="font-size:18px;font-weight:500;color:var(--text)">'+(S.mode==='full'?'Full':S.mode==='modified'?'Modified':'Recovery')+'</div></div>' +
+    '<div style="background:var(--bg2);border-radius:var(--r-md);padding:10px 12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Session</div><div style="font-size:18px;font-weight:500;color:var(--text)">'+info.sub+'</div></div>' +
+    '<div style="background:var(--bg2);border-radius:var(--r-md);padding:10px 12px"><div style="font-size:11px;color:var(--text3);margin-bottom:4px">Recovery</div><div style="font-size:18px;font-weight:500;color:var(--text)">'+S.rec+'%</div></div>';
+  fetchDebrief();
+}
+
+async function fetchDebrief() {
+  var el = document.getElementById('log-ai');
+  el.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+  var rpe = document.getElementById('sl-rpe').value;
+  var energy = document.getElementById('sl-energy').value;
+  var jump = document.getElementById('sl-jump').value;
+  S.lastRPE=+rpe; S.lastEnergy=+energy; S.lastJump=+jump;
+  try {
+    var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
+    var r = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:150,messages:[{role:'user',content:'Soccer athlete debrief. Week '+S.week+' '+getPhaseLabel(S.week)+' phase. '+info.sub+' day. Mode: '+S.mode+'. Recovery '+S.rec+'%, Sleep '+S.slp+'%. Post-session RPE: '+rpe+'/10, Energy: '+energy+'/5, Box jump: '+jump+'". Two sentences: how the session went, and one specific adjustment for next session.'}]})
+    });
+    var d = await r.json();
+    S.lastDebrief = d.content[0].text;
+    el.textContent = S.lastDebrief;
+  } catch(e) { S.lastDebrief='Session logged.'; el.textContent=S.lastDebrief; }
+}
+
+async function saveSession() {
+  var info = DAY_TYPE_INFO[S.dayType]||{sub:S.dayType};
+  var entry = {date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric'}),mode:S.mode,dayType:info.sub,week:S.week,rec:S.rec,slp:S.slp,rpe:S.lastRPE,energy:S.lastEnergy,jump:S.lastJump,debrief:S.lastDebrief};
+  S.history.unshift(entry);
+  if (S.sbConnected && S.sbUrl && S.sbKey) {
+    try {
+      await fetch(S.sbUrl+'/rest/v1/soccer_sessions',{
+        method:'POST',headers:{'Content-Type':'application/json','apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey,'Prefer':'return=minimal'},
+        body:JSON.stringify({recovery_pct:S.rec,sleep_pct:S.slp,body_feel:S.body,motivation:S.mot,mode:S.mode,day_type:info.sub,week_num:S.week,session_rpe:S.lastRPE,energy:S.lastEnergy,jump_in:S.lastJump,ai_debrief:S.lastDebrief})
+      });
+    } catch(e){ console.warn('SB save failed',e); }
+  }
+  showScreen('screen-history');
+  renderHistory();
+}
+
+async function loadHistoryFromSB() {
+  if (!S.sbConnected||!S.sbUrl||!S.sbKey) return;
+  try {
+    var r = await fetch(S.sbUrl+'/rest/v1/soccer_sessions?order=created_at.desc&limit=30',{headers:{'apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey}});
+    var rows = await r.json();
+    S.history = rows.map(function(row){
+      return {date:new Date(row.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}),mode:row.mode,dayType:row.day_type,week:row.week_num,rec:row.recovery_pct,slp:row.sleep_pct,rpe:row.session_rpe,energy:row.energy,jump:row.jump_in};
+    });
+  } catch(e){}
+}
+
+function renderHistory() {
+  loadHistoryFromSB().then(function(){
+    var el = document.getElementById('history-list');
+    if (!el) return;
+    if (!S.history.length) { el.innerHTML='<div class="ai-box"><div class="ai-text">No sessions yet.</div></div>'; return; }
+    var h = '';
+    for (var i=0;i<S.history.length;i++) {
+      var hi = S.history[i];
+      h += '<div class="history-row">' +
+        '<span style="color:var(--text2);min-width:48px">'+hi.date+'</span>' +
+        '<span class="mode-badge '+(hi.mode==='full'?'mode-full':hi.mode==='modified'?'mode-mod':'mode-rec')+'">'+hi.mode+'</span>' +
+        '<span style="color:var(--text2)">'+(hi.dayType||'—')+' Wk'+(hi.week||'?')+'</span>' +
+        '<span style="color:var(--text2)">Rec '+(hi.rec||'?')+'%</span>' +
+        '<span style="color:var(--text2)">RPE '+(hi.rpe||'?')+'</span>' +
+        '<span style="color:var(--text2)">Jump '+(hi.jump||'?')+'"</span>' +
+        '</div>';
+    }
+    el.innerHTML = h;
+  });
+}
+
+// ═══════════════════════════════════════════════════════════
+// WORKING MAXES
+// ═══════════════════════════════════════════════════════════
+function renderMaxes() {
+  var el = document.getElementById('wmax-grid');
+  if (!el) return;
+  var h = '';
+  for (var i=0;i<MAXES_CONFIG.length;i++) {
+    var m = MAXES_CONFIG[i];
+    h += '<div class="wmax-item"><div class="wmax-label">'+m.label+'</div>' +
+      '<input class="wmax-input" type="number" id="mx-'+m.key+'" placeholder="'+m.placeholder+'" value="'+(S.maxes[m.key]||'')+'">' +
+      '<div class="rec-lbl" id="rec-'+m.key+'"></div></div>';
+  }
+  el.innerHTML = h;
+  // add listeners
+  for (var i=0;i<MAXES_CONFIG.length;i++) {
+    (function(m){
+      var inp = document.getElementById('mx-'+m.key);
+      if (!inp) return;
+      inp.addEventListener('input', function(){
+        var v = +inp.value;
+        var exKey = m.key==='trapbar'?'trapbar_dl':m.key==='blgsq'?'blg_split_sq':'bench_press';
+        var pres = getStrengthPrescription(exKey, S.week, S.mode);
+        var el2 = document.getElementById('rec-'+m.key);
+        if (el2) el2.textContent = (v && pres.pct) ? '→ ~'+Math.round(v*pres.pct/2.5)*2.5+' lbs this week' : '';
+      });
+    })(MAXES_CONFIG[i]);
+  }
+}
+
+function saveMaxes() {
+  for (var i=0;i<MAXES_CONFIG.length;i++) {
+    var v = +(document.getElementById('mx-'+MAXES_CONFIG[i].key)||{value:0}).value;
+    if (v) S.maxes[MAXES_CONFIG[i].key] = v;
+  }
+  localStorage.setItem('soccer_maxes', JSON.stringify(S.maxes));
+  showScreen('screen-readiness');
+}
+
+// ═══════════════════════════════════════════════════════════
+// SUPABASE
+// ═══════════════════════════════════════════════════════════
+function saveSBConfig() {
+  S.sbUrl = (document.getElementById('sb-url').value||'').trim().replace(/\/$/,'');
+  S.sbKey = (document.getElementById('sb-key').value||'').trim();
+  S.sbConnected = false; setSBStatus(false,'Not tested');
+}
+
+async function testSB() {
+  if (!S.sbUrl||!S.sbKey){ setSBStatus(false,'Missing URL or key'); return; }
+  setSBStatus(null,'Testing...');
+  try {
+    var r = await fetch(S.sbUrl+'/rest/v1/soccer_sessions?limit=1',{headers:{'apikey':S.sbKey,'Authorization':'Bearer '+S.sbKey}});
+    if (r.ok||r.status===406){ S.sbConnected=true; setSBStatus(true,'Connected'); }
+    else { S.sbConnected=false; setSBStatus(false,'Error '+r.status); }
+  } catch(e){ S.sbConnected=false; setSBStatus(false,'Connection failed'); }
+}
+
+function setSBStatus(ok, msg) {
+  ['sb-dot','sb-dot2'].forEach(function(id){
+    var d = document.getElementById(id);
+    if (d) d.className = 'sb-dot'+(ok===true?' connected':ok===false?' error':'');
+  });
+  var s1 = document.getElementById('sb-status-text'); if(s1) s1.textContent='Supabase: '+msg;
+  var s2 = document.getElementById('sb-status2'); if(s2) s2.textContent=msg;
+}
+
+// ═══════════════════════════════════════════════════════════
+// SCREEN NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showScreen(id) {
+  var screens = document.querySelectorAll('.screen');
+  for (var i=0;i<screens.length;i++) screens[i].classList.remove('active');
+  var s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  if (id==='screen-history') renderHistory();
+  if (id==='screen-maxes') renderMaxes();
+  if (id==='screen-dayorder') renderDayOrderList();
+}
+
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
+try { Object.assign(S.maxes, JSON.parse(localStorage.getItem('soccer_maxes')||'{}')); } catch(e){}
+S.week = parseInt(localStorage.getItem('soccer_week')||'1');
+S.dayOrder = loadDayOrder();
+renderWeekBar();
+renderDaySelector();
+updateReadiness();
+// Init stepper display values
+renderStepperVal('rec'); renderStepperVal('slp'); renderStepperVal('body'); renderStepperVal('mot');
+</script>
+</body>
+</html>
