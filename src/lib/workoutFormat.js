@@ -64,3 +64,13 @@ export function rampSets(top) {
   return out;
 }
 
+
+// 61 → "1 hour 1 min", 45 → "45 min", 120 → "2 hours".
+export function fmtDuration(totalMin) {
+  if (totalMin == null) return '—';
+  const h = Math.floor(totalMin / 60);
+  const m = Math.round(totalMin % 60);
+  const hs = h ? `${h} hour${h === 1 ? '' : 's'}` : '';
+  const ms = m || !h ? `${m} min` : '';
+  return [hs, ms].filter(Boolean).join(' ');
+}

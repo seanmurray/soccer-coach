@@ -78,6 +78,9 @@ export async function saveSession({
   sessionRpe = 7.5,
   energy = 3,
   aiDebrief = null,
+  // Workout Complete extras (focus, injury rehab, all-sets, achievement,
+  // improvement, readiness score…) — merged into metadata. No new columns.
+  extras = {},
 }) {
   if (!supabase) {
     return { ok: false, error: new Error('Supabase client not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.') };
@@ -122,6 +125,7 @@ export async function saveSession({
       // duration math — created_at also counts debrief-sheet time. Falls back
       // to now() if a caller didn't supply it.
       session_ended_at: sessionEndedAt ?? new Date().toISOString(),
+      ...extras,
     },
   };
 

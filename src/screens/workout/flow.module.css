@@ -356,3 +356,48 @@
   gap: 10px;
   margin: 10px 0 24px;
 }
+
+/* ── Workout Complete / Summary ── */
+.bigStat {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 38px;
+  color: var(--accent-hi);
+  margin: 6px 0 4px;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0 8px;
+}
+.tile {
+  padding: 16px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+}
+.tileIcon { font-size: 20px; line-height: 1; }
+.tileLabel { margin-top: 10px; font-size: 15px; color: var(--t3); }
+.tileValue { margin-top: 2px; font-size: 24px; font-weight: 700; color: var(--t1); font-family: var(--font-display); }
+.perfCard {
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+}
+.perfName { font-size: 17px; font-weight: 700; color: var(--t1); margin-bottom: 8px; }
+.perfRow { display: flex; align-items: center; gap: 10px; padding: 4px 0; font-size: 16px; color: var(--t3); }
+.perfChip {
+  padding: 3px 9px;
+  border-radius: 7px;
+  background: var(--bg-pill);
+  color: var(--t1);
+  font-weight: 600;
+  font-size: 15px;
+}
+.reflect { font-size: 16px; line-height: 1.5; color: var(--t2); margin-top: 6px; }
+.doneTitle { display: flex; align-items: center; gap: 10px; }
+.doneCheck { color: var(--green); font-size: 26px; }

@@ -9,7 +9,6 @@ import { ExercisesScreen } from './screens/ExercisesScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { RestTimer } from './components/RestTimer';
 import { ModuleSheet } from './components/ModuleSheet';
-import { PostSessionSheet } from './components/PostSessionSheet';
 import { ReadinessBaselineSync } from './components/ReadinessBaselineSync';
 import { useSessionStore } from './stores/sessionStore';
 import { useSwapsStore } from './stores/swapsStore';
@@ -47,13 +46,14 @@ export default function App() {
 
   const [moduleIndex, setModuleIndex] = useState(null);
   const [saving, setSaving] = useState(false);
-  // Post-session sheet: shown after Finish Session is tapped, captures RPE
-  // + energy, confirms or cancels the save.
-  const [finishSheetOpen, setFinishSheetOpen] = useState(false);
+  // Summary of the session that was just saved (not persisted — a reload
+  // simply drops you back on the day overview).
+  const [summary, setSummary] = useState(null);
 
   const startSession = useSessionStore((s) => s.startSession);
   const resetSession = useSessionStore((s) => s.resetSession);
   const markSessionEnd = useSessionStore((s) => s.markSessionEnd);
+  const setStage = useSessionStore((s) => s.setStage);
   const clearSwaps = useSwapsStore((s) => s.clear);
   const clearTodaySlots = useSlotStore((s) => s.clearToday);
   const clearUpgrades = useUpgradesStore((s) => s.clear);
@@ -114,27 +114,42 @@ export default function App() {
     if (window.confirm('Leave the warm-up? The workout won’t be started.')) clearInFlight();
   };
 
-  // Finish Session button on the Workout screen — open the post-session sheet.
-  // Stamp the session-end time NOW (workout is done) so it isn't conflated with
-  // however long the debrief sheet stays open before save.
+  // Finish Workout → the Workout Complete step. Stamp the session-end time
+  // NOW (workout is done) so it isn't conflated with however long the
+  // Workout Complete form stays open before save.
   const handleFinish = () => {
     if (saving) return;
     markSessionEnd();
-    setFinishSheetOpen(true);
+    setStage('complete');
   };
 
-  // Confirm from the post-session sheet — save + fire debrief.
-  const handleConfirmFinish = async ({ sessionRpe, energy }) => {
+  // Complete Workout — save + fire debrief, then show the summary.
+  const handleConfirmFinish = async ({ sessionRpe, energy, minutes, allSets, achievement, improvement }) => {
     if (saving) return;
     setSaving(true);
     const snapshot = getSnapshot();
-    const result = await saveSession({ ...snapshot, sessionRpe, energy });
+    const st = useSessionStore.getState();
+    // Edited workout length → move the end stamp so duration-based load
+    // (and the History length) use the corrected number.
+    if (minutes && snapshot.sessionStartedAt) {
+      snapshot.sessionEndedAt = new Date(new Date(snapshot.sessionStartedAt).getTime() + minutes * 60000).toISOString();
+    }
+    const extras = {
+      readiness_score: Math.round(st.score),
+      focus: st.checkin.focus,
+      focus_custom: st.checkin.focus === 'custom' ? st.checkin.focusCustom || null : null,
+      injury_rehab: st.checkin.injuryRehab,
+      all_sets_completed: allSets,
+      achievement: achievement || null,
+      improvement: improvement || null,
+      duration_edited: !!minutes,
+    };
+    const result = await saveSession({ ...snapshot, sessionRpe, energy, extras });
     setSaving(false);
     if (!result.ok) {
       alert('Save failed: ' + (result.error?.message ?? 'unknown error'));
       return;
     }
-    setFinishSheetOpen(false);
 
     // Refresh the History list + PR / progression queries so the new row,
     // PR badges, and chart points all show up immediately.
@@ -158,8 +173,15 @@ export default function App() {
       queryClient,
     });
 
+    const lengthMin = snapshot.sessionStartedAt && snapshot.sessionEndedAt
+      ? Math.max(1, Math.round((new Date(snapshot.sessionEndedAt) - new Date(snapshot.sessionStartedAt)) / 60000))
+      : null;
+    setSummary({
+      snapshot, sessionRpe, energy, achievement, improvement,
+      minutes: lengthMin,
+      readinessScore: st.score,
+    });
     clearInFlight();
-    setTab('history');
   };
 
   // Render every screen and toggle visibility with `hidden`. Keeping mounted
@@ -178,6 +200,11 @@ export default function App() {
           onFinish={handleFinish}
           onCancel={handleCancel}
           onAbandonStart={handleAbandonStart}
+          onConfirmFinish={handleConfirmFinish}
+          saving={saving}
+          summary={summary}
+          onCloseSummary={() => setSummary(null)}
+          onOpenHistory={() => { setSummary(null); setTab('history'); }}
         />
       </div>
       <div hidden={tab !== 'history'}>
@@ -192,12 +219,6 @@ export default function App() {
 
       <RestTimer />
       <ModuleSheet moduleIndex={moduleIndex} onClose={() => setModuleIndex(null)} />
-      <PostSessionSheet
-        open={finishSheetOpen}
-        saving={saving}
-        onCancel={() => setFinishSheetOpen(false)}
-        onConfirm={handleConfirmFinish}
-      />
       <BottomNav active={tab} onChange={setTab} />
     </QueryClientProvider>
   );

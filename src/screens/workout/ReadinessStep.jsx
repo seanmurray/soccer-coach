@@ -116,7 +116,10 @@ export function ReadinessStep({ onBack }) {
         noFirst
       />
 
-      <div className={`overline ${styles.groupLabel}`}>Today&apos;s training</div>
+      <div className={styles.sectionHead}>
+        <div className="overline">Today&apos;s training</div>
+        <div className={styles.hint}>Readiness {Math.round(s.score)} / 100</div>
+      </div>
       <ModeBanner mode={mode} />
 
       <div className={styles.ctaSpacer} />
