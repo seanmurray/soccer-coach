@@ -84,8 +84,8 @@
   text-transform: uppercase;
 }
 .save {
-  background: var(--blue);
-  color: #0a0a0a;
+  background: var(--accent);
+  color: var(--on-accent);
   border: none;
 }
 .save:disabled { opacity: 0.4; }

@@ -122,7 +122,7 @@ export function ProgressScreen() {
               title={`${c.title} · estimated 1RM`}
               unit="lbs"
               data={c.points}
-              color="#30d158"
+              color="#5b82ff"
             />
           ))
         )

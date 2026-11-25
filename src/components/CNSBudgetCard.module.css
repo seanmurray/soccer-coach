@@ -4,6 +4,7 @@
   padding: 14px 16px;
   margin-bottom: 14px;
   border-left: 3px solid var(--green);
+  border: 1px solid var(--line);
 }
 .card.zoneGreen { border-left-color: var(--green); }
 .card.zoneOkay  { border-left-color: var(--blue); }
@@ -19,7 +20,7 @@
 }
 
 .label {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -27,7 +28,7 @@
 }
 
 .zoneLabel {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -39,9 +40,10 @@
 
 .total {
   font-family: var(--font-display);
-  font-size: 32px;
-  letter-spacing: 0.03em;
+  font-size: 26px;
+  letter-spacing: -0.005em;
   line-height: 1;
+  font-weight: 700;
 }
 .zoneGreen .total { color: var(--green); }
 .zoneOkay  .total { color: var(--blue); }

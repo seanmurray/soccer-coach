@@ -52,13 +52,14 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: 28px;
-  letter-spacing: 0.04em;
+  font-size: 23px;
+  letter-spacing: -0.005em;
   color: var(--t1);
+  font-weight: 700;
 }
 
 .sub {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -91,7 +92,7 @@
 .section { margin-bottom: 22px; }
 
 .sectionTitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -113,7 +114,7 @@
 .cb {
   width: 28px;
   height: 28px;
-  accent-color: var(--green);
+  accent-color: var(--accent);
   cursor: pointer;
   flex-shrink: 0;
   margin-top: 2px;
@@ -122,15 +123,16 @@
 .itemBody { flex: 1; }
 .itemName {
   font-family: var(--font-display);
-  font-size: 22px;
-  letter-spacing: 0.03em;
+  font-size: 18px;
+  letter-spacing: -0.005em;
   color: var(--t1);
   margin-bottom: 4px;
+  font-weight: 700;
 }
 .itemRx {
   font-family: var(--font-mono);
   font-size: 18px;
-  color: var(--green);
+  color: var(--accent-hi);
   margin-bottom: 6px;
 }
 .itemCue {
@@ -152,8 +154,8 @@
 }
 
 .info {
-  background: var(--green-bg);
-  border: 0.5px solid var(--green-line);
+  background: var(--accent-bg);
+  border: 0.5px solid var(--accent-line);
   border-radius: var(--r2);
   padding: 14px 16px;
   font-size: 16px;
@@ -168,12 +170,14 @@
   padding: 12px 14px;
   margin-bottom: 10px;
   border-left: 2px solid var(--purple);
+  border: 1px solid var(--line);
 }
 .phaseTitle {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 15px;
   color: var(--purple);
   margin-bottom: 6px;
+  font-weight: 700;
 }
 .phaseDesc {
   font-size: 16px;
@@ -186,8 +190,8 @@
   align-items: center;
   font-size: 16px;
   font-weight: 600;
-  color: var(--green);
-  border: 0.5px solid var(--green-line);
+  color: var(--accent-hi);
+  border: 0.5px solid var(--accent-line);
   border-radius: 100px;
   padding: 4px 10px;
   margin-top: 8px;

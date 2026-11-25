@@ -5,6 +5,7 @@
   border-radius: var(--r3);
   padding: 6px 0;
   margin-bottom: 12px;
+  border: 1px solid var(--line);
 }
 
 .row {
@@ -90,7 +91,7 @@
 .value {
   font-family: var(--font-mono);
   font-size: 16px;
-  color: var(--green);
+  color: var(--accent-hi);
   min-width: 44px;
   text-align: right;
   flex-shrink: 0;

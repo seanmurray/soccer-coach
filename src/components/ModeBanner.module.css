@@ -17,7 +17,9 @@
 .mod3     { background: var(--mode-mod3-bg);  border-color: var(--mode-mod3-line); }
 .recovery { background: var(--mode-rec-bg);   border-color: var(--mode-rec-line); }
 
-.label { font-family: var(--font-display); font-size: 24px; letter-spacing: 0.04em; }
+.label { font-family: var(--font-display); font-size: 20px; letter-spacing: -0.005em;
+  font-weight: 700;
+}
 .full     .label { color: var(--green); }
 .mod1     .label { color: var(--mode-mod1-fg); }
 .mod2     .label { color: var(--amber); }

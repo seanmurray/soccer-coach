@@ -9,7 +9,7 @@
 }
 
 .colLabel {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -57,7 +57,7 @@
   width: 100%;
   min-height: var(--tap-min);
 }
-.input:focus { outline: 2px solid var(--green); }
+.input:focus { outline: 2px solid var(--accent); }
 
 .rpe {
   background: var(--bg-input);
@@ -123,8 +123,8 @@
 }
 
 .done.completed {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--accent);
+  border-color: var(--accent);
   transform: scale(1.1);
 }
 .done.completed::after {
@@ -135,7 +135,7 @@
   content: '✓';
   font-size: 20px;
   font-weight: 700;
-  color: #0a0a0a;
+  color: var(--on-accent);
   position: absolute;
   top: 50%;
   left: 50%;

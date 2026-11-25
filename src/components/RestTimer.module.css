@@ -40,9 +40,10 @@
 
 .countdown {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 16px;
   color: var(--t1);
-  letter-spacing: 0.04em;
+  letter-spacing: -0.005em;
+  font-weight: 700;
 }
 
 .main {
@@ -51,7 +52,7 @@
 }
 
 .label {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -101,8 +102,8 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--green);
-  color: #0a0a0a;
+  background: var(--accent);
+  color: var(--on-accent);
   font-size: 18px;
   display: flex;
   align-items: center;

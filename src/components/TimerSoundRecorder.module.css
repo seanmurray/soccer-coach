@@ -20,6 +20,6 @@
 .btn.remove { color: var(--t3); }
 
 .statusRow { margin-top: 10px; min-height: 18px; }
-.set { font-size: 14px; color: var(--green); font-weight: 600; }
+.set { font-size: 14px; color: var(--accent-hi); font-weight: 600; }
 .msg { font-size: 14px; color: var(--t2); }
 .rec { font-size: 14px; color: var(--red); font-weight: 600; }

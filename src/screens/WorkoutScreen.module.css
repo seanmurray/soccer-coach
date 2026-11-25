@@ -1,5 +1,7 @@
 .header { margin-bottom: 16px; }
-.title { font-family: var(--font-display); font-size: 36px; letter-spacing: 0.04em; line-height: 1; }
+.title { font-family: var(--font-display); font-size: 30px; letter-spacing: -0.005em; line-height: 1;
+  font-weight: 700;
+}
 .sub   { font-size: 17px; color: var(--t3); margin-top: 6px; }
 
 .tabBar {
@@ -27,9 +29,9 @@
   transition: all 0.18s;
 }
 .tab.active {
-  background: var(--green-bg);
-  color: var(--green);
-  border-color: var(--green-line);
+  background: var(--accent-bg);
+  color: var(--accent-hi);
+  border-color: var(--accent-line);
 }
 
 .placeholder {
@@ -40,6 +42,7 @@
   color: var(--t2);
   font-size: 17px;
   line-height: 1.6;
+  border: 1px solid var(--line);
 }
 
 .placeholder strong { color: var(--t1); }

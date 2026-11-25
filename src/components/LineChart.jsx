@@ -23,7 +23,7 @@ export function LineChart({
   title,
   unit = '',
   data = [],
-  color = '#30d158',
+  color = '#5b82ff',
   emptyHint = 'No data yet — log this metric to see the trend.',
   // For pace / time metrics, lower numbers are better. The chart still
   // plots the raw value (we don't invert the y-axis), but "Best" and the

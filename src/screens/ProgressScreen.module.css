@@ -1,5 +1,5 @@
 .groupHeader {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -32,9 +32,9 @@
   transition: all 0.18s;
 }
 .tab.active {
-  background: var(--green-bg);
-  color: var(--green);
-  border-color: var(--green-line);
+  background: var(--accent-bg);
+  color: var(--accent-hi);
+  border-color: var(--accent-line);
 }
 
 .empty {
@@ -45,6 +45,7 @@
   color: var(--t2);
   font-size: 16px;
   line-height: 1.6;
+  border: 1px solid var(--line);
 }
 .empty strong { color: var(--t1); }
 

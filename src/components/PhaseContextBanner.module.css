@@ -1,17 +1,18 @@
 .box {
-  border-left: 3px solid var(--green);
+  border-left: 3px solid var(--accent);
   background: var(--bg-card);
   border-radius: 0 var(--r2) var(--r2) 0;
   padding: 12px 14px;
   margin-bottom: 14px;
+  border: 1px solid var(--line);
 }
 
 .title {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--green);
+  color: var(--accent-hi);
   margin-bottom: 6px;
 }
 
@@ -23,7 +24,7 @@
 
 .subtext {
   font-size: 17px;
-  color: var(--green);
+  color: var(--accent-hi);
   line-height: 1.5;
   margin-top: 8px;
   font-weight: 500;

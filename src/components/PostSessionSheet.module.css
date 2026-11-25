@@ -48,13 +48,14 @@
 
 .title {
   font-family: var(--font-display);
-  font-size: 28px;
-  letter-spacing: 0.04em;
+  font-size: 23px;
+  letter-spacing: -0.005em;
   color: var(--t1);
+  font-weight: 700;
 }
 
 .sub {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -83,14 +84,14 @@
 
 .range {
   flex: 1;
-  accent-color: var(--green);
+  accent-color: var(--accent);
   height: 4px;
 }
 
 .val {
   font-family: var(--font-mono);
   font-size: 17px;
-  color: var(--green);
+  color: var(--accent-hi);
   min-width: 56px;
   text-align: right;
   flex-shrink: 0;
@@ -105,16 +106,17 @@
 .cta {
   flex: 1;
   height: 52px;
-  background: var(--green);
-  color: #0a0a0a;
+  background: var(--accent);
+  color: var(--on-accent);
   border-radius: var(--r3);
   font-family: var(--font-display);
-  font-size: 20px;
-  letter-spacing: 0.08em;
+  font-size: 16px;
+  letter-spacing: -0.005em;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.15s, opacity 0.15s;
+  font-weight: 700;
 }
 .cta:active { transform: scale(0.97); opacity: 0.9; }
 .cta:disabled { opacity: 0.5; }
