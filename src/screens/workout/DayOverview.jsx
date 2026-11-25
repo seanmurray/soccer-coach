@@ -8,6 +8,7 @@ import { useSettingsStore } from '../../stores/settingsStore';
 import { useSlotStore } from '../../stores/slotStore';
 import { DAY_TYPE_INFO, MODE_DATA } from '../../data/sessions';
 import { getPhaseLabel } from '../../lib/periodization';
+import { Icon } from '../../components/ui/Icon';
 import { dayPlan } from './dayPlan';
 
 // Workout tab, before you start: the day title, a Week · Day stepper, and
@@ -83,7 +84,7 @@ export function DayOverview({ onStart }) {
                 {it.target && <div className={styles.exTarget}>{it.target}</div>}
               </div>
               {it.homeKey && (
-                <button type="button" className={styles.rowIcon} onClick={() => setSheet({ kind: 'swap', item: it })} aria-label={`Swap ${it.name}`}>⇄</button>
+                <button type="button" className={styles.rowIcon} onClick={() => setSheet({ kind: 'swap', item: it })} aria-label={`Swap ${it.name}`}><Icon name="swap" /></button>
               )}
               {(it.cue || it.url) && (
                 <button type="button" className={styles.rowIcon} onClick={() => setSheet({ kind: 'info', item: it })} aria-label={`About ${it.name}`}>

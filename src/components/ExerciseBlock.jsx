@@ -5,6 +5,7 @@ import { FullSheet } from './ui/FullSheet';
 import { ExerciseNote } from './ExerciseNote';
 import { ExerciseHistoryInline } from './ExerciseHistoryInline';
 import { summarizeSets } from '../lib/workoutFormat';
+import { Icon } from './ui/Icon';
 import { useExerciseHistory } from '../hooks/useExerciseHistory';
 
 // One exercise card in the workout: name + ⓘ / ⇄ icons, the prescription
@@ -56,7 +57,7 @@ export function ExerciseBlock({
             </button>
             {swapContent && (
               <button type="button" className={styles.icon} onClick={() => setSheet('swap')} aria-label={`Swap ${name}`}>
-                ⇄
+                <Icon name="swap" />
               </button>
             )}
           </div>

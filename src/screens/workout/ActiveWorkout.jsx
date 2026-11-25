@@ -14,6 +14,7 @@ import { AgilityTab } from '../tabs/AgilityTab';
 import { PlyometricsTab } from '../tabs/PlyometricsTab';
 import { StrengthTab } from '../tabs/StrengthTab';
 import { BuildTab } from '../tabs/BuildTab';
+import { Icon } from '../../components/ui/Icon';
 import { ConditioningTab } from '../tabs/ConditioningTab';
 
 const SECTIONS = [
@@ -72,7 +73,7 @@ export function ActiveWorkout({ onFinish, onCancel }) {
         <button type="button" className={styles.backBtn} onClick={() => setStage('overview')} aria-label="Back to overview">‹</button>
         <div className={styles.pinTitle}>{dayName}</div>
         <div className={`${styles.pinTimer} ${timerVisible ? styles.pinTimerOn : ''}`}>
-          ◷{timerVisible ? ` ${fmtClock(remaining)}` : ''}
+          <Icon name="timer" size={20} />{timerVisible ? ` ${fmtClock(remaining)}` : ''}
         </div>
       </div>
 

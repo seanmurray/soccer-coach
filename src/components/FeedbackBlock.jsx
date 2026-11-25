@@ -5,6 +5,7 @@ import { FullSheet, PillButton } from './ui/FullSheet';
 import { Stepper } from './ui/Stepper';
 import { BarScale } from './ui/BarScale';
 import { RPE_WORDS } from '../lib/workoutFormat';
+import { Icon } from './ui/Icon';
 import { useSessionStore } from '../stores/sessionStore';
 
 const QUALITY = [
@@ -107,7 +108,7 @@ export function FeedbackBlock({
         label={`${exerciseName} feedback`}
         onClose={() => setOpen(false)}
         headerActions={logged ? (
-          <button type="button" className={uiStyles.iconBtn} onClick={onReset} aria-label="Reset feedback">↺</button>
+          <button type="button" className={uiStyles.iconBtn} onClick={onReset} aria-label="Reset feedback"><Icon name="reset" /></button>
         ) : null}
         footer={<PillButton onClick={onDone}>✓ DONE</PillButton>}
       >

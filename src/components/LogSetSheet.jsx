@@ -4,6 +4,7 @@ import { Stepper } from './ui/Stepper';
 import uiStyles from './ui/ui.module.css';
 import { useRestTimer } from '../stores/restTimerStore';
 import { useSettingsStore } from '../stores/settingsStore';
+import { Icon } from './ui/Icon';
 import { RPE_WORDS, fmtClock } from '../lib/workoutFormat';
 
 // "Performance" sheet for logging one set: weight / reps (or seconds) / RPE
@@ -42,12 +43,12 @@ export function LogSetSheet({
     <>
       {timerVisible && (
         <div className={`${uiStyles.iconBtn} ${uiStyles.timerPill}`} aria-label="Rest remaining">
-          ◷ {fmtClock(remaining)}
+          <Icon name="timer" size={18} /> {fmtClock(remaining)}
         </div>
       )}
       {logged && onReset && (
         <button type="button" className={uiStyles.iconBtn} onClick={confirmReset} aria-label="Reset set">
-          ↺
+          <Icon name="reset" />
         </button>
       )}
     </>

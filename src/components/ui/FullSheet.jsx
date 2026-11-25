@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { Icon } from './Icon';
 import styles from './ui.module.css';
 
 // Full-screen sheet that slides up over everything (incl. the tab bar):
@@ -22,7 +23,7 @@ export function FullSheet({ open, title, onClose, headerActions, footer, childre
           {headerActions}
           {onClose && (
             <button type="button" className={styles.iconBtn} onClick={onClose} aria-label="Close">
-              ✕
+              <Icon name="close" />
             </button>
           )}
         </div>
