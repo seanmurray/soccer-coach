@@ -1,0 +1,346 @@
+/* Shared workout-flow primitives: cards, steppers, bar scales, full-screen
+   sheets, pill buttons, yes/no toggles, switches. */
+
+/* ─── Card ─────────────────────────────────────────────── */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r3);
+  padding: 16px 18px 18px;
+  margin-bottom: 12px;
+}
+.disabled { opacity: 0.45; }
+
+.cardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.cardLabel {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--t2);
+}
+
+/* ─── Stepper ─────────────────────────────────────────── */
+.stepRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+.roundBtn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: transparent;
+  color: var(--t1);
+  font-size: 26px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, transform 0.1s;
+}
+.roundBtn:active { background: var(--bg-raised); transform: scale(0.94); }
+.roundBtn:disabled { opacity: 0.4; }
+
+.valueWrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+.bigInput {
+  width: 100%;
+  max-width: 170px;
+  background: transparent;
+  border: none;
+  color: var(--t1);
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 46px;
+  line-height: 1.1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0;
+  border-radius: var(--r1);
+}
+.bigInput:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+.bigInput::placeholder { color: var(--t4); }
+.unit {
+  font-size: 22px;
+  color: var(--t3);
+  flex-shrink: 0;
+}
+.hint {
+  text-align: center;
+  font-size: 15px;
+  color: var(--t3);
+  margin-top: 6px;
+}
+
+/* ─── Bar scale ───────────────────────────────────────── */
+.question {
+  font-size: 18px;
+  color: var(--t1);
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+.scaleWord {
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--t1);
+}
+.scaleDesc {
+  text-align: center;
+  font-size: 15px;
+  color: var(--t3);
+  margin-top: 4px;
+  min-height: 1.3em;
+}
+.bars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 96px;
+  margin: 18px 0 10px;
+}
+.bar {
+  flex: 1;
+  max-width: 64px;
+  border-radius: 14px;
+  background: var(--bg-pill);
+  transition: background 0.18s, transform 0.12s;
+}
+.bar:active { transform: scale(0.95); }
+.barLit { background: rgba(61, 107, 255, 0.55); }
+.barOn { background: var(--accent); }
+.scaleEnds {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+/* ─── Full-screen sheet ───────────────────────────────── */
+.sheetRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  max-width: var(--app-max-w);
+  margin: 0 auto;
+  animation: sheetUp 0.28s var(--ease-sheet);
+}
+@keyframes sheetUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to   { transform: none; opacity: 1; }
+}
+.sheetTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: calc(var(--sat) + 12px) 16px 10px;
+}
+.titlePill {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--t1);
+  padding: 8px 16px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.sheetActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.iconBtn {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  color: var(--t1);
+  font-size: 17px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.iconBtn:active { background: var(--bg-raised); }
+.timerPill {
+  color: var(--accent-hi);
+  border-color: var(--accent-line);
+  background: var(--accent-bg);
+  font-variant-numeric: tabular-nums;
+}
+.sheetBody {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 16px 24px;
+}
+.sheetFooter {
+  padding: 10px 16px calc(var(--sab) + 14px);
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0), var(--bg) 30%);
+}
+
+/* ─── Pill buttons ────────────────────────────────────── */
+.pillBtn {
+  width: 100%;
+  min-height: 58px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  color: var(--t1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  transition: transform 0.12s, opacity 0.15s;
+}
+.pillBtn:active { transform: scale(0.98); }
+.pillBtn:disabled { opacity: 0.5; }
+.pillAccent {
+  border-color: var(--accent-line);
+  background: linear-gradient(180deg, rgba(61, 107, 255, 0.28), rgba(61, 107, 255, 0.1)), var(--glass);
+}
+.pillDanger { color: var(--red); }
+
+/* ─── Yes / No ────────────────────────────────────────── */
+.yesNo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ynBtn {
+  min-height: 56px;
+  border-radius: var(--r2);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--t2);
+  transition: background 0.15s, color 0.15s;
+}
+.ynOn {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* ─── Switch ──────────────────────────────────────────── */
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: var(--r3);
+  padding: 14px 18px;
+  margin-bottom: 12px;
+  min-height: 60px;
+  position: relative;
+  cursor: pointer;
+}
+.switchLabel {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--t2);
+}
+.switchLabelOn { color: var(--accent-hi); }
+.switchInput {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.switchTrack {
+  width: 54px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: var(--bg-pill);
+  position: relative;
+  transition: background 0.18s;
+}
+.switchTrack::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.18s var(--ease-spring);
+}
+.switchInput:checked + .switchTrack { background: var(--accent); }
+.switchInput:checked + .switchTrack::after { transform: translateX(22px); }
+.switchInput:focus-visible + .switchTrack { outline: 2px solid var(--accent-hi); outline-offset: 2px; }
+
+/* ─── Text area card ──────────────────────────────────── */
+.textArea {
+  width: 100%;
+  min-height: 84px;
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  color: var(--t1);
+  font-size: 18px;
+  line-height: 1.45;
+  resize: vertical;
+  font-family: inherit;
+}
+.textArea::placeholder { color: var(--t3); text-align: center; }
+.textArea:focus { outline: none; }
+
+/* ─── Choice list (stacked options) ───────────────────── */
+.choices {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+.choice {
+  min-height: 54px;
+  padding: 10px 14px;
+  border-radius: var(--r2);
+  background: var(--bg-raised);
+  color: var(--t1);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+.choiceOn {
+  background: var(--accent);
+  color: var(--on-accent);
+}

@@ -10,6 +10,7 @@ export function AgilityTab() {
   const mode = useSessionStore((s) => s.mode);
   const toggleUpgrade = useUpgradesStore((s) => s.toggle);
   const activeUpgrades = useUpgradesStore((s) => s.active);
+  const perfBuffer = useSessionStore((s) => s.exercisePerfBuffer);
 
   const block = SESSIONS[mode]?.[dayType] ?? SESSIONS.full[dayType];
   const keys = block?.agility ?? [];
@@ -33,7 +34,8 @@ export function AgilityTab() {
         target={ex.target}
         cue={ex.cue}
         url={eff.url}
-        tags={ex.tags}
+        historyKind="feedback"
+        complete={perfBuffer.some((r) => r.exercise_key === k)}
         upgrade={ex.upgrade}
         upgradeActive={upgradeActive}
         onToggleUpgrade={() => toggleUpgrade(k)}

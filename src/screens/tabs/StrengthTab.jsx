@@ -1,6 +1,6 @@
 import { ExerciseBlock } from '../../components/ExerciseBlock';
-import { SetTable } from '../../components/SetTable';
-import { ExerciseHistoryInline } from '../../components/ExerciseHistoryInline';
+import { SetTable, LogPrefsControls } from '../../components/SetTable';
+import { WarmupRamp } from '../../components/WarmupRamp';
 import { SlotSwapControl } from '../../components/SlotSwapControl';
 import { EX } from '../../data/exercises';
 import { useSessionStore } from '../../stores/sessionStore';
@@ -22,6 +22,8 @@ export function StrengthTab() {
   const season = useSettingsStore((s) => s.season);
   const today = useSlotStore((s) => s.today);
   const block = useSlotStore((s) => s.block);
+  const setsBuffer = useSessionStore((s) => s.setsBuffer);
+  const loggedCount = (key) => setsBuffer.filter((r) => r.exercise_key === key).length;
 
   const dayBlock = SESSIONS[mode]?.[dayType] ?? SESSIONS.full[dayType];
   const homes = dayBlock?.strength ?? [];
@@ -42,10 +44,10 @@ export function StrengthTab() {
 
     const prx = res.isCustom ? CUSTOM_RX : getStrengthPrescription(res.activeKey, week, mode, season);
     const rec = res.isCustom ? 0 : calcLoad(res.activeKey, prx.pct, maxes);
-    const target = res.isCustom
-      ? `${prx.sets}×${prx.reps} · log by feel`
-      : `${prx.sets}×${prx.reps} @ ${Math.round(prx.pct * 100)}%`;
-    const load = res.isCustom ? '—' : (rec ? `${rec} lbs` : 'Set max');
+    const target = `${prx.sets} sets × ${prx.reps} reps`;
+    const load = res.isCustom
+      ? 'log by feel'
+      : (rec ? `${Math.round(prx.pct * 100)}% · ${rec} lb` : `${Math.round(prx.pct * 100)}% · set a max`);
 
     return (
       <ExerciseBlock
@@ -57,23 +59,18 @@ export function StrengthTab() {
         target={target}
         load={load}
         tempo={res.isCustom ? null : prx.tempo}
+        tempoText={!res.isCustom && prx.tempo ? tempoExplain(prx.tempo) : null}
+        note={res.isCustom ? null : prx.note}
         cue={activeEx?.cue}
         url={activeEx?.url}
-        tags={activeEx?.tags ?? []}
         contrast={res.isCustom ? null : prx.contrast}
-        defaultOpen
+        complete={loggedCount(res.activeKey) >= prx.sets}
+        warmup={rec ? <WarmupRamp exerciseKey={res.activeKey} exerciseName={res.name} topWeight={rec} /> : null}
+        swapContent={<SlotSwapControl homeKey={homeKey} week={week} activeKey={res.activeKey} isCustom={res.isCustom} />}
+        settingsContent={<LogPrefsControls exerciseKey={res.activeKey} />}
       >
-        {!res.isCustom && prx.tempo && (
-          <div style={{ fontSize: 14, color: 'var(--t3)', marginBottom: 10 }}>
-            {tempoExplain(prx.tempo)}
-          </div>
-        )}
-        {!res.isCustom && prx.note && (
-          <div style={{ fontSize: 14, color: 'var(--t2)', marginBottom: 14, lineHeight: 1.5 }}>
-            {prx.note}
-          </div>
-        )}
         <SetTable
+          key={res.activeKey}
           exerciseKey={res.activeKey}
           exerciseName={savedName}
           prescription={prx}
@@ -81,8 +78,6 @@ export function StrengthTab() {
           recOverride={res.isCustom ? null : rec}
           recOverridePresent={res.isCustom}
         />
-        <ExerciseHistoryInline exerciseKey={res.activeKey} kind="sets" />
-        <SlotSwapControl homeKey={homeKey} week={week} activeKey={res.activeKey} isCustom={res.isCustom} />
       </ExerciseBlock>
     );
   });

@@ -1,6 +1,7 @@
 import styles from './ExerciseHistoryInline.module.css';
 import { useExerciseHistory } from '../hooks/useExerciseHistory';
 import { formatDate } from '../lib/dateFormat';
+import { summarizeSets } from '../lib/workoutFormat';
 import { parseMeasurement, parseDurationMin } from '../lib/measurementParse';
 import { metricFor, formatMetricValue } from '../data/conditioningProtocols';
 
@@ -41,26 +42,6 @@ function summarize(row, kind, exerciseKey) {
 
 // "N×R @ W lbs · RPE X" — N = total sets, R/W = reps/weight at the heaviest
 // weight (top working set), RPE = highest logged RPE across the session.
-function summarizeSets(sets) {
-  if (!sets?.length) return '—';
-  const valid = sets.filter((s) => s.actual_reps != null || s.actual_weight != null);
-  if (!valid.length) return '—';
-
-  const weights = valid.map((s) => s.actual_weight ?? 0);
-  const topWeight = Math.max(...weights);
-  const atTop = valid.filter((s) => (s.actual_weight ?? 0) === topWeight);
-  const topReps = Math.max(...atTop.map((s) => s.actual_reps ?? 0));
-  const rpes = valid.map((s) => s.rpe ?? 0).filter((n) => n > 0);
-  const topRpe = rpes.length ? Math.max(...rpes) : null;
-
-  // Seconds-logged sets read "3×45 sec" instead of bare reps.
-  const secs = valid.some((s) => s.unit === 'secs');
-  const parts = [`${valid.length}×${topReps}${secs ? ' sec' : ''}`];
-  if (topWeight > 0) parts.push(`@ ${topWeight} lbs`);
-  if (topRpe != null) parts.push(`RPE ${topRpe}`);
-  return parts.join(' · ');
-}
-
 function summarizeFeedback(row) {
   const parts = [];
   if (row.quality != null) parts.push(`Q ${row.quality}/5`);

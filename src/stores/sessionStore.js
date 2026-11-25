@@ -113,6 +113,7 @@ export const useSessionStore = create(persist((set, get) => ({
     frcShortChecked: [],
     frcFullChecked: [],
     tabsVisited: [],
+    rampChecked: {},
     sessionStartedAt: new Date().toISOString(),
     sessionEndedAt: null,
   }),
@@ -143,6 +144,26 @@ export const useSessionStore = create(persist((set, get) => ({
       record,
     ],
   })),
+  // Reset Set / un-log: drop a buffered set so it doesn't save.
+  removeSet: (exerciseKey, setNum) => set((s) => ({
+    setsBuffer: s.setsBuffer.filter(
+      (r) => !(r.exercise_key === exerciseKey && r.set_num === setNum)
+    ),
+  })),
+  removeExercisePerf: (exerciseKey) => set((s) => ({
+    exercisePerfBuffer: s.exercisePerfBuffer.filter((r) => r.exercise_key !== exerciseKey),
+  })),
+
+  // Warm-up ramp sets checked per lift ({ [exerciseKey]: [idx, ...] }).
+  // Ramp sets aren't working sets, so they never go to soccer_sets — this is
+  // only so the checkmarks survive a reload mid-session.
+  rampChecked: {},
+  setRampChecked: (exerciseKey, idx, checked) => set((s) => {
+    const next = new Set(s.rampChecked[exerciseKey] ?? []);
+    if (checked) next.add(idx); else next.delete(idx);
+    return { rampChecked: { ...s.rampChecked, [exerciseKey]: [...next] } };
+  }),
+
   pushModuleUsage: (record) => set((s) => ({ moduleUsageBuffer: [...s.moduleUsageBuffer, record] })),
 
   setWarmupChecked: (idx, checked) => set((s) => {
@@ -170,6 +191,7 @@ export const useSessionStore = create(persist((set, get) => ({
     frcShortChecked: [],
     frcFullChecked: [],
     tabsVisited: [],
+    rampChecked: {},
     sessionStartedAt: null,
     sessionEndedAt: null,
   }),
@@ -208,6 +230,7 @@ export const useSessionStore = create(persist((set, get) => ({
     frcShortChecked: state.frcShortChecked,
     frcFullChecked: state.frcFullChecked,
     tabsVisited: state.tabsVisited,
+    rampChecked: state.rampChecked,
     sessionStartedAt: state.sessionStartedAt,
     sessionEndedAt: state.sessionEndedAt,
   }),

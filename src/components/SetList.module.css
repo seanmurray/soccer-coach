@@ -1,0 +1,89 @@
+/* Numbered set rows inside an exercise card. */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+}
+
+.num {
+  width: 34px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: var(--bg-pill);
+  color: var(--t2);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.numOn {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.rowDone .num {
+  background: var(--bg-raised);
+  color: var(--t3);
+}
+
+.target {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.targetMain {
+  font-size: 18px;
+  color: var(--t1);
+}
+.targetSub {
+  font-size: 16px;
+  color: var(--t2);
+}
+.rowDone .targetMain { color: var(--t3); }
+
+.plus {
+  width: 92px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: var(--r-pill);
+  border: 1.5px solid rgba(61, 107, 255, 0.35);
+  background: rgba(61, 107, 255, 0.08);
+  color: var(--t3);
+  font-size: 24px;
+  line-height: 1;
+  transition: transform 0.1s, background 0.15s;
+}
+.plus:active { transform: scale(0.95); }
+.plusOn {
+  border-color: var(--accent);
+  background: var(--accent-bg);
+  color: var(--t1);
+}
+
+.logged {
+  flex-shrink: 0;
+  max-width: 62%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--t2);
+  font-size: 17px;
+  text-align: right;
+}
+.chev {
+  color: var(--accent-hi);
+  font-size: 22px;
+  line-height: 1;
+}

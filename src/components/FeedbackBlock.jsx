@@ -1,19 +1,32 @@
 import { useState } from 'react';
-import styles from './Feedback.module.css';
+import setStyles from './SetList.module.css';
+import uiStyles from './ui/ui.module.css';
+import { FullSheet, PillButton } from './ui/FullSheet';
+import { Stepper } from './ui/Stepper';
+import { BarScale } from './ui/BarScale';
+import { RPE_WORDS } from '../lib/workoutFormat';
 import { useSessionStore } from '../stores/sessionStore';
 
-const EASE_LABELS = {
-  1: 'Max',
-  2: 'Hard',
-  3: 'Target',
-  4: 'Easy',
-  5: 'Too easy',
-};
+const QUALITY = [
+  { value: 1, label: 'Rough',   desc: 'Mechanics fell apart' },
+  { value: 2, label: 'Sloppy',  desc: 'A few good reps' },
+  { value: 3, label: 'Solid',   desc: 'Mostly clean' },
+  { value: 4, label: 'Sharp',   desc: 'Crisp and fast' },
+  { value: 5, label: 'Perfect', desc: 'Best reps in a while' },
+];
 
-// Per-exercise feedback block for agility / plyo. Captures
-// quality (1-5), effort_rpe (5-10), ease (1-5), optional measurement
-// (broad jump distance, box height, etc.), and a freeform notes textarea.
-// Buffers to soccer_exercise_perf on Save (spec §11).
+const EASE = [
+  { value: 1, label: 'Max',      desc: 'All I had' },
+  { value: 2, label: 'Hard',     desc: 'Tough but doable' },
+  { value: 3, label: 'Target',   desc: 'Right where it should be' },
+  { value: 4, label: 'Easy',     desc: 'Had more in the tank' },
+  { value: 5, label: 'Too easy', desc: 'Could push this next time' },
+];
+
+// Per-exercise feedback for agility / plyo: one "How did it go?" row with a +
+// button. The sheet captures quality, effort RPE, ease, the optional
+// measurement (broad jump distance, box height…) and notes, and buffers it to
+// soccer_exercise_perf (spec §11).
 //
 // Encoded notes format when structured fields exist:
 //   "[upgrade · 42 in] freeform notes here"
@@ -27,21 +40,20 @@ export function FeedbackBlock({
 }) {
   const dayType = useSessionStore((s) => s.dayType);
   const pushPerf = useSessionStore((s) => s.pushExercisePerf);
+  const removePerf = useSessionStore((s) => s.removeExercisePerf);
+  const logged = useSessionStore((s) => s.exercisePerfBuffer.find((r) => r.exercise_key === exerciseKey));
 
+  const [open, setOpen] = useState(false);
   const [quality, setQuality] = useState(3);
   const [effort, setEffort] = useState(7);
   const [ease, setEase] = useState(3);
-  const [measureVal, setMeasureVal] = useState('');
+  const [measureVal, setMeasureVal] = useState(null);
   const [notes, setNotes] = useState('');
-  const [saved, setSaved] = useState(false);
 
-  const onSave = () => {
-    // Compose the encoded notes string per spec §11.
+  const onDone = () => {
     const tags = [];
     if (isUpgrade) tags.push('upgrade');
-    if (measure && measureVal !== '' && Number(measureVal) > 0) {
-      tags.push(`${measureVal} ${measure.unit}`);
-    }
+    if (measure && measureVal != null && measureVal > 0) tags.push(`${measureVal} ${measure.unit}`);
     const prefix = tags.length > 0 ? `[${tags.join(' · ')}] ` : '';
     const composed = (prefix + notes).trim();
 
@@ -56,65 +68,85 @@ export function FeedbackBlock({
       notes: composed,
       performed_at: new Date().toISOString(),
     });
-    setSaved(true);
+    setOpen(false);
   };
 
-  const dirty = () => setSaved(false);
+  const onReset = () => {
+    if (window.confirm('Clear the feedback logged for this exercise?')) {
+      removePerf(exerciseKey);
+      setOpen(false);
+    }
+  };
+
+  const qLabel = QUALITY.find((q) => q.value === logged?.quality)?.label;
+  const measureTag = logged?.notes?.match(/\[[^\]]*?(\d[\d.]*\s*\w+)[^\]]*\]/)?.[1];
 
   return (
-    <div className={styles.area}>
-      <div className={styles.row}>
-        <div className={styles.label}>Quality</div>
-        <input type="range" min="1" max="5" step="1" value={quality} className={styles.range}
-          onChange={(e) => { setQuality(Number(e.target.value)); dirty(); }} />
-        <div className={styles.val}>{quality}/5</div>
-      </div>
-      <div className={styles.row}>
-        <div className={styles.label}>Effort</div>
-        <input type="range" min="5" max="10" step="0.5" value={effort} className={styles.range}
-          onChange={(e) => { setEffort(Number(e.target.value)); dirty(); }} />
-        <div className={styles.val}>RPE {effort}</div>
-      </div>
-      <div className={styles.row}>
-        <div className={styles.label}>Ease</div>
-        <input type="range" min="1" max="5" step="1" value={ease} className={styles.range}
-          onChange={(e) => { setEase(Number(e.target.value)); dirty(); }} />
-        <div className={styles.val}>{ease}/5</div>
-      </div>
-      <div className={styles.easeHint}>{ease} = {EASE_LABELS[ease]}</div>
-      {measure && (
-        <div className={styles.measureRow}>
-          <div className={styles.label}>{measure.label}</div>
-          <input
-            type="number"
-            inputMode="numeric"
-            className={styles.measureInput}
-            min={measure.min}
-            max={measure.max}
-            step={measure.step}
-            placeholder={`${measure.min}-${measure.max}`}
-            value={measureVal}
-            onChange={(e) => { setMeasureVal(e.target.value); dirty(); }}
-          />
-          <div className={styles.measureUnit}>{measure.unit}</div>
+    <>
+      <div className={`${setStyles.row} ${logged ? setStyles.rowDone : ''}`}>
+        <div className={`${setStyles.num} ${!logged ? setStyles.numOn : ''}`}>✓</div>
+        <div className={setStyles.target}>
+          <div className={setStyles.targetMain}>How did it go?</div>
+          {!logged && <div className={setStyles.targetSub}>Quality · effort{measure ? ` · ${measure.label.toLowerCase()}` : ''}</div>}
         </div>
-      )}
-      <textarea
-        className={styles.notes}
-        placeholder="Notes (anything worth remembering)"
-        value={notes}
-        onChange={(e) => { setNotes(e.target.value); dirty(); }}
-      />
-      <div className={styles.saveRow}>
-        <button
-          type="button"
-          className={`${styles.save} ${saved ? styles.saved : ''}`}
-          onClick={onSave}
-          disabled={saved}
-        >
-          {saved ? 'Logged ✓' : 'Log feedback'}
-        </button>
+        {logged ? (
+          <button type="button" className={setStyles.logged} onClick={() => setOpen(true)} aria-label="Edit feedback">
+            {qLabel} · RPE {logged.effort_rpe}{measureTag ? ` · ${measureTag}` : ''}
+            <span className={setStyles.chev}>›</span>
+          </button>
+        ) : (
+          <button type="button" className={`${setStyles.plus} ${setStyles.plusOn}`} onClick={() => setOpen(true)} aria-label="Log feedback">
+            +
+          </button>
+        )}
       </div>
-    </div>
+
+      <FullSheet
+        open={open}
+        title="Performance"
+        label={`${exerciseName} feedback`}
+        onClose={() => setOpen(false)}
+        headerActions={logged ? (
+          <button type="button" className={uiStyles.iconBtn} onClick={onReset} aria-label="Reset feedback">↺</button>
+        ) : null}
+        footer={<PillButton onClick={onDone}>✓ DONE</PillButton>}
+      >
+        <div style={{ color: 'var(--t3)', fontSize: 16, margin: '4px 4px 12px' }}>{exerciseName}</div>
+        {measure && (
+          <Stepper
+            label={measure.label}
+            value={measureVal}
+            onChange={setMeasureVal}
+            step={measure.step ?? 1}
+            min={0}
+            max={measure.max ?? 999}
+            decimal
+            unit={measure.unit}
+            placeholder={String(measure.min ?? '—')}
+          />
+        )}
+        <BarScale question="How clean were the reps?" options={QUALITY} value={quality} onChange={setQuality} lowLabel="Rough" highLabel="Perfect" />
+        <Stepper
+          label="Effort (RPE)"
+          value={effort}
+          onChange={(v) => setEffort(v == null ? 7 : v)}
+          step={0.5}
+          min={5}
+          max={10}
+          decimal
+          hint={RPE_WORDS[effort] ?? ' '}
+        />
+        <BarScale question="How did it feel vs. the target?" options={EASE} value={ease} onChange={setEase} lowLabel="Max" highLabel="Too easy" />
+        <div className={uiStyles.card}>
+          <div className={uiStyles.cardLabel}>Notes</div>
+          <textarea
+            className={uiStyles.textArea}
+            placeholder="Anything worth remembering"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+      </FullSheet>
+    </>
   );
 }

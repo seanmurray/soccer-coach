@@ -1,0 +1,85 @@
+.row {
+  margin-bottom: 4px;
+}
+.label {
+  flex: 1;
+  font-size: 18px;
+  color: var(--t2);
+}
+.done {
+  min-height: 40px;
+  color: var(--t2);
+  font-size: 17px;
+}
+
+.sub {
+  color: var(--t3);
+  font-size: 16px;
+  margin: 4px 4px 14px;
+}
+
+.ramp {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.rampOn {
+  border-color: rgba(48, 209, 88, 0.4);
+  background: rgba(48, 209, 88, 0.06);
+}
+.rampWeight {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 28px;
+  color: var(--t1);
+  min-width: 96px;
+}
+.rampUnit {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 17px;
+  color: var(--t3);
+}
+.rampReps {
+  flex: 1;
+  font-size: 17px;
+  color: var(--t2);
+}
+.check {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 2px solid var(--t4);
+  color: var(--on-accent);
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rampOn .check {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 18px;
+  margin-top: 6px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  font-size: 17px;
+  color: var(--t1);
+}
+.top strong { color: var(--accent-hi); }

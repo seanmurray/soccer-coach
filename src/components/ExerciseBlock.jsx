@@ -1,156 +1,146 @@
 import { useState } from 'react';
 import styles from './ExerciseBlock.module.css';
+import uiStyles from './ui/ui.module.css';
+import { FullSheet } from './ui/FullSheet';
 import { ExerciseNote } from './ExerciseNote';
+import { ExerciseHistoryInline } from './ExerciseHistoryInline';
+import { summarizeSets } from '../lib/workoutFormat';
+import { useExerciseHistory } from '../hooks/useExerciseHistory';
 
-// Expandable card: header (name/target/load/tempo) on top, optional cue +
-// body content (children) inside when expanded. Wraps the strength sets,
-// agility/plyo feedback, build sets — all the per-exercise UI.
-
+// One exercise card in the workout: name + ⓘ / ⇄ icons, the prescription
+// line, a "Last time" memory line, then the logging rows (children). A
+// vertical bar down the left edge is blue while in progress and turns green
+// once every set is logged (`complete`).
+//
+// Everything that used to crowd the card — coaching cue, demo link, tempo
+// explanation, contrast cue, form-cue note, upgrade toggle, recent history,
+// per-exercise log settings — lives in the ⓘ sheet. The swap picker lives
+// in the ⇄ sheet (`swapContent`).
 export function ExerciseBlock({
   name,
-  badge,         // optional { text, tone } — rotation/swap indicator under name
-  exerciseKey,   // optional — when provided, renders a persistent form-cue note
-  target,        // e.g. "4×3" or "5×3 @ 185"
-  load,          // optional rec load string (e.g. "185 lbs")
-  tempo,         // optional tempo string e.g. "[5|1|X]"
+  badge,          // optional { text, tone } — rotation/swap indicator under name
+  exerciseKey,    // enables the form-cue note + history in the ⓘ sheet
+  target,         // e.g. "4 sets × 5 reps"
+  load,           // e.g. "57% · 230 lb"
+  tempo,          // e.g. "[5|1|X]"
+  tempoText,      // plain-words tempo explanation
+  note,           // phase/week note
   cue,
   url,
-  tags = [],
-  contrast,      // realization-phase contrast cue (string)
-  swaps = [],
-  activeSwap = null,    // currently selected swap label, or null
-  onSelectSwap,         // (label | null) => void — toggles the active swap
-  originalName,         // when swap/upgrade is active, this is the canonical name to display in the note
-  upgrade = null,       // optional { name, desc, prereq, url } variant
+  contrast,       // realization-phase contrast cue
+  originalName,   // canonical name for the form-cue note when swapped/upgraded
+  upgrade = null, // optional { name, desc, prereq, url } variant
   upgradeActive = false,
-  onToggleUpgrade,      // () => void — toggles upgrade on/off
+  onToggleUpgrade,
+  historyKind = 'sets', // 'sets' | 'feedback' | null (no history)
+  swapContent,    // ReactNode for the ⇄ sheet; omit to hide the icon
+  settingsContent,// ReactNode for the ⓘ sheet's Settings section
+  warmup,         // ReactNode row rendered above the sets (warm-up ramp)
+  complete = false,
   children,
-  defaultOpen = false,
 }) {
-  const [open, setOpen] = useState(defaultOpen);
+  const [sheet, setSheet] = useState(null); // 'info' | 'swap' | null
 
   return (
-    <section className={styles.block}>
-      <div
-        role="button"
-        tabIndex={0}
-        className={styles.header}
-        onClick={() => setOpen((o) => !o)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOpen((o) => !o); }
-        }}
-        aria-expanded={open}
-      >
-        <div>
-          <div className={styles.name}>{name}</div>
-          {badge && (
-            <div
-              style={{
-                display: 'inline-block', marginTop: 4, fontSize: 12.5, fontWeight: 700,
-                letterSpacing: '0.02em', padding: '3px 8px', borderRadius: 6,
-                color: badge.tone === 'swap' ? 'var(--blue)' : badge.tone === 'custom' ? 'var(--amber)' : 'var(--purple)',
-                background: badge.tone === 'swap' ? 'rgba(10,132,255,0.12)' : badge.tone === 'custom' ? 'var(--amber-bg)' : 'var(--purple-bg)',
-              }}
-            >
-              {badge.text}
-            </div>
-          )}
-          {target && <div className={styles.target}>{target}</div>}
-          {tags.length > 0 && (
-            <div className={styles.tagRow}>
-              {tags.map((t) => (
-                <span key={t} className={`${styles.tag} ${styles[`tag${t[0].toUpperCase() + t.slice(1)}`] ?? ''}`}>
-                  {t}
-                </span>
-              ))}
-            </div>
-          )}
+    <section className={`${styles.card} ${complete ? styles.complete : ''}`}>
+      <div className={styles.bar} aria-hidden />
+      <div className={styles.inner}>
+        <div className={styles.head}>
+          <div className={styles.titleCol}>
+            <h3 className={styles.name}>{name}</h3>
+            {badge && <span className={`${styles.badge} ${styles[`badge_${badge.tone}`] ?? ''}`}>{badge.text}</span>}
+          </div>
+          <div className={styles.icons}>
+            <button type="button" className={styles.icon} onClick={() => setSheet('info')} aria-label={`About ${name}`}>
+              <span className={styles.infoGlyph}>i</span>
+            </button>
+            {swapContent && (
+              <button type="button" className={styles.icon} onClick={() => setSheet('swap')} aria-label={`Swap ${name}`}>
+                ⇄
+              </button>
+            )}
+          </div>
         </div>
-        <div className={styles.metaRight}>
-          {load  && <div className={styles.load}>{load}</div>}
-          {tempo && <div className={styles.tempo}>{tempo}</div>}
-        </div>
+
+        {(target || load || tempo) && (
+          <div className={styles.rx}>
+            {target && <span>{target}</span>}
+            {load && <span className={styles.load}>{load}</span>}
+            {tempo && <span className={styles.tempo}>{tempo}</span>}
+          </div>
+        )}
+
+        {exerciseKey && historyKind === 'sets' && <LastTime exerciseKey={exerciseKey} />}
+
+        {warmup}
+
+        <div className={styles.body}>{children}</div>
       </div>
 
-      {open && (
-        <div className={styles.body}>
-          {cue && <div className={styles.cue}>{cue}</div>}
-
-          {url && (
-            <a href={url} target="_blank" rel="noreferrer" className={styles.video}>
-              ▸ Watch
-            </a>
-          )}
-
-          {contrast && (
-            <div className={styles.contrastBox}>
-              <strong>Contrast set:</strong> {contrast}
-            </div>
-          )}
-
-          {exerciseKey && <ExerciseNote exerciseKey={exerciseKey} exerciseName={originalName ?? name} />}
-
-          {upgrade && onToggleUpgrade && (
-            <div className={styles.upgradeSection}>
+      <FullSheet open={sheet === 'info'} title={name} onClose={() => setSheet(null)}>
+        {cue && <p className={styles.cue}>{cue}</p>}
+        {url && (
+          <a href={url} target="_blank" rel="noreferrer" className={styles.watch}>▸ Watch demo</a>
+        )}
+        {(tempoText || note) && (
+          <div className={uiStyles.card}>
+            {tempo && <div className={uiStyles.cardLabel}>Tempo {tempo}</div>}
+            {tempoText && <p className={styles.sheetText}>{tempoText}</p>}
+            {note && <p className={styles.sheetText}>{note}</p>}
+          </div>
+        )}
+        {contrast && (
+          <div className={`${uiStyles.card} ${styles.contrast}`}>
+            <strong>Contrast set:</strong> {contrast}
+          </div>
+        )}
+        {exerciseKey && <ExerciseNote exerciseKey={exerciseKey} exerciseName={originalName ?? name} />}
+        {upgrade && onToggleUpgrade && (
+          <div className={uiStyles.card}>
+            <div className={uiStyles.cardHead}>
+              <div className={uiStyles.cardLabel}>Upgrade: {upgrade.name}</div>
               <button
                 type="button"
-                className={`${styles.upgradePill} ${upgradeActive ? styles.active : ''}`}
+                className={`${styles.upgradeBtn} ${upgradeActive ? styles.upgradeOn : ''}`}
                 onClick={onToggleUpgrade}
                 aria-pressed={upgradeActive}
               >
-                {upgradeActive ? '↥ Using upgrade' : '↥ Try upgrade'}
+                {upgradeActive ? 'Using it' : 'Try it'}
               </button>
-              <div className={styles.upgradeBlock}>
-                <div className={styles.upgradeName}>{upgrade.name}</div>
-                <div className={styles.upgradeDesc}>{upgrade.desc}</div>
-                {upgrade.prereq && (
-                  <div className={styles.upgradePrereq}>Prereq: {upgrade.prereq}</div>
-                )}
-              </div>
             </div>
-          )}
+            <p className={styles.sheetText}>{upgrade.desc}</p>
+            {upgrade.prereq && <p className={styles.sheetMuted}>Prereq: {upgrade.prereq}</p>}
+          </div>
+        )}
+        {exerciseKey && historyKind && (
+          <ExerciseHistoryInline exerciseKey={exerciseKey} kind={historyKind} />
+        )}
+        {settingsContent && (
+          <>
+            <div className={`overline ${styles.sheetSection}`}>Settings</div>
+            {settingsContent}
+          </>
+        )}
+      </FullSheet>
 
-          {children}
-
-          {swaps.length > 0 && (
-            <div className={styles.swapSection}>
-              <div className={styles.swapLabel}>
-                {onSelectSwap ? 'Swap to' : 'Swaps'}
-              </div>
-              {onSelectSwap ? (
-                <>
-                  <div className={styles.swapList}>
-                    {swaps.map((s) => {
-                      const isActive = activeSwap === s;
-                      return (
-                        <button
-                          key={s}
-                          type="button"
-                          className={`${styles.swapPill} ${isActive ? styles.active : ''}`}
-                          onClick={() => onSelectSwap(isActive ? null : s)}
-                          aria-pressed={isActive}
-                        >
-                          {s}
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {activeSwap && (
-                    <div className={styles.swapNote}>
-                      Logging this set as <strong>{activeSwap}</strong>
-                      {originalName ? ` (swap: ${originalName})` : ''}.
-                    </div>
-                  )}
-                </>
-              ) : (
-                swaps.map((s) => (
-                  <div key={s} className={styles.swapPill} style={{ display: 'inline-block', marginRight: 6, marginBottom: 6 }}>{s}</div>
-                ))
-              )}
-            </div>
-          )}
-        </div>
+      {swapContent && (
+        <FullSheet open={sheet === 'swap'} title="Swap Exercise" onClose={() => setSheet(null)}>
+          {swapContent}
+        </FullSheet>
       )}
     </section>
+  );
+}
+
+// "Last time: 4×5 · @ 225 lbs · RPE 8" — the most recent past session for
+// this exercise, right on the card so you don't have to remember it.
+function LastTime({ exerciseKey }) {
+  const { data } = useExerciseHistory(exerciseKey, 'sets');
+  const last = data?.[0];
+  if (!last) return null;
+  return (
+    <div className={styles.lastTime}>
+      <span className={styles.lastLabel}>Last time</span> {summarizeSets(last.sets)}
+    </div>
   );
 }
