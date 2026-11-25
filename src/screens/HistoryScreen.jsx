@@ -25,7 +25,7 @@ const modeBadgeClass = (mode) => {
   }
 };
 
-export function HistoryScreen({ embedded = false } = {}) {
+export function HistoryScreen({ embedded = false, focusId = null } = {}) {
   const { data: sessions, isLoading, error } = useSessions();
   const { data: prTimeline } = usePRTimeline();
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -79,7 +79,8 @@ export function HistoryScreen({ embedded = false } = {}) {
       <WeekLog />
       {sessions.map((s) => (
         <SessionCard
-          key={s.id}
+          key={s.id === focusId ? `${s.id}-focus` : s.id}
+          focused={s.id === focusId}
           session={s}
           prTimeline={prTimeline}
           onRequestDelete={() => setPendingDelete(s)}
@@ -96,15 +97,16 @@ export function HistoryScreen({ embedded = false } = {}) {
   );
 }
 
-function SessionCard({ session, prTimeline, onRequestDelete }) {
-  const [expanded, setExpanded] = useState(false);
+function SessionCard({ session, prTimeline, onRequestDelete, focused = false }) {
+  // A calendar pick remounts the card (new key) so it opens expanded.
+  const [expanded, setExpanded] = useState(focused);
   const dayInfo = DAY_TYPE_INFO[session.day_type];
   const modeLabel = MODE_DATA[session.mode]?.label ?? session.mode ?? '—';
   const phase = session.metadata?.phase ?? (session.week_num ? getPhaseLabel(session.week_num) : null);
   const prs = prTimeline ? prsForSession(prTimeline, session.id) : [];
 
   return (
-    <div className={styles.item}>
+    <div className={styles.item} id={`session-${session.id}`}>
       <div
         role="button"
         tabIndex={0}

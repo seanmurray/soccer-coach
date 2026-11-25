@@ -162,6 +162,8 @@ export default function App() {
     queryClient.invalidateQueries({ queryKey: ['sprint_exposure'] });
     queryClient.invalidateQueries({ queryKey: ['readiness_baseline'] });
     queryClient.invalidateQueries({ queryKey: ['recent_workouts'] });
+    queryClient.invalidateQueries({ queryKey: ['history_range'] });
+    queryClient.invalidateQueries({ queryKey: ['week_status'] });
 
     // Fire the debrief in the background — non-blocking. When it returns
     // it updates ai_debrief on the row and invalidates queries again so

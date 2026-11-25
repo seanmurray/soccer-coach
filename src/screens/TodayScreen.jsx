@@ -1,17 +1,17 @@
 import styles from './TodayScreen.module.css';
-import common from '../components/Common.module.css';
-import { ReadinessRing } from '../components/ReadinessRing';
-import { ModeBanner } from '../components/ModeBanner';
-import { AiInsightCard } from '../components/AiInsightCard';
-import { WeekBar } from '../components/WeekBar';
+import dash from '../components/dashboard/Dashboard.module.css';
+import flow from './workout/flow.module.css';
+import { PillButton } from '../components/ui/FullSheet';
+import { ReadinessHero } from '../components/dashboard/ReadinessHero';
+import { LoadTiles } from '../components/dashboard/LoadTiles';
 import { MaxSuggestion } from '../components/MaxSuggestion';
-import { TodayLoadStrip } from '../components/TodayLoadStrip';
 import { HrPrescriptionBanner } from '../components/HrPrescriptionBanner';
 import { RecoveryActivityBadge } from '../components/RecoveryActivityBadge';
 import { WeekComplete } from '../components/WeekComplete';
 import { LoadScreen } from './LoadScreen';
 import { useSessionStore } from '../stores/sessionStore';
-import { MODE_INSIGHTS } from '../data/sessions';
+import { DAY_TYPE_INFO, MODE_DATA, MODE_INSIGHTS } from '../data/sessions';
+import { getPhaseLabel } from '../lib/periodization';
 
 const scrollToLoad = () =>
   document.getElementById('training-load')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -19,58 +19,58 @@ const scrollToLoad = () =>
 const formatToday = (d) =>
   d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
+// Dashboard: readiness hero (latest check-in), this week's progress with the
+// days × weeks grid + Complete Week, load / sprint tiles, the next session,
+// any banners that need attention, then the full Training load section.
+// "View Today's Session" stays docked above the tab bar.
 export function TodayScreen({ onStartSession }) {
-  const rec = useSessionStore((s) => s.rec);
-  const battery = useSessionStore((s) => s.battery);
   const mode = useSessionStore((s) => s.mode);
   const dayType = useSessionStore((s) => s.dayType);
+  const week = useSessionStore((s) => s.week);
+  const inSession = useSessionStore((s) => !!s.sessionStartedAt);
 
   const insight = MODE_INSIGHTS[mode]?.[dayType] ?? '';
+  const phase = getPhaseLabel(week);
 
   return (
     <main className="screen">
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div className="overline">{formatToday(new Date())}</div>
-          <div className="title-xl">Today</div>
+      <div className={dash.header}>
+        <div>
+          <div className={dash.wordmark}>SOCCER <span>COACH</span></div>
+          <div className={dash.date}>{formatToday(new Date())}</div>
         </div>
-        <WeekBar />
+        <div className={dash.weekPill}>Wk {week} <span>{phase}</span></div>
       </div>
 
-      {/* Two big Athlytic rings — Recovery is the lead readiness signal
-          (54% of the composite), Battery is the multi-day energy balance.
-          Together they mirror the two rings on Athlytic's own home screen. */}
-      <div className={styles.rings}>
-        <ReadinessRing value={rec}     label="Recovery" color="#30d158" />
-        <ReadinessRing value={battery} label="Battery"  color="#0a84ff" />
-      </div>
-
-      <ModeBanner mode={mode} />
-
-      <RecoveryActivityBadge />
+      <ReadinessHero />
 
       <WeekComplete />
 
-      {/* Glanceable training-load summary; tapping it scrolls to the full
-          Training load section at the bottom of this screen.
-          Today's HR prescription stays here (it's about today's session) along
-          with any working-max backfill suggestions from recent set history. */}
-      <TodayLoadStrip onOpen={scrollToLoad} />
+      <LoadTiles onOpen={scrollToLoad} />
+
+      <div className={dash.sessionCard}>
+        <div className={dash.sessionKicker}>{inSession ? 'In progress' : 'Next up'}</div>
+        <div className={dash.sessionName}>{DAY_TYPE_INFO[dayType]?.sub ?? 'Workout'}</div>
+        <div className={dash.sessionMeta}>Week {week} · last check-in: {MODE_DATA[mode]?.label}</div>
+        {insight && <div className={dash.sessionInsight}>{insight}</div>}
+      </div>
+
+      <RecoveryActivityBadge />
       <HrPrescriptionBanner />
       <MaxSuggestion />
 
-      <AiInsightCard>{insight || 'Check in after your warm-up to set today’s training.'}</AiInsightCard>
-
-      <button type="button" className={common.cta} onClick={onStartSession}>
-        View Today&apos;s Session →
-      </button>
-
-      {/* Training load — formerly its own tab. Kept below the start button
-          so today's decision flow stays on top. */}
+      {/* Training load — formerly its own tab. */}
       <section id="training-load" className={styles.loadSection}>
         <div className={`overline ${styles.label}`}>Training load</div>
         <LoadScreen embedded />
       </section>
+
+      <div className={flow.ctaSpacer} />
+      <div className={flow.ctaDock}>
+        <PillButton variant="accent" onClick={onStartSession}>
+          {inSession ? '▷ Resume Workout' : 'View Today’s Session →'}
+        </PillButton>
+      </div>
     </main>
   );
 }

@@ -60,6 +60,8 @@ export function useDeleteSession() {
       queryClient.invalidateQueries({ queryKey: ['max_suggestions'] });
       queryClient.invalidateQueries({ queryKey: ['acwr'] });
       queryClient.invalidateQueries({ queryKey: ['cns_budget'] });
+      queryClient.invalidateQueries({ queryKey: ['history_range'] });
+      queryClient.invalidateQueries({ queryKey: ['week_status'] });
     },
   });
 }

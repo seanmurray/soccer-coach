@@ -1,0 +1,219 @@
+/* Dashboard: readiness hero, week grid, load tiles, session card. */
+
+/* ── Readiness hero ── */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 20px 20px 16px;
+  margin-bottom: 14px;
+  border-radius: var(--r4);
+  border: 1px solid var(--line-strong);
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(61, 107, 255, 0.28), rgba(61, 107, 255, 0) 60%),
+    linear-gradient(180deg, #0f1430, #0b0e1c);
+}
+.heroTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+.heroKicker {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t2);
+}
+.heroWindow {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent-hi);
+}
+.heroScoreRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+.heroScore {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 96px;
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  color: var(--t1);
+  font-style: italic;
+}
+.heroOutOf {
+  font-size: 26px;
+  color: var(--t3);
+  padding-bottom: 6px;
+}
+.heroDelta {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--t1);
+  padding-bottom: 6px;
+}
+.heroDeltaSub { font-size: 14px; font-weight: 500; color: var(--t3); }
+.heroMode {
+  margin-top: 14px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+}
+.heroSub { margin-top: 2px; font-size: 16px; color: var(--t2); }
+.heroLoading { color: var(--t4); }
+.heroEmpty { margin-top: 10px; font-size: 17px; color: var(--t2); line-height: 1.5; }
+
+.spark { margin-top: 16px; }
+.spark svg { width: 100%; height: 56px; display: block; }
+.sparkLine { fill: none; stroke: var(--accent-hi); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.sparkRef { stroke: rgba(48, 209, 88, 0.45); stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.sparkDot { fill: var(--accent); }
+.sparkDotOn { fill: #fff; stroke: var(--accent); stroke-width: 2; }
+.sparkLegend {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--t3);
+}
+.sparkRefLabel { color: rgba(48, 209, 88, 0.8); }
+
+/* ── Week grid ── */
+.grid {
+  display: grid;
+  gap: 5px;
+  align-items: center;
+  margin: 6px 0 14px;
+}
+.gridHead {
+  text-align: center;
+  font-size: 13px;
+  color: var(--t3);
+  font-variant-numeric: tabular-nums;
+}
+.gridHeadOn { color: var(--accent-hi); font-weight: 700; }
+.gridLabel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--t3);
+}
+.cell {
+  aspect-ratio: 1;
+  max-width: 26px;
+  justify-self: center;
+  width: 100%;
+  border-radius: 5px;
+  border: 1.5px solid var(--t4);
+}
+.cellOn {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.cellNow:not(.cellOn) { border-color: var(--accent-line); }
+
+/* ── Load tiles ── */
+.tiles {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.tile {
+  text-align: left;
+  padding: 16px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  transition: background 0.15s;
+}
+.tile:active { background: var(--bg-raised); }
+.tileLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  color: var(--t2);
+}
+.tileIcon { color: var(--accent-hi); flex-shrink: 0; }
+.tileValue {
+  margin-top: 8px;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 32px;
+  color: var(--t1);
+}
+.tileTrend { font-size: 22px; margin-left: 4px; color: var(--t2); }
+.tileSub { margin-top: 2px; font-size: 15px; font-weight: 600; }
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.wordmark {
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 23px;
+  letter-spacing: 0.02em;
+  color: var(--t1);
+}
+.wordmark span { color: var(--accent-hi); }
+.date { font-size: 15px; color: var(--t3); margin-top: 2px; }
+.weekPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--t1);
+  white-space: nowrap;
+}
+.weekPill span { color: var(--accent-hi); }
+
+/* ── Today's session card ── */
+.sessionCard {
+  padding: 18px 18px 16px;
+  margin-bottom: 14px;
+  border-radius: var(--r4);
+  border: 1px solid var(--line);
+  background: linear-gradient(160deg, rgba(61, 107, 255, 0.10), rgba(61, 107, 255, 0) 50%), var(--bg-card);
+}
+.sessionKicker {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+.sessionName {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  color: var(--t1);
+}
+.sessionMeta { margin-top: 2px; font-size: 16px; color: var(--t2); }
+.sessionInsight {
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.55;
+  color: var(--t2);
+}

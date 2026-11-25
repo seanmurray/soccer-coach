@@ -4,6 +4,7 @@ import sheet from './PostSessionSheet.module.css';
 import { useSessionStore } from '../stores/sessionStore';
 import { getPhaseLabel } from '../lib/periodization';
 import { DAY_TYPE_INFO } from '../data/sessions';
+import { WeekGrid } from './dashboard/WeekGrid';
 import { useWeekStatus, useCompleteWeek, useWeekCompletions, REQUIRED_DAYS } from '../hooks/useWeek';
 
 const todayStr = () => {
@@ -23,6 +24,7 @@ export function WeekComplete() {
   const [open, setOpen] = useState(false);
 
   const phase = getPhaseLabel(week);
+  const doneCount = REQUIRED_DAYS.filter((d) => status?.requiredDone?.[d]).length;
 
   return (
     <div className={styles.card}>
@@ -31,26 +33,13 @@ export function WeekComplete() {
         <div className={styles.phase}>{phase}</div>
       </div>
 
-      {/* Compact status pills — short labels (e.g. ACCEL, MAX VEL) keep each
-          pill on a single line; the done state is communicated by the green
-          glow, so the labels can be terse. The long names live on tabs. */}
-      <div className={styles.days}>
-        {REQUIRED_DAYS.map((d) => (
-          <div
-            key={d}
-            className={`${styles.day} ${status?.requiredDone?.[d] ? styles.dayDone : ''}`}
-            title={DAY_TYPE_INFO[d]?.sub}
-          >
-            {DAY_TYPE_INFO[d]?.short ?? d}
-          </div>
-        ))}
-        <div
-          className={`${styles.day} ${styles.dayCond} ${status?.condDone ? styles.dayDone : ''}`}
-          title="Conditioning (optional)"
-        >
-          COND
-        </div>
+      <div className={styles.progressLine}>
+        <strong>{status ? doneCount : '–'}</strong> of {REQUIRED_DAYS.length} required days done
+        {status?.condDone ? ' · conditioning ✓' : ''}
       </div>
+
+      {/* Days × weeks history grid — this week's column is outlined. */}
+      <WeekGrid />
 
       <button type="button" className={styles.completeBtn} onClick={() => setOpen(true)}>
         Complete Week {week} →
