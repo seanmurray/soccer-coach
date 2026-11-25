@@ -84,7 +84,7 @@ export function FeedbackBlock({
   return (
     <>
       <div className={`${setStyles.row} ${logged ? setStyles.rowDone : ''}`}>
-        <div className={`${setStyles.num} ${!logged ? setStyles.numOn : ''}`}>✓</div>
+        <div className={`${setStyles.num} ${logged ? setStyles.numDone : ''}`}>{logged ? '✓' : '•'}</div>
         <div className={setStyles.target}>
           <div className={setStyles.targetMain}>How did it go?</div>
           {!logged && <div className={setStyles.targetSub}>Quality · effort{measure ? ` · ${measure.label.toLowerCase()}` : ''}</div>}

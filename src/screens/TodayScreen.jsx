@@ -1,16 +1,13 @@
 import styles from './TodayScreen.module.css';
 import common from '../components/Common.module.css';
 import { ReadinessRing } from '../components/ReadinessRing';
-import { ReadinessSliders } from '../components/ReadinessSliders';
 import { ModeBanner } from '../components/ModeBanner';
-import { DaySelector } from '../components/DaySelector';
 import { AiInsightCard } from '../components/AiInsightCard';
 import { WeekBar } from '../components/WeekBar';
 import { MaxSuggestion } from '../components/MaxSuggestion';
 import { TodayLoadStrip } from '../components/TodayLoadStrip';
 import { HrPrescriptionBanner } from '../components/HrPrescriptionBanner';
 import { RecoveryActivityBadge } from '../components/RecoveryActivityBadge';
-import { MastersSpacingWarning } from '../components/MastersSpacingWarning';
 import { WeekComplete } from '../components/WeekComplete';
 import { LoadScreen } from './LoadScreen';
 import { useSessionStore } from '../stores/sessionStore';
@@ -62,16 +59,10 @@ export function TodayScreen({ onStartSession }) {
       <HrPrescriptionBanner />
       <MaxSuggestion />
 
-      <ReadinessSliders />
-
-      <div className={`overline ${styles.label}`}>Session</div>
-      <DaySelector />
-      <MastersSpacingWarning />
-
-      <AiInsightCard>{insight || 'Set your readiness scores above.'}</AiInsightCard>
+      <AiInsightCard>{insight || 'Check in after your warm-up to set today’s training.'}</AiInsightCard>
 
       <button type="button" className={common.cta} onClick={onStartSession}>
-        Start Session →
+        View Today&apos;s Session →
       </button>
 
       {/* Training load — formerly its own tab. Kept below the start button

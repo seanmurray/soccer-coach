@@ -93,6 +93,21 @@ export const useSessionStore = create(persist((set, get) => ({
     try { localStorage.setItem(WEEK_KEY, String(week)); } catch { /* ignore */ }
   },
 
+  // ── Workout flow stage ──
+  // 'overview'  — day overview (pick day, swap, Start)
+  // 'warmup'    — warm-up checklist (session has started)
+  // 'readiness' — readiness check-in (drives mode)
+  // 'active'    — logging the workout
+  // 'complete'  — Workout Complete form (Finish tapped)
+  // Persisted so a reload lands you back on the same step.
+  stage: 'overview',
+  setStage: (stage) => set({ stage }),
+
+  // Check-in extras captured on the readiness step; saved to
+  // soccer_sessions.metadata. focus: one of FOCUS_OPTIONS ids or 'custom'.
+  checkin: { focus: null, focusCustom: '', injuryRehab: false },
+  setCheckin: (patch) => set((s) => ({ checkin: { ...s.checkin, ...patch } })),
+
   // ── In-flight workout buffers ──
   // Sets buffer: per-set strength/build records waiting to flush to Supabase.
   setsBuffer: [],
@@ -116,6 +131,8 @@ export const useSessionStore = create(persist((set, get) => ({
     rampChecked: {},
     sessionStartedAt: new Date().toISOString(),
     sessionEndedAt: null,
+    stage: 'warmup',
+    checkin: { focus: null, focusCustom: '', injuryRehab: false },
   }),
 
   // Stamp the real end-of-session time when "Finish Session" is tapped — used
@@ -194,14 +211,21 @@ export const useSessionStore = create(persist((set, get) => ({
     rampChecked: {},
     sessionStartedAt: null,
     sessionEndedAt: null,
+    stage: 'overview',
+    checkin: { focus: null, focusCustom: '', injuryRehab: false },
   }),
 }), {
   name: 'soccer-coach-session',
   // Bump when the meaning of any persisted field changes so we can rescale
   // cached values in `migrate`. v1: Athlytic stress scale 0-60 → 0-100.
-  version: 1,
+  version: 2,
   storage: createJSONStorage(() => localStorage),
   migrate: (persisted, fromVersion) => {
+    // v2: workout flow stage. An install mid-session lands on the workout;
+    // otherwise on the day overview.
+    if (fromVersion < 2 && persisted) {
+      persisted.stage = persisted.sessionStartedAt ? 'active' : 'overview';
+    }
     if (fromVersion < 1 && persisted) {
       if (persisted.stress != null) {
         persisted.stress = Math.round((persisted.stress * 100) / 60);
@@ -231,6 +255,8 @@ export const useSessionStore = create(persist((set, get) => ({
     frcFullChecked: state.frcFullChecked,
     tabsVisited: state.tabsVisited,
     rampChecked: state.rampChecked,
+    stage: state.stage,
+    checkin: state.checkin,
     sessionStartedAt: state.sessionStartedAt,
     sessionEndedAt: state.sessionEndedAt,
   }),

@@ -82,12 +82,36 @@ export default function App() {
     };
   };
 
+  // Dashboard CTA → the Workout tab's day overview.
+  const goToWorkout = () => setTab('workout');
+
+  // Start Workout on the day overview. Today-scope swaps are NOT cleared here
+  // any more: you pick them on the overview right before starting. They're
+  // in-memory only and get cleared on save / cancel.
   const handleStart = () => {
     startSession();
+    clearUpgrades();
+  };
+
+  const clearInFlight = () => {
+    resetSession();
     clearSwaps();
     clearTodaySlots();
     clearUpgrades();
-    setTab('workout');
+  };
+
+  // Cancel Workout — throws away everything logged this session.
+  const handleCancel = () => {
+    const logged = useSessionStore.getState().setsBuffer.length;
+    const msg = logged > 0
+      ? `Cancel this workout? The ${logged} set${logged === 1 ? '' : 's'} you logged will be discarded.`
+      : 'Cancel this workout?';
+    if (window.confirm(msg)) clearInFlight();
+  };
+
+  // Back from the warm-up = never mind, don't start.
+  const handleAbandonStart = () => {
+    if (window.confirm('Leave the warm-up? The workout won’t be started.')) clearInFlight();
   };
 
   // Finish Session button on the Workout screen — open the post-session sheet.
@@ -134,10 +158,7 @@ export default function App() {
       queryClient,
     });
 
-    resetSession();
-    clearSwaps();
-    clearTodaySlots();
-    clearUpgrades();
+    clearInFlight();
     setTab('history');
   };
 
@@ -149,10 +170,15 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <ReadinessBaselineSync />
       <div hidden={tab !== 'dashboard'}>
-        <TodayScreen onStartSession={handleStart} />
+        <TodayScreen onStartSession={goToWorkout} />
       </div>
       <div hidden={tab !== 'workout'}>
-        <WorkoutScreen onFinish={handleFinish} />
+        <WorkoutScreen
+          onStart={handleStart}
+          onFinish={handleFinish}
+          onCancel={handleCancel}
+          onAbandonStart={handleAbandonStart}
+        />
       </div>
       <div hidden={tab !== 'history'}>
         <HistoryHubScreen />

@@ -34,6 +34,10 @@
   background: var(--bg-raised);
   color: var(--t3);
 }
+.rowDone .numDone {
+  background: rgba(48, 209, 88, 0.16);
+  color: var(--green);
+}
 
 .target {
   flex: 1;

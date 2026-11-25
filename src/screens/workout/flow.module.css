@@ -1,0 +1,358 @@
+/* Workout flow screens: Day overview, Warm-up, Check-in, Active workout. */
+
+.sub {
+  margin-top: 6px;
+  font-size: 16px;
+  color: var(--t3);
+}
+.lede {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--t2);
+  margin: 10px 0 18px;
+}
+
+/* ── Week · Day stepper ── */
+.dayStepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 22px;
+  margin: 22px 0 8px;
+}
+.stepBtn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+  color: var(--accent-hi);
+  font-size: 30px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 3px;
+}
+.stepBtn:disabled { opacity: 0.3; }
+.stepText { text-align: center; min-width: 110px; }
+.stepWeek { font-size: 15px; font-weight: 600; color: var(--t3); }
+.stepDay { font-size: 19px; font-weight: 700; color: var(--t1); }
+
+/* ── Section heads ── */
+.sectionHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 22px 0 10px;
+}
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  color: var(--t1);
+}
+.hint { font-size: 14px; color: var(--t3); text-align: right; }
+.linkBtn {
+  color: var(--accent-hi);
+  font-size: 16px;
+  font-weight: 600;
+  min-height: 40px;
+}
+
+.group { margin-bottom: 14px; }
+.groupLabel { margin: 14px 2px 8px; }
+
+/* ── Exercise row (overview) ── */
+.exRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 64px;
+  padding: 10px 8px 10px 18px;
+  margin-bottom: 8px;
+  border-radius: var(--r3);
+  background: linear-gradient(160deg, rgba(61, 107, 255, 0.08), rgba(61, 107, 255, 0) 60%), var(--bg-card);
+  border: 1px solid var(--line);
+}
+.exText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.exName {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--t1);
+}
+.exTarget {
+  font-size: 15px;
+  color: var(--t3);
+}
+.rowIcon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  color: var(--t2);
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rowIcon:active { background: var(--bg-raised); }
+.infoGlyph {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.8px solid currentColor;
+  font-family: Georgia, serif;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.infoAccent { color: var(--accent-hi); }
+
+/* ── Docked CTA above the tab bar ── */
+.ctaSpacer { height: 96px; }
+.ctaDock {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(var(--bottom-nav-h) + var(--sab) + 4px);
+  width: 100%;
+  max-width: var(--app-max-w);
+  padding: 0 16px;
+  z-index: 90;
+}
+.ctaRow {
+  display: flex;
+  gap: 10px;
+}
+.ctaRow > :last-child { flex: 1; }
+.skipBtn {
+  min-height: 58px;
+  padding: 0 24px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  color: var(--t1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+/* ── Sheets ── */
+.sheetCue {
+  font-size: 18px;
+  line-height: 1.55;
+  color: var(--t1);
+  margin: 4px 4px 14px;
+}
+.watch {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap-min);
+  padding: 0 16px;
+  margin: 0 0 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--accent-line);
+  color: var(--accent-hi);
+  font-size: 16px;
+  font-weight: 600;
+}
+.badge {
+  display: inline-block;
+  margin: 0 4px 10px;
+  padding: 3px 10px;
+  border-radius: 7px;
+  background: var(--purple-bg);
+  color: var(--purple);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ── Check-off cards (warm-up) ── */
+.checkCard {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 70px;
+  padding: 12px 12px 12px 18px;
+  margin-bottom: 8px;
+  border-radius: var(--r3);
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+.checkOn {
+  border-color: rgba(48, 209, 88, 0.35);
+  background: rgba(48, 209, 88, 0.05);
+}
+.checkText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.checkBox {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  margin: 0 4px;
+  border-radius: 9px;
+  border: 1.5px solid var(--t4);
+  background: var(--bg-pill);
+  color: var(--on-accent);
+  font-size: 19px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.checkOn .checkBox {
+  background: var(--green);
+  border-color: var(--green);
+}
+
+/* ── Flow header ── */
+.flowHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: -4px 0 14px;
+}
+.backBtn {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  color: var(--t1);
+  font-size: 28px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 3px;
+}
+.backSpacer { width: 44px; }
+.flowTitle {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+.flowTitleMain { font-size: 16px; font-weight: 700; color: var(--t1); }
+.flowTitleSub { font-size: 14px; color: var(--t3); }
+.flowRight { width: 44px; display: flex; justify-content: flex-end; }
+
+/* ── Check-in bits ── */
+.chip {
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--line-strong);
+  color: var(--t3);
+  font-size: 14px;
+  font-weight: 600;
+}
+.chipOn {
+  border-color: var(--amber-line);
+  color: var(--amber);
+  background: var(--amber-bg);
+}
+.textInput {
+  width: 100%;
+  min-height: 52px;
+  padding: 0 14px;
+  border-radius: var(--r2);
+  background: var(--bg-input);
+  border: 1px solid var(--line);
+  color: var(--t1);
+  font-size: 17px;
+}
+.textInput:focus { outline: 2px solid var(--accent); }
+
+/* ── Active workout ── */
+.pinned {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -110%);
+  width: 100%;
+  max-width: var(--app-max-w);
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: calc(var(--sat) + 8px) 16px 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.7));
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: transform 0.22s var(--ease-sheet);
+  pointer-events: none;
+}
+.pinnedOn {
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.pinTitle {
+  flex: 1;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  color: var(--t1);
+  padding: 8px 14px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pinTimer {
+  min-width: 44px;
+  height: 44px;
+  padding: 0 10px;
+  border-radius: var(--r-pill);
+  background: var(--glass);
+  border: 1px solid var(--line-strong);
+  color: var(--t2);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pinTimerOn {
+  color: var(--accent-hi);
+  border-color: var(--accent-line);
+  background: var(--accent-bg);
+}
+
+.block { margin-top: 26px; }
+.blockTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 28px;
+  color: var(--t1);
+  margin: 0 2px 12px;
+}
+
+.finishStack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0 24px;
+}
