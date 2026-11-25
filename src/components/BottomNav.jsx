@@ -3,7 +3,7 @@ import styles from './BottomNav.module.css';
 // Line icons drawn on a 24px grid, stroke = currentColor so the active tab
 // picks up the accent via CSS.
 const ICONS = {
-  today: (
+  dashboard: (
     <>
       <path d="M4 15a8 8 0 1 1 16 0" />
       <path d="M12 15l4-4" />
@@ -18,18 +18,13 @@ const ICONS = {
       <path d="M2.5 10v4M21.5 10v4" />
     </>
   ),
-  load: <path d="M2.5 12h4l2.5-6 4 12 3-8 1.5 2h4" />,
-  history: (
+  history: <path d="M2.5 12h4l2.5-6 4 12 3-8 1.5 2h4" />,
+  exercises: (
     <>
-      <rect x="3.5" y="5" width="17" height="15" rx="3" />
-      <path d="M3.5 9.5h17M8 3v4M16 3v4" />
-    </>
-  ),
-  progress: (
-    <>
-      <path d="M4 19V5" />
-      <path d="M4 19h16" />
-      <path d="M7.5 14.5l3.5-4 3 2.5 5-6" />
+      <path d="M9 6.5h11M9 12h11M9 17.5h11" />
+      <circle cx="4.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="4.5" cy="12" r="1" fill="currentColor" stroke="none" />
+      <circle cx="4.5" cy="17.5" r="1" fill="currentColor" stroke="none" />
     </>
   ),
   settings: (
@@ -41,12 +36,11 @@ const ICONS = {
 };
 
 const TABS = [
-  { id: 'today',    label: 'Today' },
-  { id: 'workout',  label: 'Workout' },
-  { id: 'load',     label: 'Load' },
-  { id: 'history',  label: 'History' },
-  { id: 'progress', label: 'Progress' },
-  { id: 'settings', label: 'Settings' },
+  { id: 'dashboard', label: 'Dashboard' },
+  { id: 'workout',   label: 'Workout' },
+  { id: 'history',   label: 'History' },
+  { id: 'exercises', label: 'Exercises' },
+  { id: 'settings',  label: 'Settings' },
 ];
 
 export function BottomNav({ active, onChange }) {

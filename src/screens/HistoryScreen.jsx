@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Screen } from '../components/Screen';
 import { useQueryClient } from '@tanstack/react-query';
 import styles from './HistoryScreen.module.css';
 import sheetStyles from '../components/PostSessionSheet.module.css';
@@ -24,7 +25,7 @@ const modeBadgeClass = (mode) => {
   }
 };
 
-export function HistoryScreen() {
+export function HistoryScreen({ embedded = false } = {}) {
   const { data: sessions, isLoading, error } = useSessions();
   const { data: prTimeline } = usePRTimeline();
   const [pendingDelete, setPendingDelete] = useState(null);
@@ -42,43 +43,39 @@ export function HistoryScreen() {
 
   if (isLoading) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
+      <Screen title="History" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div className={styles.loading}>
           <span className="dot" /><span className="dot" /><span className="dot" />
         </div>
-      </main>
+      </Screen>
     );
   }
 
   if (error) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
+      <Screen title="History" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div className={styles.error}>
           Couldn't load sessions: {error.message ?? String(error)}
         </div>
-      </main>
+      </Screen>
     );
   }
 
   if (!sessions || sessions.length === 0) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
+      <Screen title="History" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div className={styles.empty}>
           <strong>No sessions yet.</strong>
           <div style={{ marginTop: 8 }}>
             Finish a session from the Workout tab and it'll appear here.
           </div>
         </div>
-      </main>
+      </Screen>
     );
   }
 
   return (
-    <main className="screen">
-      <div className="title-xl" style={{ marginBottom: 20 }}>History</div>
+    <Screen title="History" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
       <WeekLog />
       {sessions.map((s) => (
         <SessionCard
@@ -95,7 +92,7 @@ export function HistoryScreen() {
         onCancel={() => setPendingDelete(null)}
         onConfirm={onConfirmDelete}
       />
-    </main>
+    </Screen>
   );
 }
 

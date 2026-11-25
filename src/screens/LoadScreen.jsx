@@ -1,4 +1,5 @@
 import styles from './LoadScreen.module.css';
+import { Screen } from '../components/Screen';
 import { ACWRCard } from '../components/ACWRCard';
 import { CNSBudgetCard } from '../components/CNSBudgetCard';
 import { SprintExposureCard } from '../components/SprintExposureCard';
@@ -15,7 +16,7 @@ import { useRecentWorkouts } from '../hooks/useRecentWorkouts';
 //
 // Each card self-hides when it has no data; if ALL are empty we show a single
 // empty state instead of a blank screen.
-export function LoadScreen() {
+export function LoadScreen({ embedded = false } = {}) {
   const acwr = useACWR();
   const cns = useCNSBudget();
   const sprint = useSprintExposure();
@@ -32,9 +33,10 @@ export function LoadScreen() {
   const isEmpty = !anyLoading && !hasACWR && !hasCNS && !hasSprint && !hasWorkouts;
 
   return (
-    <main className="screen">
-      <div className="title-xl" style={{ marginBottom: 6 }}>Load</div>
-      <div className={styles.subtitle}>Training load, recovery &amp; recent activity</div>
+    <Screen title="Load" embedded={embedded} titleStyle={{ marginBottom: 6 }}>
+      {!embedded && (
+        <div className={styles.subtitle}>Training load, recovery &amp; recent activity</div>
+      )}
 
       {anyLoading && (
         <div className={styles.loading}>
@@ -58,6 +60,6 @@ export function LoadScreen() {
           <RecentWorkoutsCard />
         </>
       )}
-    </main>
+    </Screen>
   );
 }

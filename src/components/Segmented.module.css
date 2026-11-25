@@ -1,0 +1,25 @@
+.seg {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.opt {
+  flex: 1;
+  min-height: var(--tap-min);
+  border-radius: var(--r1);
+  background: var(--bg-pill);
+  color: var(--t2);
+  font-size: 17px;
+  font-weight: 600;
+  transition: background 0.18s, color 0.18s;
+}
+
+.opt.active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.opt:active {
+  transform: scale(0.98);
+}

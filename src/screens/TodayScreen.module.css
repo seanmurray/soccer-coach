@@ -1,6 +1,7 @@
 .header {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap; /* week bar drops under the title on narrow phones */
+  align-items: flex-end;
   justify-content: space-between;
   margin-bottom: 16px;
   gap: 12px;
@@ -21,4 +22,9 @@
 
 .label {
   margin-bottom: 10px;
+}
+
+.loadSection {
+  margin-top: 28px;
+  scroll-margin-top: calc(var(--sat) + 12px);
 }

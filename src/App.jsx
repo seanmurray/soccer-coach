@@ -4,9 +4,8 @@ import { queryClient } from './lib/queryClient';
 import { BottomNav } from './components/BottomNav';
 import { TodayScreen } from './screens/TodayScreen';
 import { WorkoutScreen } from './screens/WorkoutScreen';
-import { LoadScreen } from './screens/LoadScreen';
-import { HistoryScreen } from './screens/HistoryScreen';
-import { ProgressScreen } from './screens/ProgressScreen';
+import { HistoryHubScreen } from './screens/HistoryHubScreen';
+import { ExercisesScreen } from './screens/ExercisesScreen';
 import { SettingsScreen } from './screens/SettingsScreen';
 import { RestTimer } from './components/RestTimer';
 import { ModuleSheet } from './components/ModuleSheet';
@@ -22,16 +21,21 @@ import { WARMUP, FRC_SHORT, FRC_FULL } from './data/frc';
 
 // Persist the active bottom-nav tab across reloads. Mobile Chrome aggressively
 // suspends backgrounded tabs and reloads them on return — without this, the
-// user always lands on Today even if they were mid-workout. Sub-tab and
+// user always lands on the Dashboard even if they were mid-workout. Sub-tab and
 // in-flight buffers are persisted separately (sessionStore + WorkoutScreen).
 const TAB_KEY = 'soccer-coach-tab';
-const VALID_TABS = ['today', 'workout', 'load', 'history', 'progress', 'settings'];
+const VALID_TABS = ['dashboard', 'workout', 'history', 'exercises', 'settings'];
+// Tabs from the pre-redesign 6-tab bar → where that content lives now.
+// 'progress' also flips the History segment so the user lands on the charts.
+const LEGACY_TABS = { today: 'dashboard', load: 'dashboard', progress: 'history' };
 function readPersistedTab() {
   try {
     const v = localStorage.getItem(TAB_KEY);
-    return VALID_TABS.includes(v) ? v : 'today';
+    if (v === 'progress') localStorage.setItem('soccer-coach-history-seg', 'progress');
+    const mapped = LEGACY_TABS[v] ?? v;
+    return VALID_TABS.includes(mapped) ? mapped : 'dashboard';
   } catch {
-    return 'today';
+    return 'dashboard';
   }
 }
 
@@ -144,24 +148,17 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <ReadinessBaselineSync />
-      <div hidden={tab !== 'today'}>
-        <TodayScreen
-          onStartSession={handleStart}
-          onOpenModule={(i) => setModuleIndex(i)}
-          onNavigate={setTab}
-        />
+      <div hidden={tab !== 'dashboard'}>
+        <TodayScreen onStartSession={handleStart} />
       </div>
       <div hidden={tab !== 'workout'}>
         <WorkoutScreen onFinish={handleFinish} />
       </div>
-      <div hidden={tab !== 'load'}>
-        <LoadScreen />
-      </div>
       <div hidden={tab !== 'history'}>
-        <HistoryScreen />
+        <HistoryHubScreen />
       </div>
-      <div hidden={tab !== 'progress'}>
-        <ProgressScreen />
+      <div hidden={tab !== 'exercises'}>
+        <ExercisesScreen onOpenModule={(i) => setModuleIndex(i)} />
       </div>
       <div hidden={tab !== 'settings'}>
         <SettingsScreen />

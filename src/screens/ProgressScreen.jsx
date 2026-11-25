@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { Screen } from '../components/Screen';
 import styles from './ProgressScreen.module.css';
 import { useProgressSeries } from '../hooks/useProgressSeries';
 import { LineChart } from '../components/LineChart';
@@ -19,7 +20,7 @@ const GROUP_LABEL = { strength: 'Strength', jumps: 'Jumps', cond: 'Conditioning'
 
 const LIFT_LABEL = Object.fromEntries(MAXES_CONFIG.map((m) => [m.key, m.label]));
 
-export function ProgressScreen() {
+export function ProgressScreen({ embedded = false } = {}) {
   const { data, isLoading, error } = useProgressSeries();
   const [group, setGroup] = useState('strength');
 
@@ -57,21 +58,19 @@ export function ProgressScreen() {
 
   if (isLoading) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>Progress</div>
+      <Screen title="Progress" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div style={{ display: 'flex', justifyContent: 'center', padding: 40 }}>
           <span className="dot" /><span className="dot" /><span className="dot" />
         </div>
-      </main>
+      </Screen>
     );
   }
 
   if (error) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>Progress</div>
+      <Screen title="Progress" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div className={styles.empty}>Couldn't load progress data: {error.message ?? String(error)}</div>
-      </main>
+      </Screen>
     );
   }
 
@@ -81,21 +80,19 @@ export function ProgressScreen() {
 
   if (totalPoints === 0) {
     return (
-      <main className="screen">
-        <div className="title-xl" style={{ marginBottom: 20 }}>Progress</div>
+      <Screen title="Progress" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
         <div className={styles.empty}>
           <strong>No trend data yet.</strong>
           <div style={{ marginTop: 8 }}>
             Log a few strength sets and jump measurements and the trends will show up here.
           </div>
         </div>
-      </main>
+      </Screen>
     );
   }
 
   return (
-    <main className="screen">
-      <div className="title-xl" style={{ marginBottom: 20 }}>Progress</div>
+    <Screen title="Progress" embedded={embedded} titleStyle={{ marginBottom: 20 }}>
 
       <div className={styles.tabBar} role="tablist" aria-label="Progress sections">
         {GROUPS.map((g) => (
@@ -175,6 +172,6 @@ export function ProgressScreen() {
       <div className={styles.legend}>
         <span><span className={styles.dotPR} /> = personal record</span>
       </div>
-    </main>
+    </Screen>
   );
 }

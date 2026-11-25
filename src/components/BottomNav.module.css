@@ -17,8 +17,8 @@
 .pill {
   pointer-events: auto;
   display: flex;
-  gap: 2px;
-  padding: 6px;
+  gap: 0;
+  padding: 5px;
   border-radius: var(--r-pill);
   background: var(--glass);
   backdrop-filter: blur(24px) saturate(160%);
@@ -61,6 +61,6 @@
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
-  letter-spacing: 0;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }

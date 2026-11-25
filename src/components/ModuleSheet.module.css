@@ -159,7 +159,7 @@
   border-radius: var(--r2);
   padding: 14px 16px;
   font-size: 16px;
-  color: #4af090;
+  color: var(--t1);
   line-height: 1.6;
   margin-bottom: 16px;
 }

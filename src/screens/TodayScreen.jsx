@@ -4,7 +4,6 @@ import { ReadinessRing } from '../components/ReadinessRing';
 import { ReadinessSliders } from '../components/ReadinessSliders';
 import { ModeBanner } from '../components/ModeBanner';
 import { DaySelector } from '../components/DaySelector';
-import { ModuleRow } from '../components/ModuleRow';
 import { AiInsightCard } from '../components/AiInsightCard';
 import { WeekBar } from '../components/WeekBar';
 import { MaxSuggestion } from '../components/MaxSuggestion';
@@ -13,13 +12,17 @@ import { HrPrescriptionBanner } from '../components/HrPrescriptionBanner';
 import { RecoveryActivityBadge } from '../components/RecoveryActivityBadge';
 import { MastersSpacingWarning } from '../components/MastersSpacingWarning';
 import { WeekComplete } from '../components/WeekComplete';
+import { LoadScreen } from './LoadScreen';
 import { useSessionStore } from '../stores/sessionStore';
 import { MODE_INSIGHTS } from '../data/sessions';
+
+const scrollToLoad = () =>
+  document.getElementById('training-load')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
 const formatToday = (d) =>
   d.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
 
-export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
+export function TodayScreen({ onStartSession }) {
   const rec = useSessionStore((s) => s.rec);
   const battery = useSessionStore((s) => s.battery);
   const mode = useSessionStore((s) => s.mode);
@@ -51,10 +54,11 @@ export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
 
       <WeekComplete />
 
-      {/* Glanceable training-load summary; full analytics live on the Load tab.
+      {/* Glanceable training-load summary; tapping it scrolls to the full
+          Training load section at the bottom of this screen.
           Today's HR prescription stays here (it's about today's session) along
           with any working-max backfill suggestions from recent set history. */}
-      <TodayLoadStrip onOpen={() => onNavigate?.('load')} />
+      <TodayLoadStrip onOpen={scrollToLoad} />
       <HrPrescriptionBanner />
       <MaxSuggestion />
 
@@ -64,14 +68,18 @@ export function TodayScreen({ onStartSession, onOpenModule, onNavigate }) {
       <DaySelector />
       <MastersSpacingWarning />
 
-      <div className={`overline ${styles.label}`} style={{ marginTop: 12 }}>Modules</div>
-      <ModuleRow onOpen={onOpenModule} />
-
       <AiInsightCard>{insight || 'Set your readiness scores above.'}</AiInsightCard>
 
       <button type="button" className={common.cta} onClick={onStartSession}>
         Start Session →
       </button>
+
+      {/* Training load — formerly its own tab. Kept below the start button
+          so today's decision flow stays on top. */}
+      <section id="training-load" className={styles.loadSection}>
+        <div className={`overline ${styles.label}`}>Training load</div>
+        <LoadScreen embedded />
+      </section>
     </main>
   );
 }
